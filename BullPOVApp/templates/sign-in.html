@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}SignIN | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+    <!-- Login Section -->
+    <section id="login" class="login section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8" data-aos="zoom-in" data-aos-delay="200">
+            <div class="login-form-wrapper">
+              <div class="login-header text-center">
+                <h2>SignIN</h2>
+                <p>Welcome back! Please enter your details.</p>
+              </div>
+
+              <form action="/login" method="post">
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between">
+                  <label for="email" class="form-label">Username</label>
+                  <a href="/forgot-username" class="forgot-link">Forgot Username?</a>
+                  </div>
+                  <input type="text" class="form-control" id="email" name="email" placeholder="Enter your username" required="" autocomplete="email" value="{{username}}">
+                </div>
+
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between">
+                    <label for="password" class="form-label">Password</label>
+                    <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                  </div>
+                  <input type="password" class="form-control" name="password" placeholder="Enter your password" required="" autocomplete="current-password">
+                </div>
+
+                <div class="mb-4 form-check">
+                  <input type="checkbox" class="form-check-input" id="remember" name="remember" checked>
+                  <label class="form-check-label" for="remember">Remember me in this device?</label>
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                  <button type="submit" class="btn btn-primary">SignIN</button>
+                </div>
+
+                <div class="signup-link text-center">
+                  <span>Don't have an account?</span>
+                  <a href="/signup">Sign up for free</a>
+                </div>
+                {% csrf_token %}
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Login Section -->
+
+{% endblock %}

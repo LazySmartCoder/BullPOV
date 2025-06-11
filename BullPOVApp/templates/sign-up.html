@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}SignUP | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+    <section id="register" class="register section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+
+            <div class="registration-form-wrapper" data-aos="zoom-in" data-aos-delay="200">
+
+              <div class="section-header mb-4 text-center">
+                <h2>Create Your Account</h2>
+                <p>Sign up to explore stocks and enjoy real-time market insights.</p>
+              </div>
+
+              <form action="/register" method="POST">
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="form-group">
+                      <label for="firstName">First Name</label>
+                      <input type="text" class="form-control" name="fname" id="firstName" required="" minlength="2" placeholder="Ajay">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <div class="form-group">
+                      <label for="lastName">Last Name</label>
+                      <input type="text" class="form-control" name="lname" id="lastName" required="" minlength="2" placeholder="Singh">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="email">Email Address</label>
+                  <input type="email" class="form-control" name="email" id="email" required="" placeholder="you@example.com">
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="email">Country</label>
+                  <select class="form-control" name="country">
+                    <option value="India">India</option>
+                    <option value="India">USA</option>
+                  </select>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="email">Phone Number</label>
+                  <input type="number" class="form-control" name="number" id="email" required="" placeholder="90235XXXXX">
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="email">Set Username</label>
+                  <input type="text" class="form-control" value="{{username}}" name="username" id="username" required="" placeholder="AjayTrader">
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="password">Password</label>
+                  <div class="password-input">
+                    <input type="password" class="form-control" name="pass1" id="password" required="" minlength="8" placeholder="At least 8 characters">
+                  </div>
+                  <small class="password-requirements">
+                    Must be at least 8 characters long and include letters, number, and special character
+                  </small>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <div class="password-input">
+                    <input type="password" class="form-control" name="pass2" id="confirmPassword" required="" minlength="8" placeholder="Repeat your password">
+                  </div>
+                </div>
+
+                <div class="form-group mb-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="newsletter" id="newsletter" checked>
+                    <label class="form-check-label" for="newsletter">
+                      Subscribe to our newsletter for exclusive offers and updates
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group mb-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="terms" id="terms" required="" checked>
+                    <label class="form-check-label" for="terms">
+                      I agree to the <a href="/tac">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>
+                    </label>
+                  </div>
+                </div>
+                <div class="text-center mb-4">
+                  <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                </div>
+
+                <div class="text-center">
+                  <p class="mb-0">Already have an account? <a href="/signin">Sign in</a></p>
+                </div>
+                {% csrf_token %}
+              </form>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Register Section -->
+
+{% endblock %}

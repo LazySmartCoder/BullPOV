@@ -1,0 +1,14 @@
+what is bullpov?
+
+bullpov is a platform where people will predict skillfully on whether
+a share will rise of fall on the same day.
+
+we will display more than 50 shares from indian stock market - Bull50
+
+vision - making stock market more fun to explore and invest. we are trying 
+to build more excitement amongst netizens about stock market. we also aim to make 
+people keep a keen eye on economic and finacial news so that they can have the best
+knowledge about the indian economy and financial markets. making stock market more used to and common
+investment platform for people so they can get motivated to invest in real stocks.
+
+our tagline - Khojo, Parkho, Khelo
