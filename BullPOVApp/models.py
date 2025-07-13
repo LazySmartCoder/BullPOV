@@ -2,22 +2,6 @@ from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 
-class UserDetail(models.Model):
-    User = models.ForeignKey(User, related_name="OtherUserDetails", on_delete=models.CASCADE)
-    ProfilePhoto = models.CharField(default="")
-    Newsletters = models.BooleanField(default=False)
-    ForgotPasswordOTP = models.CharField(default="")
-    PhoneNumber = models.CharField(default="")
-    Country = models.CharField(default="India")
-    VerifiedAccount = models.BooleanField(default=False)
-    VerificationOTP = models.CharField(default="")
-    Address = models.CharField(default="")
-    UPI = models.CharField(default="")
-    WalletBalance = models.FloatField(default=0)
-    
-    def __str__(self):
-        return self.User.username
-    
 class Stock(models.Model):
     Name = models.CharField(default="")
     Logo = models.CharField(default="")
@@ -44,6 +28,24 @@ class Stock(models.Model):
 
     def __str__(self):
         return f"{self.Name} | {self.Symbol}"
+
+class UserDetail(models.Model):
+    User = models.ForeignKey(User, related_name="OtherUserDetails", on_delete=models.CASCADE)
+    ProfilePhoto = models.ImageField(upload_to='ProfilePhotos/', default='default.png')
+    Newsletters = models.BooleanField(default=False)
+    OTPEmail = models.CharField(default="")
+    OTPPhone = models.CharField(default="")
+    PhoneNumber = models.CharField(default="")
+    Country = models.CharField(default="India")
+    VerifiedAccount = models.BooleanField(default=False)
+    VerificationOTP = models.CharField(default="")
+    Address = models.CharField(default="")
+    UPI = models.CharField(default="")
+    WalletBalance = models.FloatField(default=0)
+    Watchlist = models.ManyToManyField(Stock, blank=True, related_name='watchList')
+    
+    def __str__(self):
+        return self.User.username
 
 class Trade(models.Model):
     Trader = models.ForeignKey(User, related_name="TraderDetails", on_delete=models.CASCADE)

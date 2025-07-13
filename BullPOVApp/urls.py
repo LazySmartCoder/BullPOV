@@ -32,4 +32,11 @@ urlpatterns = [
     path("trade-details/<str:symbol>", tradeDetails, name = "TradeDetails"),
     path("hit-order/<str:stock>", hitOrder, name = "HitOrder"),
     path("check-return-rate/<str:stock>", checkReturnRate, name = "CheckReturnRate"),
+    path("update-profile", updateProfile, name = "UpdateProfile"),
+    path("delete-acc", deleteAcc, name = "DeleteAcc"),
+    path("password-change", passwordChange, name = "passwordChange"),
+    path("change-email/<str:verify>", changeEmail, name = "ChangeEmail"),
+    path("watch-list", watchList, name = "WatchList"),
+    path("remove-watch-list/<str:stock>", removeWatchList, name = "RemoveWatchList"),
+    path("add-watch-list/<str:stock>", addWatchList, name = "AddWatchList"),
 ]

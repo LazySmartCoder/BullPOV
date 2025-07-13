@@ -23,7 +23,7 @@ from django.conf.urls import handler400, handler403, handler404, handler500
 urlpatterns = [
     path('BullPOV-Admin-AB-HG', admin.site.urls),
     path('', include("BullPOVApp.urls")),
-    re_path(r'^ImageData/(?P<path>.*)$', serve, {'document_root' : settings.MEDIA_ROOT})
+    re_path(r'^ProfilePhoto/(?P<path>.*)$', serve, {'document_root' : settings.MEDIA_ROOT})
 ]
 
 handler404 = "BullPOVApp.views.ErrorPage"

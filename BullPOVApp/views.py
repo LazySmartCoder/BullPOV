@@ -26,9 +26,9 @@ def is_valid_password(s):
     has_special = any(c in string.punctuation for c in s)
     return has_letter and has_digit and has_special
 
-def sendEmail(receiver, subject, message):
-    sender_email = "no-reply@bullpov.com"
-    sender_password = "nblzxvfbndpzumzn"
+def sendEmail(sender, receiver, subject, message):
+    sender_email = sender
+    sender_password = google_app_password
     msg = MIMEMultipart("alternative")
     msg["From"] = sender_email
     msg["To"] = receiver
@@ -37,7 +37,7 @@ def sendEmail(receiver, subject, message):
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
-        server.login(sender_email, sender_password)
+        server.login("contact.bullpov@gmail.com", sender_password)
         server.sendmail(sender_email, receiver, msg.as_string())
         server.quit()
         return None
@@ -68,7 +68,6 @@ def register(request):
        fname = request.POST["fname"]
        lname = request.POST["lname"]
        email = request.POST["email"]
-       country = request.POST["country"]
        phone = request.POST["phone"]
        username = str(request.POST["username"]).lower()
        pass1 = request.POST["pass1"]
@@ -83,6 +82,9 @@ def register(request):
        if User.objects.filter(email=email).exists():
            messages.warning(request, "An user with this email is already registered with us.")
            return redirect("SignUP")
+       if UserDetail.objects.filter(PhoneNumber = phone).exists():
+           messages.warning(request, "An user with this phone number is already registered with us.")
+           return redirect("SignUP")
        if is_valid_password(pass1) == False:
            messages.warning(request, "Password must be at least 8 characters long and include letters, numbers, and special characters.")
            return redirect("SignUP")
@@ -93,8 +95,10 @@ def register(request):
        authenticating = authenticate(request, username=username, password=pass1)
        if authenticating is not None:
            login(request, authenticating)
-           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, Country = country, VerificationOTP = random.randint(100000, 999999))
+           veriotp = random.randint(100000, 999999)
+           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp)
            userdet.save()
+           sendEmail("no-reply@bullpov.com", email, "Verify your email", f"Your otp for email verfication is: {veriotp}")
            messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
        else:
            messages.warning(request, "Something went wrong. Please try again later.")
@@ -143,10 +147,11 @@ def fp(request):
             userdet = User.objects.get(email = email)
             save_otp = UserDetail.objects.get(User = userdet)
             forgotp = random.randint(1000, 9999)
-            save_otp.ForgotPasswordOTP = str(forgotp)
+            save_otp.OTPEmail = str(forgotp)
             save_otp.save()
-            # sendEmail(email, "Password Recovery", f"tap this link - https://bullpov.com/password-recovery/{email}-{forgotp}")
+            sendEmail("no-reply@bullpov.com", email, "Password Recovery", f"tap this link - https://bullpov.com/password-recovery-verification/{email}-{forgotp}")
             messages.success(request, "A password recovery email has been sent to your email.")
+            return redirect("HomePage")
         else:
             messages.warning(request, "No user found with this email.")
         return redirect("ForgotPassword")
@@ -156,14 +161,14 @@ def passRecoverVerify(request, otp):
     forotp = str(otp).split("-")[1]
     if User.objects.filter(email = email).exists():
         user = User.objects.get(email = email)
-        if UserDetail.objects.get(User = user).ForgotPasswordOTP == forotp:
+        if UserDetail.objects.get(User = user).OTPEmail == forotp:
             messages.success(request, "Create New Password.")
             return render(request, "new-password.html", {"email" : email, "otp" : forotp})
         else:
             messages.warning(request, "Password Recovery failed.")
     else:
         messages.warning(request, "Password Recovery failed.")
-    return redirect("ForgotPassword")
+    return redirect("HomePage")
 
 def pr(request, otp):
     email = str(otp).split("-")[0]
@@ -171,6 +176,7 @@ def pr(request, otp):
     if request.method == "POST":
         pass1 = request.POST["pass1"]
         pass2 = request.POST["pass2"]
+        print(pass1)
         if pass1 != pass2:
            messages.warning(request, "Passwords do not match. Please try again.")
            return render(request, "new-password.html", {"email" : email, "otp" : forotp})
@@ -178,13 +184,12 @@ def pr(request, otp):
            messages.warning(request, "Password must be at least 8 characters long and include letters, numbers, and special characters.")
            return render(request, "new-password.html", {"email" : email, "otp" : forotp})
         user = User.objects.get(email = email)
-        user.set_password("pass1")
+        user.set_password(pass1)
         user.save()
+        sendEmail("no-reply@bullpov.com", email, "Password Recovered", "Your password has been changed.")
         messages.success(request, "Password changed. You may SignIN now.")
         return redirect("SignIN")
         
-    
-
 def signout(request):
     logout(request)
     messages.success(request, "Signed Out")
@@ -380,6 +385,79 @@ def account(request):
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "user-profile.html", {"user" : userdet})
 
+def passwordChange(request):
+    userdet = UserDetail.objects.get(User = request.user)
+    if request.method == "POST":
+        old = request.POST["old"]
+        pass1 = request.POST["pass1"]
+        pass2 = request.POST["pass2"]
+        if pass1 != pass2:
+            messages.warning(request, "Password mismatch.")
+            return render(request, "user-profile.html", {"user" : userdet})
+        if not is_valid_password(pass1):
+            messages.warning(request, "Enter a strong password.")
+            return render(request, "user-profile.html", {"user" : userdet})
+        if request.user.check_password(old):
+            request.user.set_password(pass1)
+            request.user.save()
+            messages.success(request, "Your password has been changed.")
+        else:
+            messages.warning(request, 'Enter correct old password. If you forgot, logout and go to "Forgot Password" to change.')
+        return redirect("HomePage")
+
+def deleteAcc(request):
+    if request.method == "POST":
+        pwd = request.POST["pwd"]
+        if request.user.check_password(pwd):
+            request.user.delete()
+            messages.warning(request, "Account Deleted.")
+            # send an email here
+            return redirect("HomePage")
+        else:
+            messages.warning(request, "Incorrect Password.")
+        userdet = UserDetail.objects.get(User = request.user)
+        return render(request, "user-profile.html", {"user" : userdet})
+
+def updateProfile(request):
+    if request.method == "POST":
+        pfp = request.FILES.get('pfp')
+        name = request.POST["name"]
+        email = request.POST["email"]
+        phone = request.POST["phone"]
+        address = request.POST["address"]
+        password = request.POST["password"]
+        user = request.user
+        if user.check_password(password):
+            userdet = UserDetail.objects.get(User = user)
+            user.first_name = name
+            if user.email != email:
+                cotp = random.randint(1000, 9999)
+                userdet.OTPEmail = cotp
+                userdet.save()
+                sendEmail("no-reply@bullpov.com", email, "Change email", f"Your email will be changed as soon as you click this link: https://bullpov.com/change-email/{email}-{cotp}")
+                messages.success(request, "Your email will be changed as soon as you verify yourself.")
+            userdet.PhoneNumber = phone
+            userdet.Address = address
+            userdet.ProfilePhoto = pfp
+            user.save()
+            userdet.save()
+            sendEmail("no-reply@bullpov.com", email, "Profile Updated", "Your profile has been updated.")
+            messages.success(request, "Profile has been updated.")
+        else:
+            messages.warning(request, "Enter correct password.")
+        return render(request, "user-profile.html", {"user" : userdet})
+
+def changeEmail(request, verify):
+    user = request.user
+    userdet = UserDetail.objects.get(User = user)
+    if userdet.OTPEmail == str(verify).split("-")[1]:
+        user.email = str(verify).split("-")[0]
+        user.save()
+        messages.success(request, "Email has been changed.")
+    else:
+        messages.warning(request, "Email not changed.")
+    return redirect("HomePage")
+
 def categories(request):
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
@@ -491,3 +569,22 @@ def checkReturnRate(request, stock):
             userReturn = returnPercentage / 100 * amt
             returnRate = float(f"{returnPercentage / 10:.2f}")
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
+
+def watchList(request):
+    userlist = UserDetail.objects.get(User = request.user)
+    watchlist = userlist.Watchlist.all()
+    return render(request, "watch-list.html", {"watch" : watchlist})
+
+def addWatchList(request, stock):
+    userlist = UserDetail.objects.get(User = request.user)
+    userlist.Watchlist.add(Stock.objects.get(Symbol = stock))
+    userlist.save()
+    messages.success(request, "Watch List Updated.")
+    return redirect(f"/stock-preview/{stock}")
+
+def removeWatchList(request, stock):
+    userlist = UserDetail.objects.get(User = request.user)
+    userlist.Watchlist.remove(Stock.objects.get(Symbol = stock))
+    userlist.save()
+    messages.success(request, "Watch List Updated.")
+    return redirect("WatchList")
