@@ -10,6 +10,7 @@ urlpatterns = [
     path("login", logIn, name = "Login"),
     path("signout", signout, name = "SignOut"),
     path("contact", contact, name = "Contact"),
+    path("contact-save", contactSave, name = "ContactSave"),
     path("dashboard", dashboard, name = "Dashboard"),
     path("account", account, name = "Account"),
     # fu is forgot username

@@ -127,6 +127,66 @@
       </div>
     </div>
     <!-- Announcement Bar -->
+         {% if messages %}
+         {% for message in messages %}
+         {% if message.tags == "warning" %}
+    <div class="announcement-bar py-2" style="background-color: red;">
+      <div class="container-fluid container-xl">
+        <div class="announcement-slider swiper init-swiper">
+          <script type="application/json" class="swiper-config">
+            {
+              "loop": true,
+              "speed": 600,
+              "autoplay": {
+                "delay": 700
+              },
+              "slidesPerView": 1,
+              "effect": "slide",
+              "direction": "vertical"
+            }
+          </script>
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">{{message}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="announcement-bar py-2" style="background-color: green;">
+      <div class="container-fluid container-xl">
+        <div class="announcement-slider swiper init-swiper">
+          <script type="application/json" class="swiper-config">
+            {
+              "loop": true,
+              "speed": 600,
+              "autoplay": {
+                "delay": 700
+              },
+              "slidesPerView": 1,
+              "effect": "slide",
+              "direction": "vertical"
+            }
+          </script>
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">{{message}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    <script>
+  setTimeout(() => {
+    const bar = document.querySelector('.announcement-bar');
+    if (bar) {
+      bar.style.transition = 'opacity 0.5s ease';
+      bar.style.opacity = '0';
+      setTimeout(() => bar.remove(), 500); // remove it after fade-out
+    }
+  }, 4000);
+</script>
+    <!-- Announcement Bar -->
     <div class="announcement-bar py-2">
       <div class="container-fluid container-xl">
         <div class="announcement-slider swiper init-swiper">
@@ -216,7 +276,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{trade.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}">{{trade.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{trade.CurrentPrice}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap}}</strong>
                           <br>
@@ -371,7 +431,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{topvolume.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topvolume.Symbol}}">{{topvolume.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{topvolume.CurrentPrice}} {% if topvolume.CurrentPrice > topvolume.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap}}</strong>
                           <br>
@@ -445,7 +505,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{topgainer.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topgainer.Symbol}}">{{topgainer.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{topgainer.CurrentPrice}} {% if topgainer.CurrentPrice > topgainer.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{topgainer.MktCap}}</strong>
                           <br>
@@ -519,7 +579,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{toploser.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toploser.Symbol}}">{{toploser.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{toploser.CurrentPrice}} {% if toploser.CurrentPrice > toploser.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{toploser.MktCap}}</strong>
                           <br>

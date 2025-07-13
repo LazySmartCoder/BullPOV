@@ -9,6 +9,7 @@
         <div class="row">
           <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
             <div class="cart-items">
+                {% if watch %}
                 <h1>Your Watch List</h1>
               {% for stock in watch %}
               <!-- Cart Item 3 -->
@@ -37,6 +38,9 @@
               </div><!-- End Cart Item -->
               
               {% endfor %}
+              {% else %}
+              <h1 style="text-align: center;">No stocks in Watch List. Add now!!</h1>
+              {% endif %}
 
       </div>
 

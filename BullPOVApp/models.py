@@ -59,3 +59,11 @@ class Trade(models.Model):
     def __str__(self):
         return f"{self.Trader} | {self.Stock}"
 
+class Contact(models.Model):
+    Name = models.CharField(default="")
+    Email = models.EmailField(default="")
+    Subject = models.CharField(default="")
+    Message = models.TextField(default="")
+
+    def __str__(self):
+        return self.Subject

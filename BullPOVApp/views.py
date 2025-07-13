@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from .models import *
 from django.contrib import messages
+from django.db.models import Q
 import string
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
@@ -269,7 +270,20 @@ def ErrorOccured(request):
 def contact(request):
     return render(request, "contact.html")
 
+def contactSave(request):
+    if request.method == "POST":
+        name = request.POST["name"]
+        email = request.POST["email"]
+        subject = request.POST["subject"]
+        message = request.POST["message"]
+        conSave = Contact(Name = name, Email = email, Subject = subject, Message = message)
+        conSave.save()
+        messages.success(request, "We have received your message / feedback. We will revert back via email.")
+        return redirect("Contact")
+
 def dashboard(request):
+    if request.user.is_authenticated == False:
+        return redirect("SignIN")
     # indice data list access for the scroller
     indice_results = {}
     for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
@@ -314,7 +328,9 @@ def dashboard(request):
 
 def search(request):
     search_text = request.GET["search"]
-    results = Stock.objects.filter(Name__icontains=search_text, Symbol__icontains=search_text)
+    results = Stock.objects.filter(
+    Q(Name__icontains=search_text) | Q(Symbol__icontains=search_text)
+)
     return render(request, "search.html", {"search" : results, "searchText" : search_text, "count" : results.count()})
 
 def stockPreview(request, symbol):
