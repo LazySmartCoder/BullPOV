@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{searchText}} | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+<!-- Search Results Header Section -->
+    <section id="search-results-header" class="search-results-header section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="search-results-header">
+          <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+              <div class="results-count" data-aos="fade-right" data-aos-delay="200">
+                <h2>Search Results</h2>
+                <p>We found <span class="results-number">{{count}}</span> results for <span class="search-term">"{{searchText}}"</span></p>
+              </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+              <form method="get" class="search-form" action="/search">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="Search..." name="search" value="" required="">
+                  <button class="btn search-btn" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+      </div>
+
+    </section><!-- /Search Results Header Section -->
+
+    <!-- Search Product List Section -->
+    <section id="category-product-list" class="category-product-list section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row g-4">
+
+          {% for s in search %}
+          <div class="col-lg-4">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{s.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{s.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="product-details.html">{{s.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{s.CurrentPrice}} {% if s.CurrentPrice > s.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{s.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{s.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{s.Volume}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+          {% endfor %}
+
+        </div>
+
+      </div>
+
+    </section><!-- /Search Product List Section -->
+
+
+{% endblock %}

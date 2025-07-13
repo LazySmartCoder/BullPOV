@@ -20,7 +20,7 @@
                   <label for="email" class="form-label">Username</label>
                   <a href="/forgot-username" class="forgot-link">Forgot Username?</a>
                   </div>
-                  <input type="text" class="form-control" id="email" name="email" placeholder="Enter your username" required="" autocomplete="email" value="{{username}}">
+                  <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required="" value="{{username}}">
                 </div>
 
                 <div class="mb-3">
@@ -42,7 +42,7 @@
 
                 <div class="signup-link text-center">
                   <span>Don't have an account?</span>
-                  <a href="/signup">Sign up for free</a>
+                  <a href="/signup" style="text-decoration: none;">Sign up for free</a>
                 </div>
                 {% csrf_token %}
               </form>

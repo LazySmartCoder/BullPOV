@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}User Verification | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+    <!-- Login Section -->
+    <section id="login" class="login section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8" data-aos="zoom-in" data-aos-delay="200">
+            <div class="login-form-wrapper">
+              <div class="login-header text-center">
+                <h2>Verify Yourself</h2>
+                <p>Just need some assurance!</p>
+              </div>
+
+              <form action="/vu" method="post">
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between">
+                  <label for="otp" class="form-label">One Time Password</label>
+                  <a href="/resend-otp" class="forgot-link">Resend OTP?</a>
+                  </div>
+                  <input type="number" class="form-control" id="otp" name="otp" placeholder="Enter your OTP" required="">
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                  <button type="submit" class="btn btn-primary">Verify</button>
+                </div>
+                {% csrf_token %}
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Login Section -->
+
+{% endblock %}

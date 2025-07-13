@@ -42,6 +42,54 @@
             <h1 class="BullPOV">ullPOV</h1>
           </a>
 
+          {% if request.user.is_authenticated %}
+
+          <!-- Actions -->
+          <div class="header-actions d-flex align-items-center justify-content-end">
+
+            <!-- Account -->
+            <div class="dropdown account-dropdown">
+              <button class="header-action-btn" data-bs-toggle="dropdown">
+                <i class="bi bi-person"></i>
+                <span class="action-text d-none d-md-inline-block">Account</span>
+              </button>
+              <div class="dropdown-menu">
+                <div class="dropdown-header">
+                  <h6>Welcome <span class="sitename">{{request.user.first_name}}</span></h6>
+                  <p class="mb-0">Access account &amp; manage trades</p>
+                </div>
+                <div class="dropdown-body">
+                  <a class="dropdown-item d-flex align-items-center" href="account.html">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span>My Profile</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
+                    <i class="bi bi-bag-check me-2"></i>
+                    <span>My Orders</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
+                    <i class="bi bi-eye me-2"></i>
+                    <span>My Watch List</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="settings.html">
+                    <i class="bi bi-gear me-2"></i>
+                    <span>Settings</span>
+                  </a>
+                </div>
+                <div class="dropdown-footer">
+                  <a href="/signout" class="btn btn-outline-primary w-100 mb-2">SignOUT</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wishlist -->
+            <a href="wishlist.html" class="header-action-btn d-none d-md-flex">
+              <i class="bi bi-eye"></i>
+              <span class="action-text d-none d-md-inline-block">Watch List</span>
+              <span class="badge">0</span>
+            </a>
+            {% endif %}
+
             <!-- Mobile Navigation Toggle -->
             <i class="mobile-nav-toggle d-xl-none bi bi-list me-0"></i>
 
@@ -55,6 +103,15 @@
       <div class="container-fluid container-xl position-relative">
         <nav id="navmenu" class="navmenu">
           <ul>
+            {% if request.user.is_authenticated %}
+            <li><a href="/">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#how-it-works">How it works?</a></li>
+            <li><a href="#what-you-get">What you get?</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            {% else %}
             <li><a href="/">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#how-it-works">How it works?</a></li>
@@ -63,6 +120,7 @@
             <li><a href="#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             <li><a href="/signin">SignIN</a></li>
+            {% endif %}
 
           </ul>
         </nav>
@@ -77,17 +135,21 @@
               "loop": true,
               "speed": 600,
               "autoplay": {
-                "delay": 700
+                "delay": 1000
               },
               "slidesPerView": 1,
               "effect": "slide",
               "direction": "vertical"
             }
           </script>
-          <div class="swiper-wrapper">
-            <div class="swiper-slide">NIFTY 7432871 (7481)</div>
-            <div class="swiper-slide">SENSEX 7432871 (7481)</div>
-            <div class="swiper-slide">BANKNIFTY 7432871 (7481)</div>
+          <div class="swiper-wrapper" id="data">
+            {% for name, figs in data.items %}
+            {% if figs.2 == "up" %}
+            <div class="swiper-slide">{{name}} - {{figs.0}} (<i style="color: green;">{{figs.1}}</i>)</div>
+            {% else %}
+            <div class="swiper-slide">{{name}} - {{figs.0}} (<i style="color: red;">{{figs.1}}</i>)</div>
+            {% endif %}
+            {% endfor %}
           </div>
         </div>
       </div>
@@ -99,509 +161,384 @@
 
 
            <div class="container">
-          <!-- Category Header Section -->
-          <section style="margin-top: -30px;" id="category-header" class="category-header section">
+          <!-- Search Results Header Section -->
+    <section id="search-results-header" class="search-results-header section">
 
-            <div class="container" data-aos="fade-up">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-              <!-- Filter and Sort Options -->
-              <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="row g-3">
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <div class="filter-item search-form">
-                      <label for="productSearch" class="form-label">Search Stocks</label>
-                      <div class="input-group">
-                        <input type="text" class="form-control" id="productSearch" placeholder="Search for products..." aria-label="Search for products">
-                        <button class="btn search-btn" type="button">
-                          <i class="bi bi-search"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-6 col-lg-4">
-                    <div class="filter-item">
-                      <label for="priceRange" class="form-label">Top Sectors</label>
-                      <select class="form-select" id="priceRange">
-                        <option selected="">All Prices</option>
-                        <option>Under $25</option>
-                        <option>$25 to $50</option>
-                        <option>$50 to $100</option>
-                        <option>$100 to $200</option>
-                        <option>$200 &amp; Above</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="col-12 col-md-4 col-lg-4">
-                    <div class="filter-item">
-                      <label for="sortBy" class="form-label">Sort By</label>
-                      <select class="form-select" id="sortBy">
-                        <option selected="">Featured</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Customer Rating</option>
-                        <option>Newest Arrivals</option>
-                      </select>
-                    </div>
-                  </div>
-
-              </div>
-
+        <div class="search-results-header">
+          <div class="row align-items-center">
+            <div class="col-lg-12" data-aos="fade-left" data-aos-delay="300">
+                <form method="get" class="search-form" action="/search">
+                <div class="input-group">
+                  <input type="search" class="form-control" placeholder="Search Stocks..." name="search" value="" required="">
+                  <button class="btn search-btn" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </form>
             </div>
+          </div>
+        </div>
 
-          </section><!-- /Category Header Section -->
+      </div>
 
+    </section><!-- /Search Results Header Section -->
+
+
+
+
+<!-- https://assets.tickertape.in/stock-logos/TCS.png -->
           <!-- Category Product List Section -->
           <section id="category-product-list" class="category-product-list section">
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
 
               <div class="row gy-4">
-                <h1>Top Intraday</h1>
-                <!-- Product 1 -->
+
+                {% if userTrades != None %}
+                <h1>Your Trades</h1>
+                {% for trade in userTrades %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
-                      <span class="product-label">New Season</span>
-                      <img src="assets/img/product/product-3.webp" alt="Product Image" class="main-img" loading="lazy">
+                      <span class="product-label">{{trade.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
                         </div>
                         <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
+</div>
+
                         </div>
                       </div>
                     </div>
                     <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Vestibulum ante ipsum primis</a></h3>
-                        <div class="product-price">
-                          <span>$149.99</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">4.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option" style="background-color: #3b82f6;"></span>
-                        <span class="color-option" style="background-color: #22c55e;"></span>
-                        <span class="color-option active" style="background-color: #f97316;"></span>
-                      </div>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{trade.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{trade.CurrentPrice}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{trade.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{trade.Volume}}</strong>
+                        </p>
                     </div>
                   </div>
                 </div>
                 <!-- End Product 1 -->
+                 {% endfor %}
+                <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
+{% endif %}
 
-                <!-- Product 2 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <span class="product-label product-label-sale">-30%</span>
-                      <img src="assets/img/product/product-6.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Aliquam tincidunt mauris eu risus</a></h3>
-                        <div class="product-price">
-                          <span class="original">$199.99</span>
-                          <span class="sale">$139.99</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-half"></i>
-                        </div>
-                        <span class="rating-number">4.5</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option" style="background-color: #0ea5e9;"></span>
-                        <span class="color-option active" style="background-color: #111827;"></span>
-                        <span class="color-option" style="background-color: #a855f7;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 2 -->
 
-                <!-- Product 3 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 3 -->
 
-                <h1>Top Gainers</h1>
-                <!-- Product 3 -->
+                <h1>Most traded on BullPOV</h1>
+                {% for toptraded in topTraded %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
+                      <span class="product-label">{{toptraded.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
                         </div>
                         <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 3 -->
-                <!-- Product 3 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 3 -->
-                 <!-- Product 3 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 3 -->
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{toptraded.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{toptraded.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
 
-                <h1>Top Losers</h1>
-                <!-- Product 3 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- End Product 3 -->
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
 
-                <h1>Stock in News</h1>
-                <!-- Product 3 -->
-                <div class="col-lg-4">
-                  <div class="product-box">
-                    <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
-                      <div class="product-overlay">
-                        <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
-                        </div>
-                        <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
                         </div>
                       </div>
                     </div>
                     <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{toptraded.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{toptraded.CurrentPrice}} {% if toptraded.CurrentPrice > toptraded.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{toptraded.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{toptraded.Volume}}</strong>
+                        </p>
                     </div>
                   </div>
                 </div>
-                <!-- End Product 3 -->
-                 <!-- Product 3 -->
+                <!-- End Product 1 -->
+                 {% endfor %}
+                <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
+
+
+
+                <h1>Top Volumes</h1>
+                {% for topvolume in topVolumes %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
-                      <img src="assets/img/product/product-9.webp" alt="Product Image" class="main-img" loading="lazy">
+                      <span class="product-label">{{topvolume.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-heart"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-arrow-repeat"></i>
-                          </button>
-                          <button type="button" class="quick-action-btn">
-                            <i class="bi bi-eye"></i>
-                          </button>
                         </div>
                         <div class="add-to-cart-container">
-                          <button type="button" class="add-to-cart-btn">Add to Cart</button>
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
                         </div>
                       </div>
                     </div>
                     <div class="product-content">
-                      <div class="product-details">
-                        <h3 class="product-title"><a href="product-details.html">Cras ornare tristique elit</a></h3>
-                        <div class="product-price">
-                          <span>$89.50</span>
-                        </div>
-                      </div>
-                      <div class="product-rating-container">
-                        <div class="rating-stars">
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star-fill"></i>
-                          <i class="bi bi-star"></i>
-                          <i class="bi bi-star"></i>
-                        </div>
-                        <span class="rating-number">3.0</span>
-                      </div>
-                      <div class="product-color-options">
-                        <span class="color-option active" style="background-color: #ef4444;"></span>
-                        <span class="color-option" style="background-color: #64748b;"></span>
-                        <span class="color-option" style="background-color: #eab308;"></span>
-                      </div>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{topvolume.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{topvolume.CurrentPrice}} {% if topvolume.CurrentPrice > topvolume.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{topvolume.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{topvolume.Volume}}</strong>
+                        </p>
                     </div>
                   </div>
                 </div>
-                <!-- End Product 3 -->
+                 {% endfor %}
+                 <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
+
+                 <h1>Top Gainers</h1>
+                {% for topgainer in topGainers %}
+                <div class="col-lg-4">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{topgainer.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{topgainer.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{topgainer.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{topgainer.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{topgainer.CurrentPrice}} {% if topgainer.CurrentPrice > topgainer.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{topgainer.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{topgainer.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{topgainer.Volume}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                 {% endfor %}
+                 <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
+
+                 <h1>Top Losers</h1>
+                {% for toploser in topLosers %}
+                <div class="col-lg-4">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{toploser.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{toploser.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{toploser.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{toploser.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{toploser.CurrentPrice}} {% if toploser.CurrentPrice > toploser.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{toploser.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{toploser.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{toploser.Volume}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                 {% endfor %}
+                 <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
 
 
               </div>
@@ -610,36 +547,47 @@
 
           </section><!-- /Category Product List Section -->
 
-          <!-- Category Pagination Section -->
+          <section id="cart" class="cart section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+<h1>Top by Market Cap</h1>
+        <div class="row">
+          <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
+            <div class="cart-items">
+
+              {% for mkt in topMktCap %}
+              <!-- Cart Item 3 -->
+              <div class="cart-item">
+                <div class="row align-items-center">
+                  <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
+                    <div class="product-info d-flex align-items-center">
+                      <div class="product-image">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol|slice:':-3'}}.png" alt="Product" class="img-fluid" loading="lazy">
+                      </div>
+                      <a href="/stock-preview/{{mkt.Symbol}}">
+                        <div class="product-details">
+                        <h6 class="product-title">{{mkt.Symbol}}</h6>
+                        <div class="product-meta">
+                          <span class="product-color">Price: {{mkt.CurrentPrice}}</span>
+                          <span class="product-size">MktCap: {{mkt.MktCap}}</span>
+                        </div>
+                      </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End Cart Item -->
+              {% endfor %}
+
+      </div>
+
+    </section>
+    <!-- Category Pagination Section -->
           <section id="category-pagination" class="category-pagination section">
-
-            <div class="container">
-              <nav class="d-flex justify-content-center" aria-label="Page navigation">
-                <ul>
-                  <li>
-                    <a href="#" aria-label="Previous page">
-                      <i class="bi bi-arrow-left"></i>
-                      <span class="d-none d-sm-inline">Previous</span>
-                    </a>
-                  </li>
-
-                  <li><a href="#" class="active">1</a></li>
-                  <li><a href="#">2</a></li>
-                  <li><a href="#">3</a></li>
-                  <li class="ellipsis">...</li>
-                  <li><a href="#">8</a></li>
-                  <li><a href="#">9</a></li>
-                  <li><a href="#">10</a></li>
-
-                  <li>
-                    <a href="#" aria-label="Next page">
-                      <span class="d-none d-sm-inline">Next</span>
-                      <i class="bi bi-arrow-right"></i>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+              
+              <center>
+              <a href="/explore" class="btn btn-outline-dark">Explore More...</a>
+              </center>
 
           </section><!-- /Category Pagination Section -->
 
@@ -743,6 +691,7 @@ It’s a gamified gateway to real investing, built to spark financial curiosity 
       </div>
     </div>
   </footer>
+
 
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>

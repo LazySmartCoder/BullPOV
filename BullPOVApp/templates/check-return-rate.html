@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Confirmation | BullPOV</title>
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .confirmation-container {
+      background-color: #F5F5F5;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .confirmation-container h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #00ffcc;
+    }
+
+    .confirmation-container .company {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .confirmation-container .amount,
+    .confirmation-container .return-rate {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+
+    .place-order-btn {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 18px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #00c6ff, #137dff);
+      border: none;
+      border-radius: 30px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .place-order-btn:hover {
+      background: linear-gradient(135deg, #0072ff, #00c6ff);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="confirmation-container">
+    <h1><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on {{predict}}</h1>
+    <div class="company" style="color: black;">{{stock.Name}}</div>
+    <div class="amount" style="color: black">Potential Earnings: ₹{{return|floatformat:2}}</div>
+    <div class="return-rate" id="returnRate">
+  <small style="color: black;">Place live order at <span id="liveTime"></span></small>
+</div>
+
+<form action="/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}" method="post">
+        <button type="submit" class="place-order-btn">Place Order</button>
+{% csrf_token %}
+</form>
+<p style="color: red;">Note: This order once executed can't be reversed or refunded.</p>
+</div>
+
+</body>
+</html>
+<script>
+  function updateTime() {
+    const now = new Date();
+    const options = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    const formattedTime = now.toLocaleString('en-IN', options);
+    document.getElementById("liveTime").textContent = formattedTime;
+  }
+
+  // Initial call and then update every second
+  updateTime();
+  setInterval(updateTime, 1000);
+</script>

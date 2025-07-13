@@ -12,6 +12,10 @@ from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
 import random
+import yfinance as yf
+from .stock_list import stocks
+from .MarketFeatures import *
+from SmartApi.smartConnect import SmartConnect
 
 # Some important functions
 def is_valid_password(s):
@@ -40,10 +44,18 @@ def sendEmail(receiver, subject, message):
     except Exception as e:
         print(f"Error sending email: {e}")
 
-
 # BullPOV Code
 def index(request):
-    return render(request, "index.html")
+    topt = {}
+    topTraded = Stock.objects.filter(Nifty50 = True)
+    for i in topTraded:
+        topt[i.Symbol] = i.TotalUsers
+    topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
+    topTraded = Stock.objects.filter(Symbol__in=topTraded)
+    return render(request, "index.html", {"stocks" : topTraded})
+
+def aboutUs(request):
+    return render(request, "about-us.html")
 
 def signin(request):
     return render(request, "sign-in.html")
@@ -56,7 +68,9 @@ def register(request):
        fname = request.POST["fname"]
        lname = request.POST["lname"]
        email = request.POST["email"]
-       username = request.POST["username"]
+       country = request.POST["country"]
+       phone = request.POST["phone"]
+       username = str(request.POST["username"]).lower()
        pass1 = request.POST["pass1"]
        pass2 = request.POST["pass2"]
        if pass1 != pass2:
@@ -72,39 +86,37 @@ def register(request):
        if is_valid_password(pass1) == False:
            messages.warning(request, "Password must be at least 8 characters long and include letters, numbers, and special characters.")
            return redirect("SignUP")
-       creating_user = User.objects.create_user(username=str(username).lower(), password=pass1)
+       creating_user = User.objects.create_user(username=username, password=pass1)
        creating_user.email = email
        creating_user.first_name = f"{fname} {lname}"
        creating_user.save()
        authenticating = authenticate(request, username=username, password=pass1)
        if authenticating is not None:
            login(request, authenticating)
-           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST))
+           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, Country = country, VerificationOTP = random.randint(100000, 999999))
            userdet.save()
-           messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify your phone number.")
+           messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
        else:
            messages.warning(request, "Something went wrong. Please try again later.")
            return redirect("SignUP")
-       return redirect("HomePage")
+       return redirect("UserVerification")
     return redirect("ErrorPage")
 
 def logIn(request):
     if request.method == "POST":
         username = str(request.POST["username"]).lower()
         password = request.POST["password"]
-        remember = request.POST["remember"]
+        remember = request.POST.get("remember", "off")
         authenticating = authenticate(username=username, password=password)
         if authenticating is not None:
             login(request, authenticating)
-            if remember:
-                request.session.set_expiry(1209600)
-            else:
+            if remember == "off":
                 request.session.set_expiry(0)
             messages.success(request, "Signed IN")
         else:
             messages.warning(request, "Please fill in all fields correctly")
             return redirect("SignIN")
-        return redirect("HomePage")
+        return redirect("Dashboard")
     return redirect("ErrorPage")
 
 def forgotuser(request):
@@ -225,6 +237,21 @@ def passwordchange(request):
         else:
             messages.warning(request, "Something went wrong.")
             return redirect("UserProfile")
+        
+def userVerification(request):
+    return render(request, "user-verification.html")
+
+def verifyUser(request):
+    if request.method == "POST":
+        otp = request.POST["otp"]
+        if str(otp) == UserDetail.objects.get(User = request.user).VerificationOTP:
+            userdet = UserDetail.objects.get(User = request.user)
+            userdet.VerifiedAccount = True
+            userdet.save()
+            messages.success(request, "Account verified successfully.")
+        else:
+            messages.warning(request, "Please enter the correct OTP.")
+        return redirect("HomePage")
 
 def ErrorPage(request, exception):
     # This is for handler 404
@@ -238,7 +265,229 @@ def contact(request):
     return render(request, "contact.html")
 
 def dashboard(request):
-    return render(request, "dashboard.html")
+    # indice data list access for the scroller
+    indice_results = {}
+    for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
+        change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
+        trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
+        indice_results[i.Name] = [i.CurrentPrice, i.PriceChange, trend]
+    
+    # top data to be displayed
+    topGainers = Stock.objects.filter(TopGainer = True)[:4]
+    topLosers = Stock.objects.filter(TopLoser = True)[:4]
+
+    topv = {}
+    topVolumes = Stock.objects.filter(Nifty50 = True)
+    for i in topVolumes:
+        topv[i.Symbol] = i.Volume
+    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
+    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
+
+    topt = {}
+    topTraded = Stock.objects.filter(Nifty50 = True)
+    for i in topTraded:
+        topt[i.Symbol] = i.TotalUsers
+    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
+    topTraded = Stock.objects.filter(Symbol__in=topTraded)
+
+    topm = {}
+    topMktCap = Stock.objects.filter(Nifty50 = True)
+    for i in topMktCap:
+        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
+    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
+    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
+
+    # getting user trades data to be displayed
+    usertradesdata = []
+    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4]
+    for i in usertrades:
+        usertradesdata.append(i.Stock)
+    if len(usertradesdata) == 0:
+        usertradesdata = None
+
+    return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
+
+def search(request):
+    search_text = request.GET["search"]
+    results = Stock.objects.filter(Name__icontains=search_text, Symbol__icontains=search_text)
+    return render(request, "search.html", {"search" : results, "searchText" : search_text, "count" : results.count()})
+
+def stockPreview(request, symbol):
+    stock = Stock.objects.get(Symbol = symbol)
+    user = UserDetail.objects.get(User = request.user)
+    if (stock.CurrentPrice - stock.ClosingPrice) > 0:
+        change = True
+    else:
+        change = False
+
+    return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user})
+
+def hitOrder(request, stock):
+    predict = False
+    if str(stock).split("-")[1] == "UP":
+        predict = True
+    if request.method == "POST":
+        amt = int(str(stock).split("-")[2])
+        share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+
+        # up party data
+        totalAmtup = 0
+        retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
+        for i in retrieve_up:
+            totalAmtup += i.Amount
+        
+        # down party data
+        totalAmtdown = 0
+        retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
+        for i in retrieve_down:
+            totalAmtdown += i.Amount
+        
+        # our cut
+        # if (totalAmtdown + totalAmtup) / totalAmtup > 1.2:
+        #     totalcut = 10 / 100 * (totalAmtdown + totalAmtup)
+        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
+        # else:
+        #     totalcut = 5 / 100 * (totalAmtdown + totalAmtup)
+        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
+        remAmt = (totalAmtdown + totalAmtup)
+
+        if predict == True:
+            remAmt = totalAmtup + amt
+            returnPercentage = amt / remAmt * 100
+            userReturn = returnPercentage / 100 * amt
+        if predict == False:
+            remAmt = totalAmtdown + amt
+            returnPercentage = amt / remAmt * 100
+            userReturn = returnPercentage / 100 * amt
+        initTrade = Trade(Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Return = userReturn)
+        initTrade.save()
+        return redirect(f"/trade-details/{share.Symbol}")
+
+def marketDataUpdation(request):
+    def remove_brackets(text):
+        return text.replace("(", "").replace(")", "")
+    # update = Stock.objects.all()
+    # for i in update:
+    #     try:
+    #         i.Name = str(i.Name).replace(".", "")
+    #         i.save()
+    #     except Exception as e:
+    #         continue
+
+    return HttpResponse("Market data has been updated.")
 
 def account(request):
-    return render(request, "account.html")
+    userdet = UserDetail.objects.get(User = request.user)
+    return render(request, "user-profile.html", {"user" : userdet})
+
+def categories(request):
+    # top data to be displayed
+    topGainers = Stock.objects.filter(TopGainer = True)[:4]
+    topLosers = Stock.objects.filter(TopLoser = True)[:4]
+
+    topv = {}
+    topVolumes = Stock.objects.filter(Nifty50 = True)
+    for i in topVolumes:
+        topv[i.Symbol] = i.Volume
+    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
+    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
+
+    topt = {}
+    topTraded = Stock.objects.filter(Nifty50 = True)
+    for i in topTraded:
+        topt[i.Symbol] = i.TotalUsers
+    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
+    topTraded = Stock.objects.filter(Symbol__in=topTraded)
+
+    topm = {}
+    topMktCap = Stock.objects.filter(Nifty50 = True)
+    for i in topMktCap:
+        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
+    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
+    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
+
+    # getting user trades data to be displayed
+    usertradesdata = []
+    usertrades = Trade.objects.filter(Trader = request.user)[:4]
+    for i in usertrades:
+        usertradesdata.append(i.Stock)
+    if len(usertradesdata) == 0:
+        usertradesdata = None
+
+    # Tag each stock with its category and combine into one list
+    categories = []
+
+    for stock in topGainers:
+        categories.append({"type": "top-gainers", "stock": stock})
+
+    for stock in topLosers:
+        categories.append({"type": "top-losers", "stock": stock})
+
+    for stock in topVolumes:
+        categories.append({"type": "top-volumes", "stock": stock})
+
+    for stock in topTraded:
+        categories.append({"type": "top-traded", "stock": stock})
+
+    for stock in usertradesdata:
+        categories.append({"type": "user-trades", "stock": stock})
+
+    return render(request, "category.html", {"categories" : categories})
+
+def tradeHistory(request):
+    usertradesdata = []
+    usertrades = Trade.objects.filter(Trader = request.user)
+    for i in usertrades:
+        usertradesdata.append(i.Stock)
+    if len(usertradesdata) == 0:
+        usertradesdata = None
+    return render(request, "trade-history.html", {"history" : zip(usertradesdata, usertrades)})
+
+def tradeDetails(request, symbol):
+    stock = Stock.objects.get(Symbol = symbol)
+    trader = Trade.objects.get(Trader = request.user, Stock = stock)
+    user = UserDetail.objects.get(User = request.user)
+    upi = f"{user.UPI[:4]}***********{user.UPI[user.UPI.find("@"):]}"
+    
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user})
+
+def checkReturnRate(request, stock):
+    share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+    if Trade.objects.filter(Trader = request.user, Stock = share).exists():
+        return HttpResponse("You have already opted for his stock. Try again for next trading day.")
+    predict = False
+    if str(stock).split("-")[1] == "UP":
+        predict = True
+    if request.method == "POST":
+        amt = int(request.POST["amount"])
+
+        # up party data
+        totalAmtup = 0
+        retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
+        for i in retrieve_up:
+            totalAmtup += i.Amount
+        
+        # down party data
+        totalAmtdown = 0
+        retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
+        for i in retrieve_down:
+            totalAmtdown += i.Amount
+        
+        # our cut
+        # if (totalAmtdown + totalAmtup) / totalAmtup > 1.2:
+        #     totalcut = 10 / 100 * (totalAmtdown + totalAmtup)
+        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
+        # else:
+        #     totalcut = 5 / 100 * (totalAmtdown + totalAmtup)
+        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
+        if predict == True:
+            remAmt = totalAmtup + amt
+            returnPercentage = amt / remAmt * 100
+            userReturn = returnPercentage / 100 * amt
+            returnRate = float(f"{returnPercentage / 10:.2f}")
+        if predict == False:
+            remAmt = totalAmtdown + amt
+            returnPercentage = amt / remAmt * 100
+            userReturn = returnPercentage / 100 * amt
+            returnRate = float(f"{returnPercentage / 10:.2f}")
+        return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})

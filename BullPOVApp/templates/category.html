@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Categories | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+    <section id="product-list" class="product-list section">
+
+      <div class="container isotope-layout" data-aos="fade-up" data-aos-delay="100" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+
+        <div class="row">
+          <div class="col-12">
+            <div class="product-filters isotope-filters mb-5 d-flex justify-content-center" data-aos="fade-up">
+              <ul class="d-flex flex-wrap gap-2 list-unstyled">
+                <li class="filter-active" data-filter="*">All</li>
+                <li data-filter=".user-trades">Your Trades</li>
+                <li data-filter=".top-traded">Top Traded</li>
+                <li data-filter=".top-volumes">Top Volumes</li>
+                <li data-filter=".top-gainers">Top Gainers</li>
+                <li data-filter=".top-losers">Top Losers</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="row product-container isotope-container" data-aos="fade-up" data-aos-delay="200">
+
+          {% for c in categories %}
+          <!-- Product Item 1 -->
+          <div class="col-md-12 col-lg-3 product-item isotope-item {{c.type}}">
+            <section id="category-product-list" class="category-product-list section">
+            <div class="col-lg-12">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{c.stock.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{c.stock.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{c.stock.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{c.stock.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="product-details.html">{{c.stock.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{c.stock.CurrentPrice}} {% if c.stock.CurrentPrice > c.stock.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{c.stock.MktCap}}</strong>
+                          <br>
+                          Sector: <strong>{{c.stock.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{c.stock.Volume}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                </section>
+          </div><!-- End Product Item -->
+          {% endfor %}
+
+        </div>
+
+      </div>
+
+    </section>
+
+{% endblock %}

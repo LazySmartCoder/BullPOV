@@ -42,6 +42,55 @@
             <h1 class="BullPOV">ullPOV</h1>
           </a>
 
+
+          {% if request.user.is_authenticated %}
+
+          <!-- Actions -->
+          <div class="header-actions d-flex align-items-center justify-content-end">
+
+            <!-- Account -->
+            <div class="dropdown account-dropdown">
+              <button class="header-action-btn" data-bs-toggle="dropdown">
+                <i class="bi bi-person"></i>
+                <span class="action-text d-none d-md-inline-block">Account</span>
+              </button>
+              <div class="dropdown-menu">
+                <div class="dropdown-header">
+                  <h6>Welcome <span class="sitename">{{request.user.first_name}}</span></h6>
+                  <p class="mb-0">Access account &amp; manage trades</p>
+                </div>
+                <div class="dropdown-body">
+                  <a class="dropdown-item d-flex align-items-center" href="account.html">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span>My Profile</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
+                    <i class="bi bi-bag-check me-2"></i>
+                    <span>My Orders</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
+                    <i class="bi bi-eye me-2"></i>
+                    <span>My Watch List</span>
+                  </a>
+                  <a class="dropdown-item d-flex align-items-center" href="settings.html">
+                    <i class="bi bi-gear me-2"></i>
+                    <span>Settings</span>
+                  </a>
+                </div>
+                <div class="dropdown-footer">
+                  <a href="/signout" class="btn btn-outline-primary w-100 mb-2">SignOUT</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wishlist -->
+            <a href="wishlist.html" class="header-action-btn d-none d-md-flex">
+              <i class="bi bi-eye"></i>
+              <span class="action-text d-none d-md-inline-block">Watch List</span>
+              <span class="badge">0</span>
+            </a>
+            {% endif %}
+
             <!-- Mobile Navigation Toggle -->
             <i class="mobile-nav-toggle d-xl-none bi bi-list me-0"></i>
 
@@ -55,6 +104,15 @@
       <div class="container-fluid container-xl position-relative">
         <nav id="navmenu" class="navmenu">
           <ul>
+            {% if request.user.is_authenticated %}
+            <li><a href="/">Home</a></li>
+            <li><a href="/about-us">About</a></li>
+            <li><a href="#how-it-works">How it works?</a></li>
+            <li><a href="#what-you-get">What you get?</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            {% else %}
             <li><a href="/">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#how-it-works">How it works?</a></li>
@@ -63,6 +121,7 @@
             <li><a href="#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             <li><a href="/signin">SignIN</a></li>
+            {% endif %}
 
           </ul>
         </nav>
