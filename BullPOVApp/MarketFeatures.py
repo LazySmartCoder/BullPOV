@@ -4,6 +4,11 @@ from .credentials import *
 from datetime import datetime, timedelta
 from .stock_list import stocks
 import pytz
+import time
+import yfinance as yf
+from datetime import datetime, timedelta
+import wikipedia
+import plotly.graph_objects as go
 
 def fetch_stock_details(symbol):
     api_key = smartapi_api_key
@@ -199,3 +204,108 @@ def get_today_high_low(symbol):
     except Exception as e:
         print(f"Error fetching today's high/low for {symbol}: {e}")
         return [None, None]
+    
+import yfinance as yf
+
+def get_previous_close(symbol):
+    try:
+        stock = yf.Ticker(symbol)
+        prev_close = stock.info['previousClose']
+        return prev_close
+    except KeyError:
+        print(f"Previous close not found for {symbol}")
+    except Exception as e:
+        print(f"Error fetching previous close for {symbol}: {e}")
+    return None
+
+def get_day_high_low(symbol):
+    try:
+        today = datetime.today()
+        # Use yesterday if today is a weekend or market holiday
+        if today.weekday() >= 5:  # Saturday or Sunday
+            today -= timedelta(days=(today.weekday() - 4))
+        
+        yesterday = today - timedelta(days=1)
+
+        # Fetch 5 days data to be safe
+        df = yf.Ticker(symbol).history(period="5d", interval="1d")
+
+        if df.empty:
+            print(f"No data found for {symbol}")
+            return None
+
+        # Get the last row (most recent trading day)
+        latest_data = df.iloc[-1]
+        return {
+            'date': latest_data.name.strftime('%Y-%m-%d'),
+            'high': round(latest_data['High'], 2),
+            'low': round(latest_data['Low'], 2),
+            'close': round(latest_data['Close'], 2)
+        }
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        return None
+
+def get_market_cap(symbol):
+    try:
+        stock = yf.Ticker(symbol)
+        info = stock.info
+        mkt_cap = info.get("marketCap", None)
+        
+        if mkt_cap is None:
+            print(f"[ERROR] Market Cap not available for {symbol}")
+            return None
+
+        # Optional: Convert to readable format (e.g., Crores INR if it's Indian stock)  # from INR to Crores (assuming INR)
+        return round(mkt_cap, 2)
+    
+    except Exception as e:
+        print(f"[ERROR] Could not fetch Market Cap for {symbol}: {e}")
+        return None
+    
+def get_stock_description(company_name):
+    try:
+        summary = wikipedia.summary(company_name, sentences=5)
+        return summary
+    except wikipedia.exceptions.DisambiguationError as e:
+        return f"Disambiguation error. Possible options: {e.options[:5]}"
+    except wikipedia.exceptions.PageError:
+        return "Page not found."
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+def plot_intraday_line_chart(symbol):
+    if not symbol.endswith(".NS"):
+        symbol += ".NS"
+
+    # Fetch today's intraday data (15-minute interval)
+    data = yf.download(
+        tickers=symbol,
+        period='1d',
+        interval='15m',
+        progress=False
+    )
+
+    if data.empty:
+        print(f"No intraday data available for {symbol}.")
+        return
+
+    fig = go.Figure()
+
+    # Add line chart using closing price
+    fig.add_trace(go.Scatter(
+        x=data.index,
+        y=data['Close'],
+        mode='lines+markers',
+        name='Close Price',
+        line=dict(color='cyan')
+    ))
+
+    fig.update_layout(
+        title=f"{symbol} - Intraday 15-minute Line Chart",
+        xaxis_title='Time',
+        yaxis_title='Price',
+        template='plotly_dark'
+    )
+
+    fig.show()

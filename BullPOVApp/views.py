@@ -323,7 +323,7 @@ def dashboard(request):
         usertradesdata.append(i.Stock)
     if len(usertradesdata) == 0:
         usertradesdata = None
-
+    print(get_day_high_low("TCS.NS"))
     return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
 
 def search(request):
@@ -340,8 +340,11 @@ def stockPreview(request, symbol):
         change = True
     else:
         change = False
-
-    return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user})
+    upPercent = stock.UPUsers / stock.TotalUsers * 100
+    downPercent = stock.DownUsers / stock.TotalUsers * 100
+    stockDesc = get_stock_description(stock.Name)
+    plot_intraday_line_chart("TCS")
+    return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
 
 def hitOrder(request, stock):
     predict = False
@@ -385,12 +388,11 @@ def hitOrder(request, stock):
         return redirect(f"/trade-details/{share.Symbol}")
 
 def marketDataUpdation(request):
-    def remove_brackets(text):
-        return text.replace("(", "").replace(")", "")
-    # update = Stock.objects.all()
+    update = Stock.objects.all()[:20]
     # for i in update:
     #     try:
-    #         i.Name = str(i.Name).replace(".", "")
+    #         i.MinPrice = get_day_high_low(i.Symbol)["low"]
+    #         i.MaxPrice = get_day_high_low(i.Symbol)["high"]
     #         i.save()
     #     except Exception as e:
     #         continue
