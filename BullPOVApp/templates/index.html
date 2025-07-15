@@ -15,10 +15,10 @@
             <div class="cta-buttons" data-aos="fade-up" data-aos-delay="300">
               {% if request.user.is_authenticated %}
               <a href="/dashboard" class="btn btn-primary">Trade Online</a>
-              <a href="/watch-list" class="btn btn-outline">Watch List</a>
+              <a href="/categories" class="btn btn-outline">Explore</a>
               {% else %}
               <a href="/signup" class="btn btn-primary">Get Started</a>
-              <a href="/dashboard" class="btn btn-outline">Explore Stocks</a>
+              <a href="/download-app" class="btn btn-outline">Download App</a>
               {% endif %}
             </div>
             
@@ -147,8 +147,8 @@
                         </div>
                         <div class="add-to-cart-container">
                           <div class="cart-btn-group">
-                              <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
-                              <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+                              <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+                              <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
                             </div>
                             <style>
                               .cart-btn-group {
@@ -188,7 +188,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="product-details.html">{{s.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{s.Symbol}}">{{s.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{s.CurrentPrice}} {% if s.CurrentPrice > s.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{s.MktCap}}</strong>
                           <br>
@@ -322,7 +322,7 @@
                     </div>
                     <div class="timeline-dot"></div>
                     <div class="timeline-right">
-                      <p class="description">Analyze the day’s closing pattern, recent news, or global cues that might influence tomorrow's opening. Every small insight, from SGX Nifty to FII activity, adds to your edge. You're not just guessing, you're decoding momentum.</p>
+                      <p class="description">Analyze the day’s closing pattern, recent news, or global cues that might influence tomorrow's closing. Every small insight, from SGX Nifty to FII activity, adds to your edge. You're not just guessing, you're decoding momentum.</p>
                     </div>
                   </div>
 
@@ -333,7 +333,7 @@
                     </div>
                     <div class="timeline-dot"></div>
                     <div class="timeline-right">
-                      <p class="description">This is your directional call, based on the last closing price, do you believe the stock will open higher or lower the next day at 9:15 AM? It’s your instinct vs the world. The earlier you enter, the greater the return potential.</p>
+                      <p class="description">This is your directional call, based on the last closing price, do you believe the stock will close higher or lower the next day at 3:30 PM? It’s your instinct vs the world. The earlier you enter, the greater the return potential.</p>
                     </div>
                   </div>
 
@@ -344,7 +344,7 @@
                     </div>
                     <div class="timeline-dot"></div>
                     <div class="timeline-right">
-                      <p class="description">Submit your up or down prediction with a single tap between 3:30 PM and 9:15 AM. As others join in, the prediction pool grows, and so do your potential rewards, especially for early movers.</p>
+                      <p class="description">Submit your up or down prediction with a single tap between 4:00 PM and 8:55 AM. As others join in, the prediction pool grows, and so do your potential rewards, especially for early movers.</p>
                     </div>
                   </div>
 

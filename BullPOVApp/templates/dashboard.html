@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Stocks | BullPOV</title>
+  <title>Dashboard | BullPOV</title>
   <meta name="description" content="Play the markets your way with BullPOV — India's first stock-based skill gaming platform. Analyze, predict, and win based on your stock market skills. No luck, just strategy. Join now and trade for thrill, not risk.">
   <meta name="keywords" content="bullpov, bull pov, stock gaming India, skill-based trading, stock market game, NSE simulation, trading game app, stock prediction platform, BullPOV, stock fantasy India">
 
@@ -205,9 +205,9 @@
           <div class="swiper-wrapper" id="data">
             {% for name, figs in data.items %}
             {% if figs.2 == "up" %}
-            <div class="swiper-slide">{{name}} - {{figs.0}} (<i style="color: green;">{{figs.1}}</i>)</div>
+            <div class="swiper-slide">{{name}} - {{figs.0|floatformat:2}} (<i style="color: green;">{{figs.1|floatformat:2}}</i>)</div>
             {% else %}
-            <div class="swiper-slide">{{name}} - {{figs.0}} (<i style="color: red;">{{figs.1}}</i>)</div>
+            <div class="swiper-slide">{{name}} - {{figs.0|floatformat:2}} (<i style="color: red;">{{figs.1|floatformat:2}}</i>)</div>
             {% endif %}
             {% endfor %}
           </div>

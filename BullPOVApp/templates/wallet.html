@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Wallet | BullPOV{% endblock %}
+{% load static %}
+{% block body %}
+
+<!-- Wallet Section -->
+<div class="wallet-container my-5">
+  <div class="wallet-card">
+    <h2 class="wallet-title">Wallet Balance</h2>
+
+    <div class="wallet-balance">
+        <span class="balance-amount">Liquid: <span style="color: green;">₹{{user.WalletBalance}}</span></span>
+      <span class="balance-amount">Invested: <span style="color: green;">₹{{user.InvestedBalance}}</span></span>
+    </div>
+
+    <div class="wallet-actions mt-4">
+      <button data-bs-toggle="modal" data-bs-target="#addmoney" class="btn btn-success">Add Money</button>
+      <button data-bs-toggle="modal" data-bs-target="#withdraw" class="btn btn-primary ms-2">Withdraw ({{user.WalletBalance}})</button>
+    </div>
+  </div>
+</div>
+
+
+<style>
+    .wallet-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wallet-card {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.wallet-balance {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.balance-amount {
+  font-weight: bold;
+  display: block;
+  font-size: 28px;
+  margin-top: 5px;
+}
+
+.upi-section label {
+  font-weight: 500;
+}
+
+.wallet-actions button {
+  width: 48%;
+}
+
+</style>
+
+<!-- Modal -->
+<div class="modal fade" id="addmoney" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Money to Wallet</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/add-money" method="post">
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">UPI ID</label>
+    <input required type="text" class="form-control" name="upi" value="{{user.UPI}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <label for="exampleInputEmail1" class="form-label">Amount</label>
+    <input required type="number" class="form-control" name="amount" value="500" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <div id="emailHelp" class="form-text">Maximum Wallet Limit - ₹10,000</div>
+  </div>
+  <div class="modal-footer">
+        <button type="submit" style="width: 100%;" class="btn btn-outline-success">Proceed to Add Money</button>
+      </div>
+      {% csrf_token %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="withdraw" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Withdraw Money from Wallet</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/withdraw-money" method="post">
+          <div class="mb-3">
+    <label for="exampleInputEmail1" class="form-label">Amount</label>
+    <input required type="number" class="form-control" name="amount" value="{{suggest|floatformat:2}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <div id="emailHelp" class="form-text">Maximum Withdrawal Amount - ₹{{user.WalletBalance}}</div>
+  </div>
+  <div class="modal-footer">
+        <button type="submit" style="width: 100%;" class="btn btn-outline-success">Proceed for Withdrawal</button>
+      </div>
+      {% csrf_token %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -46,55 +46,83 @@
           {% if request.user.is_authenticated %}
 
           <!-- Actions -->
-          <div class="header-actions d-flex align-items-center justify-content-end">
+<div class="header-actions d-flex align-items-center justify-content-end">
 
-            <!-- Account -->
-            <div class="dropdown account-dropdown">
-              <button class="header-action-btn" data-bs-toggle="dropdown">
-                <i class="bi bi-person"></i>
-                <span class="action-text d-none d-md-inline-block">Account</span>
-              </button>
-              <div class="dropdown-menu">
-                <div class="dropdown-header">
-                  <h6>Welcome <span class="sitename">{{request.user.first_name}}</span></h6>
-                  <p class="mb-0">Access account &amp; manage trades</p>
-                </div>
-                <div class="dropdown-body">
-                  <a class="dropdown-item d-flex align-items-center" href="account.html">
-                    <i class="bi bi-person-circle me-2"></i>
-                    <span>My Profile</span>
-                  </a>
-                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
-                    <i class="bi bi-bag-check me-2"></i>
-                    <span>My Orders</span>
-                  </a>
-                  <a class="dropdown-item d-flex align-items-center" href="orders.html">
-                    <i class="bi bi-eye me-2"></i>
-                    <span>My Watch List</span>
-                  </a>
-                  <a class="dropdown-item d-flex align-items-center" href="settings.html">
-                    <i class="bi bi-gear me-2"></i>
-                    <span>Settings</span>
-                  </a>
-                </div>
-                <div class="dropdown-footer">
-                  <a href="/signout" class="btn btn-outline-primary w-100 mb-2">SignOUT</a>
-                </div>
-              </div>
-            </div>
+  <!-- Account -->
+  <div class="dropdown account-dropdown me-1">
+    <button class="header-action-btn" data-bs-toggle="dropdown">
+      <i class="bi bi-person"></i>
+      <!-- Show text only on md+ screens -->
+      <span class="action-text d-none d-md-inline-block">{{ request.user.username }}</span>
+    </button>
+    <div class="dropdown-menu">
+      <div class="dropdown-header">
+        <h6>Welcome <span class="sitename">{{ request.user.first_name }}</span></h6>
+        <p class="mb-0">Access account &amp; manage trades</p>
+      </div>
+      <div class="dropdown-body">
+        <a class="dropdown-item d-flex align-items-center" href="/account">
+          <i class="bi bi-person-circle me-2"></i> <span>My Profile</span>
+        </a>
+        <a class="dropdown-item d-flex align-items-center" href="/trade-history">
+          <i class="bi bi-clock-history me-2"></i> <span>Trade History</span>
+        </a>
+        <a class="dropdown-item d-flex align-items-center" href="/watch-list">
+          <i class="bi bi-eye me-2"></i> <span>Watch List</span>
+        </a>
+        <a class="dropdown-item d-flex align-items-center" href="/wallet">
+          <i class="bi bi-wallet me-2"></i> <span>Wallet</span>
+        </a>
+      </div>
+      <div class="dropdown-footer">
+        <a href="/signout" class="btn btn-outline-primary w-100 mb-2">Logout</a>
+      </div>
+    </div>
+  </div>
 
-            <!-- Wishlist -->
-            <a href="wishlist.html" class="header-action-btn d-none d-md-flex">
-              <i class="bi bi-eye"></i>
-              <span class="action-text d-none d-md-inline-block">Watch List</span>
-              <span class="badge">0</span>
-            </a>
-            {% endif %}
+  <!-- Watchlist -->
+  <div class="dropdown cart-dropdown me-2">
+    <button class="header-action-btn" data-bs-toggle="dropdown">
+      <i class="bi bi-eye"></i>
+      <!-- Hide label on mobile -->
+      <span class="action-text d-none d-md-inline-block">Watchlist</span>
+      <span class="badge">{{ watchlist|length }}</span>
+    </button>
+    <div class="dropdown-menu cart-dropdown-menu">
+      <div class="dropdown-header">
+        <h6>Your Watchlist ({{ watchlist|length }})</h6>
+      </div>
+      <div class="dropdown-body">
+        <div class="cart-items">
+          {% if watchlist %}
+            {% for w in watchlist %}
+              <a href="/stock-preview/{{w.Symbol}}">
+                <div class="cart-item">
+                      <div class="cart-item-image">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{w.Symbol|slice:':-3'}}.png" alt="Product" class="img-fluid">
+                      </div>
+                      <div class="cart-item-content">
+                        <h6 class="cart-item-title">{{w.Name}}</h6>
+                        <div class="cart-item-meta">Price: ₹{{w.CurrentPrice}}</div>
+                      </div>
+                    </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <h4 style="text-align: center;">Nothing in Watchlist. Browse Now!</h4>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
-            <!-- Mobile Navigation Toggle -->
-            <i class="mobile-nav-toggle d-xl-none bi bi-list me-0"></i>
+  <!-- Mobile Nav Toggle (always visible) -->
+  <div class="mobile-nav-toggle-wrapper d-xl-none">
+    <i class="mobile-nav-toggle bi bi-list"></i>
+  </div>
 
-          </div>
+</div>
         </div>
       </div>
     </div>
@@ -106,21 +134,26 @@
           <ul>
             {% if request.user.is_authenticated %}
             <li><a href="/">Home</a></li>
-            <li><a href="/about-us">About</a></li>
+            <li><a href="/about-us">About Us</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/market-info">Market Info</a></li>
+            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="#how-it-works">How it works?</a></li>
-            <li><a href="#what-you-get">What you get?</a></li>
             <li><a href="#reviews">Reviews</a></li>
             <li><a href="#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             {% else %}
             <li><a href="/">Home</a></li>
-            <li><a href="#about">About</a></li>
+            <li><a href="/about-us">About Us</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/market-info">Market Info</a></li>
+            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="#how-it-works">How it works?</a></li>
-            <li><a href="#what-you-get">What you get?</a></li>
             <li><a href="#reviews">Reviews</a></li>
             <li><a href="#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             <li><a href="/signin">SignIN</a></li>
+            <li><a href="/signup">SignUP</a></li>
             {% endif %}
 
           </ul>
@@ -224,9 +257,8 @@ It’s a gamified gateway to real investing, built to spark financial curiosity 
                   <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
                   <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                   <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-                  <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-                  <a href="#" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
                   <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                  <a href="#" aria-label="YouTube"><i class="bi bi-linkedin"></i></a>
                 </div>
               </div>
             </div>
@@ -238,26 +270,21 @@ It’s a gamified gateway to real investing, built to spark financial curiosity 
               <div class="footer-contact">
                 <div class="contact-item">
                   <i class="bi bi-geo-alt"></i>
-                  <span>123 Fashion Street, New York, NY 10001</span>
+                  <span>Muniswamy Gowda Layout, Kempapura, Hebbal, Bengaluru - 560024, Karnataka, India</span>
                 </div>
                 <div class="contact-item">
                   <i class="bi bi-telephone"></i>
-                  <span>+1 (555) 123-4567</span>
+                  <span>+91 9740 168 962</span>
                 </div>
                 <div class="contact-item">
                   <i class="bi bi-envelope"></i>
-                  <span>hello@example.com</span>
+                  <span>support@bullpov.com</span>
                 </div>
-                <div class="contact-item">
-                  <i class="bi bi-clock"></i>
-                  <span>Monday-Friday: 9am-6pm<br>Saturday: 10am-4pm<br>Sunday: Closed</span>
-                </div>
-              </div>
 
               <div class="app-buttons mt-4">
                 <a href="#" class="app-btn">
-                  <i class="bi bi-app-indicator"></i>
-                  <span>Download App</span>
+                  <i class="bi bi-rocket-takeoff"></i>
+                  <span>Get Started</span>
                 </a>
               </div>
             </div>
@@ -290,9 +317,8 @@ It’s a gamified gateway to real investing, built to spark financial curiosity 
               </div>
 
               <div class="legal-links">
-                <a href="tos.html">Terms</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="tos.html">Cookies</a>
+                <a href="/tac">Terms and Conditions</a>
+                <a href="/privacy-policy">Privacy Policy</a>
               </div>
             </div>
           </div>

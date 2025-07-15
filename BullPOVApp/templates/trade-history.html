@@ -24,8 +24,8 @@
                         <div class="product-details">
                         <h6 class="product-title">{{stock.Symbol}}</h6>
                         <div class="product-meta">
-                          <span class="product-color">Price: {{stock.CurrentPrice}}</span>
-                          <span class="product-size">MktkCap: {{stock.MktCap}}</span>
+                          {% if predict.Prediction %}<span class="product-color">Prediction: <span style="color: green;">UP</span></span>{% else %}<span class="product-color">Prediction: <span style="color: red;">DOWN</span></span>{% endif %}
+                          <span class="product-size">Amount: {{predict.Amount}}</span>
                         </div>
                         <button class="remove-item" type="button" style="color: green;">
                           <i class="bi bi-check2-circle"></i> Active Trade
@@ -49,8 +49,8 @@
                         <div class="product-details">
                         <h6 class="product-title">{{stock.Symbol}}</h6>
                         <div class="product-meta">
-                          <span class="product-color">Price: {{stock.CurrentPrice}}</span>
-                          <span class="product-size">MktkCap: {{stock.MktCap}}</span>
+                          <span class="product-color">Prediction: {{predict.Prediction}}</span>
+                          <span class="product-size">Amount: {{stock.Amount}}</span>
                         </div>
                       </div>
                       </a>
@@ -60,7 +60,6 @@
               </div><!-- End Cart Item -->
               {% endif %}
               {% endfor %}
-
       </div>
 
     </section>

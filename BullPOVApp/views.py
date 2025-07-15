@@ -19,6 +19,7 @@ from .MarketFeatures import *
 from SmartApi.smartConnect import SmartConnect
 
 # Some important functions
+site_url = "localhost:8000"
 def is_valid_password(s):
     if len(s) < 8:
         return False
@@ -53,7 +54,10 @@ def index(request):
         topt[i.Symbol] = i.TotalUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
-    return render(request, "index.html", {"stocks" : topTraded})
+    if request.user.is_authenticated:
+        return render(request, "index.html", {"stocks" : topTraded, "watchlist" : UserDetail.objects.get(User = request.user).Watchlist.all()})
+    else:
+        return render(request, "index.html", {"stocks" : topTraded})
 
 def aboutUs(request):
     return render(request, "about-us.html")
@@ -343,7 +347,7 @@ def stockPreview(request, symbol):
     upPercent = stock.UPUsers / stock.TotalUsers * 100
     downPercent = stock.DownUsers / stock.TotalUsers * 100
     stockDesc = get_stock_description(stock.Name)
-    plot_intraday_line_chart("TCS")
+    print(get_day_high_low("ACC.BO"))
     return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
 
 def hitOrder(request, stock):
@@ -401,20 +405,19 @@ def marketDataUpdation(request):
 
 def account(request):
     userdet = UserDetail.objects.get(User = request.user)
-    return render(request, "user-profile.html", {"user" : userdet})
+    return render(request, "user-profile.html", {"user" : userdet, "url" : site_url})
 
 def passwordChange(request):
-    userdet = UserDetail.objects.get(User = request.user)
     if request.method == "POST":
         old = request.POST["old"]
         pass1 = request.POST["pass1"]
         pass2 = request.POST["pass2"]
         if pass1 != pass2:
             messages.warning(request, "Password mismatch.")
-            return render(request, "user-profile.html", {"user" : userdet})
+            return redirect("/account")
         if not is_valid_password(pass1):
             messages.warning(request, "Enter a strong password.")
-            return render(request, "user-profile.html", {"user" : userdet})
+            return redirect("/account")
         if request.user.check_password(old):
             request.user.set_password(pass1)
             request.user.save()
@@ -433,8 +436,7 @@ def deleteAcc(request):
             return redirect("HomePage")
         else:
             messages.warning(request, "Incorrect Password.")
-        userdet = UserDetail.objects.get(User = request.user)
-        return render(request, "user-profile.html", {"user" : userdet})
+        return redirect("/account")
 
 def updateProfile(request):
     if request.method == "POST":
@@ -463,7 +465,7 @@ def updateProfile(request):
             messages.success(request, "Profile has been updated.")
         else:
             messages.warning(request, "Enter correct password.")
-        return render(request, "user-profile.html", {"user" : userdet})
+        return redirect("/account")
 
 def changeEmail(request, verify):
     user = request.user
@@ -495,20 +497,11 @@ def categories(request):
     topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
 
-    topm = {}
-    topMktCap = Stock.objects.filter(Nifty50 = True)
-    for i in topMktCap:
-        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
-    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
-    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
-
     # getting user trades data to be displayed
     usertradesdata = []
     usertrades = Trade.objects.filter(Trader = request.user)[:4]
     for i in usertrades:
         usertradesdata.append(i.Stock)
-    if len(usertradesdata) == 0:
-        usertradesdata = None
 
     # Tag each stock with its category and combine into one list
     categories = []
@@ -535,8 +528,6 @@ def tradeHistory(request):
     usertrades = Trade.objects.filter(Trader = request.user)
     for i in usertrades:
         usertradesdata.append(i.Stock)
-    if len(usertradesdata) == 0:
-        usertradesdata = None
     return render(request, "trade-history.html", {"history" : zip(usertradesdata, usertrades)})
 
 def tradeDetails(request, symbol):
@@ -606,3 +597,31 @@ def removeWatchList(request, stock):
     userlist.save()
     messages.success(request, "Watch List Updated.")
     return redirect("WatchList")
+
+def wallet(request):
+    userdet = UserDetail.objects.get(User = request.user)
+    return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
+
+def addMoney(request):
+    if request.method == "POST":
+        upi = request.POST["upi"]
+        amt = request.POST["amount"]
+        userdet = UserDetail.objects.get(User = request.user)
+        userdet.WalletBalance = userdet.WalletBalance + int(amt)
+        userdet.upi = upi
+        userdet.save()
+        messages.success(request, "Money added.")
+        return redirect("Wallet")
+
+def withdrawMoney(request):
+    if request.method == "POST":
+        amt = int(request.POST["amount"])
+        userdet = UserDetail.objects.get(User = request.user)
+        if amt > userdet.WalletBalance:
+            messages.warning(request, "Insufficient balance.")
+            return redirect("Wallet")
+        userdet.WalletBalance = userdet.WalletBalance - amt
+        userdet.save()
+        messages.success(request, "Money withdrawn.")
+        return redirect("Wallet")
+

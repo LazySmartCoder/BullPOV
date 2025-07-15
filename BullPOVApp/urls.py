@@ -40,4 +40,7 @@ urlpatterns = [
     path("watch-list", watchList, name = "WatchList"),
     path("remove-watch-list/<str:stock>", removeWatchList, name = "RemoveWatchList"),
     path("add-watch-list/<str:stock>", addWatchList, name = "AddWatchList"),
+    path("wallet", wallet, name = "Wallet"),
+    path("add-money", addMoney, name = "AddMoney"),
+    path("withdraw-money", withdrawMoney, name = "WithdrawMoney"),
 ]

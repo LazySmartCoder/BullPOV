@@ -7,6 +7,7 @@ class Stock(models.Model):
     Logo = models.CharField(default="")
     Symbol = models.CharField(default="")
     Sector = models.CharField(default="")
+    Description = models.CharField(default="", max_length=10000)
     CurrentPrice = models.FloatField(default=0)
     DayHigh = models.FloatField(default=0)
     DayLow = models.FloatField(default=0)
@@ -33,7 +34,7 @@ class Stock(models.Model):
 
 class UserDetail(models.Model):
     User = models.ForeignKey(User, related_name="OtherUserDetails", on_delete=models.CASCADE)
-    ProfilePhoto = models.ImageField(upload_to='ProfilePhotos/', default='default.png')
+    ProfilePhoto = models.ImageField(upload_to='ProfilePhotos/', default='/default.png')
     Newsletters = models.BooleanField(default=False)
     OTPEmail = models.CharField(default="")
     OTPPhone = models.CharField(default="")
@@ -44,6 +45,7 @@ class UserDetail(models.Model):
     Address = models.CharField(default="")
     UPI = models.CharField(default="")
     WalletBalance = models.FloatField(default=0)
+    InvestedBalance = models.FloatField(default=0)
     Watchlist = models.ManyToManyField(Stock, blank=True, related_name='watchList')
     
     def __str__(self):
