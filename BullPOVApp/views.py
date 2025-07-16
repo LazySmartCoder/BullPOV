@@ -9,10 +9,22 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random
+import locale
 from .MarketFeatures import *
 
 # Some important functions and variables
 site_url = "localhost:8000"
+locale.setlocale(locale.LC_ALL, 'en_IN.UTF-8')
+
+def convert_to_crores(amount):
+    try:
+        # Convert to float to support decimals
+        amount = float(amount)
+        crores = amount / 1e7  # 1 crore = 1 crore = 1 * 10^7
+        formatted = locale.format_string("%.2f", crores, grouping=True)
+        return f"₹{formatted} Cr"
+    except Exception as e:
+        return f"Error: {e}"
 
 def is_valid_password(s):
     if len(s) < 8:

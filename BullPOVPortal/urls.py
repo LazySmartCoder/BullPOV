@@ -24,7 +24,7 @@ urlpatterns = [
     path('BullPOV-Admin-AB-HG', admin.site.urls),
     path('', include("BullPOVApp.urls")),
     path('admin-panel', include("BullPOVAdmin.urls")),
-    re_path(r'^ProfilePhoto/(?P<path>.*)$', serve, {'document_root' : settings.MEDIA_ROOT})
+    re_path(r'^assets/(?P<path>.*)$', serve, {'document_root' : settings.MEDIA_ROOT}),
 ]
 
 handler404 = "BullPOVApp.views.ErrorPage"

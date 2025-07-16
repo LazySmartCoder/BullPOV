@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Watch List | BullPOV{% endblock %}
 {% load static %}
+{% load tempfea %}
 {% block body %}
 
 <section id="cart" class="cart section">
@@ -24,8 +25,8 @@
                         <div class="product-details">
                         <h6 class="product-title">{{stock.Symbol}}</h6>
                         <div class="product-meta">
-                          <span class="product-color">Price: {{stock.CurrentPrice}}</span>
-                          <span class="product-size">MktkCap: {{stock.MktCap}}</span>
+                          <span class="product-color">Price: ₹{{stock.CurrentPrice|comma}}</span>
+                          <span class="product-size">MktkCap: {{stock.MktCap|crores}}</span>
                         </div>
                     </a>
                         <button onclick="window.location.href='/remove-watch-list/{{stock.Symbol}}'" class="remove-item" type="button" style="color: red;">

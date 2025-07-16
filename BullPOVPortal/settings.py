@@ -122,8 +122,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR / 'static')
-MEDIA_URL = '/ProfilePhoto/'
-MEDIA_ROOT = os.path.join(BASE_DIR / 'ProfilePhoto')
+MEDIA_URL = '/assets/'
+MEDIA_ROOT = os.path.join(BASE_DIR / 'assets')
 
 CSRF_TRUSTED_ORIGINS = ["https://bullpov.com", "https://www.bullpov.com", "https://beta.bullpov.com"]
 

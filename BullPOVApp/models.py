@@ -42,7 +42,6 @@ class UserDetail(models.Model):
     VerifiedAccount = models.BooleanField(default=False)
     VerificationOTP = models.CharField(default="")
     Address = models.CharField(default="")
-    UPI = models.CharField(default="")
     WalletBalance = models.FloatField(default=0)
     InvestedBalance = models.FloatField(default=0)
     Watchlist = models.ManyToManyField(Stock, blank=True, related_name='watchList')
@@ -59,6 +58,7 @@ class Trade(models.Model):
     ActiveStatus = models.BooleanField(default=False)
     Return = models.FloatField(default=0)
     Outcome = models.BooleanField(default=False) # False means Lose, True means Won!
+    Receipt = models.FileField(upload_to="Receipts/", default="")
 
     def __str__(self):
         return f"{self.Trader} | {self.Stock}"

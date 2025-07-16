@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Trade Details | BullPOV{% endblock %}
 {% load static %}
+{% load tempfea %}
 {% block body %}
 
 <section id="order-confirmation" class="order-confirmation section">
@@ -24,7 +25,7 @@
                   <div class="order-date">Results are yet to be declared!</div>
                   {% else %}
                   {% if trade.Outcome %}
-                  <div class="order-date">YOU WON ₹{{trade.Return}}!!</div>
+                  <div class="order-date">YOU WON ₹{{trade.Return|comma}}!!</div>
                   {% else %}
                   <div class="order-date">YOU LOST, Better luck next time!</div>
                   {% endif %}
@@ -59,7 +60,7 @@
                   <ul class="summary-list">
                     <li>
                       <span>Investment</span>
-                      <span>₹{{trade.Amount}}</span>
+                      <span>₹{{trade.Amount|comma}}</span>
                     </li>
                     <li>
                       <span>Platform Fee</span>
@@ -72,10 +73,10 @@
                       {% else %}
                       {% if trade.Outcome %}
                       <span>Profit / Loss</span>
-                      <span style="color: green;">₹{{trade.Return}}</span>
+                      <span style="color: green;">₹{{trade.Return|comma}}</span>
                       {% else %}
                       <span>Profit / Loss</span>
-                      <span style="color: red;">-₹{{trade.Amount}}</span>
+                      <span style="color: red;">-₹{{trade.Amount|comma}}</span>
                       {% endif %}
                       {%endif  %}
                     </li>
@@ -86,7 +87,7 @@
                       {% else %}
                       {% if trade.Outcome %}
                       <span>Total</span>
-                      <span style="color: green;">₹{{totalamt}}</span>
+                      <span style="color: green;">₹{{totalamt|comma}}</span>
                       {% else %}
                       <span>Total</span>
                       <span style="color: red;">₹0</span>

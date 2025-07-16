@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+{% load tempfea %}
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -144,9 +145,9 @@
             <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/market-info">Market Info</a></li>
             <li><a href="/e-learning">E - Learning</a></li>
-            <li><a href="#how-it-works">How it works?</a></li>
-            <li><a href="#reviews">Reviews</a></li>
-            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="/#how-it-works">How it works?</a></li>
+            <li><a href="/#reviews">Reviews</a></li>
+            <li><a href="/#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             {% else %}
             <li><a href="/">Home</a></li>
@@ -154,9 +155,9 @@
             <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/market-info">Market Info</a></li>
             <li><a href="/e-learning">E - Learning</a></li>
-            <li><a href="#how-it-works">How it works?</a></li>
-            <li><a href="#reviews">Reviews</a></li>
-            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="/#how-it-works">How it works?</a></li>
+            <li><a href="/#reviews">Reviews</a></li>
+            <li><a href="/#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             <li><a href="/signin">SignIN</a></li>
             <li><a href="/signup">SignUP</a></li>
@@ -318,12 +319,12 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}">{{trade.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{trade.CurrentPrice}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap}}</strong>
+                        <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores|crores}}</strong>
                           <br>
                           Sector: <strong>{{trade.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{trade.Volume}}</strong>
+                          Volume: <strong>{{trade.Volume|comma|comma}}</strong>
                         </p>
                     </div>
                   </div>
@@ -396,12 +397,12 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{toptraded.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{toptraded.CurrentPrice}} {% if toptraded.CurrentPrice > toptraded.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap}}</strong>
+                        <h4 style="text-align: left;">₹{{toptraded.CurrentPrice|comma}} {% if toptraded.CurrentPrice > toptraded.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{toptraded.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{toptraded.Volume}}</strong>
+                          Volume: <strong>{{toptraded.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>
@@ -473,12 +474,12 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topvolume.Symbol}}">{{topvolume.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{topvolume.CurrentPrice}} {% if topvolume.CurrentPrice > topvolume.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap}}</strong>
+                        <h4 style="text-align: left;">₹{{topvolume.CurrentPrice|comma}} {% if topvolume.CurrentPrice > topvolume.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{topvolume.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{topvolume.Volume}}</strong>
+                          Volume: <strong>{{topvolume.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>
@@ -547,12 +548,12 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topgainer.Symbol}}">{{topgainer.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{topgainer.CurrentPrice}} {% if topgainer.CurrentPrice > topgainer.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{topgainer.MktCap}}</strong>
+                        <h4 style="text-align: left;">₹{{topgainer.CurrentPrice|comma}} {% if topgainer.CurrentPrice > topgainer.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{topgainer.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{topgainer.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{topgainer.Volume}}</strong>
+                          Volume: <strong>{{topgainer.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>
@@ -621,12 +622,12 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toploser.Symbol}}">{{toploser.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{toploser.CurrentPrice}} {% if toploser.CurrentPrice > toploser.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{toploser.MktCap}}</strong>
+                        <h4 style="text-align: left;">₹{{toploser.CurrentPrice|comma}} {% if toploser.CurrentPrice > toploser.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{toploser.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{toploser.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{toploser.Volume}}</strong>
+                          Volume: <strong>{{toploser.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>
@@ -669,8 +670,8 @@
                         <div class="product-details">
                         <h6 class="product-title">{{mkt.Symbol}}</h6>
                         <div class="product-meta">
-                          <span class="product-color">Price: {{mkt.CurrentPrice}}</span>
-                          <span class="product-size">MktCap: {{mkt.MktCap}}</span>
+                          <span class="product-color">Price: ₹{{mkt.CurrentPrice|comma}}</span>
+                          <span class="product-size">MktCap: {{mkt.MktCap|crores}}</span>
                         </div>
                       </div>
                       </a>
@@ -683,14 +684,7 @@
       </div>
 
     </section>
-    <!-- Category Pagination Section -->
-          <section id="category-pagination" class="category-pagination section">
-              
-              <center>
-              <a href="/explore" class="btn btn-outline-dark">Explore More...</a>
-              </center>
 
-          </section><!-- /Category Pagination Section -->
 
         </div>
 
