@@ -58,6 +58,7 @@ class Trade(models.Model):
     Prediction = models.BooleanField(default=None) # True means UP, False means Down
     ActiveStatus = models.BooleanField(default=False)
     Return = models.FloatField(default=0)
+    Outcome = models.BooleanField(default=False) # False means Lose, True means Won!
 
     def __str__(self):
         return f"{self.Trader} | {self.Stock}"

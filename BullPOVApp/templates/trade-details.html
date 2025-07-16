@@ -23,7 +23,11 @@
                   {% if trade.ActiveStatus %}
                   <div class="order-date">Results are yet to be declared!</div>
                   {% else %}
+                  {% if trade.Outcome %}
                   <div class="order-date">YOU WON ₹{{trade.Return}}!!</div>
+                  {% else %}
+                  <div class="order-date">YOU LOST, Better luck next time!</div>
+                  {% endif %}
                   {% endif %}
                 </div>
 
@@ -66,8 +70,13 @@
                       <span>Profit / Loss</span>
                       <span>Pending</span>
                       {% else %}
+                      {% if trade.Outcome %}
                       <span>Profit / Loss</span>
-                      <span>₹{{trade.Return}}</span>
+                      <span style="color: green;">₹{{trade.Return}}</span>
+                      {% else %}
+                      <span>Profit / Loss</span>
+                      <span style="color: red;">-₹{{trade.Amount}}</span>
+                      {% endif %}
                       {%endif  %}
                     </li>
                     <li class="total">
@@ -75,8 +84,13 @@
                       <span>Total</span>
                       <span>Pending</span>
                       {% else %}
+                      {% if trade.Outcome %}
                       <span>Total</span>
-                      <span>₹{{totalamt}}</span>
+                      <span style="color: green;">₹{{totalamt}}</span>
+                      {% else %}
+                      <span>Total</span>
+                      <span style="color: red;">₹0</span>
+                      {% endif %}
                       {%endif  %}
                     </li>
                   </ul>
@@ -87,7 +101,7 @@
                   <h5>Trade Information</h5>
                   <p class="delivery-estimate">
                     <i class="bi bi-emoji-sunglasses"></i>
-                    <span>Prediction: UP</span>
+                    <span>Prediction: {{predict}}</span>
                   </p>
                   <p class="shipping-method">
                     <i class="bi bi-calendar-check"></i>

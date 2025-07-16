@@ -284,6 +284,9 @@ def hitOrder(request, stock):
     if request.method == "POST":
         amt = float(str(stock).split("-")[2])
         share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
+            messages.success(request, "You can only place one order in a complete trading cycle.")
+            return redirect(f"/trade-details/{str(stock).split("-")[0]}")
         user = UserDetail.objects.get(User = request.user)
         user.WalletBalance = user.WalletBalance - amt
         user.InvestedBalance = user.InvestedBalance + amt
@@ -560,8 +563,12 @@ def tradeDetails(request, symbol):
     trader = Trade.objects.get(Trader = request.user, Stock = stock)
     user = UserDetail.objects.get(User = request.user)
     upi = f"{user.UPI[:4]}***********{user.UPI[user.UPI.find("@"):]}"
+    if trader.Prediction:
+        predict = "UP"
+    else:
+        predict = "DOWN"
     
-    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user, "totalamt" : trader.Return + trader.Amount})
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict})
 # displaying market data in different paths ends
 
 
