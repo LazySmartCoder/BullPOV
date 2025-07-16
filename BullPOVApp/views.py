@@ -46,18 +46,17 @@ def sendEmail(sender, receiver, subject, message):
     except Exception as e:
         print(f"Error sending email: {e}")
 
-# BullPOV Code
+# BullPOV Code    
 def index(request):
+    if request.user.is_authenticated:
+        return redirect("Dashboard")
     topt = {}
     topTraded = Stock.objects.filter(Nifty50 = True)
     for i in topTraded:
         topt[i.Symbol] = i.TotalUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
-    if request.user.is_authenticated:
-        return render(request, "index.html", {"stocks" : topTraded, "watchlist" : UserDetail.objects.get(User = request.user).Watchlist.all()})
-    else:
-        return render(request, "index.html", {"stocks" : topTraded})
+    return render(request, "index.html", {"stocks" : topTraded})
 
 def aboutUs(request):
     return render(request, "about-us.html")
@@ -199,54 +198,6 @@ def signout(request):
     logout(request)
     messages.success(request, "Signed Out")
     return redirect("HomePage")
-
-def DeleteAccount(request):
-    if request.method == "POST":
-        password = request.POST["password"]
-        if check_password(password, request.user.password):
-            user = User.objects.get(username = request.user)
-            user.delete()
-            user.save()
-            messages.success(request, "Your account has been successfully deleted. Never come back...")
-            return redirect("HomePage")
-        else:
-            messages.warning(request, "Please enter the correct password.")
-            return redirect("UserProfile")
-    return redirect("ErrorPage")
-
-def userprofile(request):
-    return render(request, "user-profile.html")
-
-def profileupdate(request):
-    if request.method == "POST":
-        if check_password(request.POST["password"], request.user.password):
-            name = request.POST["name"]
-            email = request.POST["email"]
-            user = User.objects.get(username = request.user)
-            user.first_name = name
-            user.email = user.username = email
-            user.save()
-            messages.success(request, "Your profile has been successfully updated.")
-        else:
-            messages.warning(request, "Please enter the correct password.")
-        return redirect("UserProfile")
-    return redirect("ErrorPage")
-
-def passwordchange(request):
-    if request.method == "POST":
-        password = request.POST["pass"]
-        newpass1 = request.POST["newpass1"]
-        newpass2 = request.POST["newpass2"]
-        if (newpass1 == newpass2) and check_password(password, request.user.password):
-            user = User.objects.get(username = request.user)
-            user.set_password(newpass2)
-            user.save()
-            logout(request)
-            messages.success(request, "Your password has been updated sucessfully.")
-            return redirect("HomePage")
-        else:
-            messages.warning(request, "Something went wrong.")
-            return redirect("UserProfile")
         
 def userVerification(request):
     return render(request, "user-verification.html")
@@ -339,16 +290,22 @@ def search(request):
 
 def stockPreview(request, symbol):
     stock = Stock.objects.get(Symbol = symbol)
-    user = UserDetail.objects.get(User = request.user)
     if (stock.CurrentPrice - stock.ClosingPrice) > 0:
         change = True
     else:
         change = False
-    upPercent = stock.UPUsers / stock.TotalUsers * 100
-    downPercent = stock.DownUsers / stock.TotalUsers * 100
+    try:
+        upPercent = stock.UPUsers / stock.TotalUsers * 100
+        downPercent = stock.DownUsers / stock.TotalUsers * 100
+    except ZeroDivisionError:
+        upPercent = 50
+        downPercent = 50
     stockDesc = get_stock_description(stock.Name)
-    print(get_day_high_low("ACC.BO"))
-    return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
+    if request.user.is_authenticated:
+        user = UserDetail.objects.get(User = request.user)
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
+    else:
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
 
 def hitOrder(request, stock):
     predict = False
@@ -404,6 +361,9 @@ def marketDataUpdation(request):
     return HttpResponse("Market data has been updated.")
 
 def account(request):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "user-profile.html", {"user" : userdet, "url" : site_url})
 
@@ -468,6 +428,9 @@ def updateProfile(request):
         return redirect("/account")
 
 def changeEmail(request, verify):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     user = request.user
     userdet = UserDetail.objects.get(User = user)
     if userdet.OTPEmail == str(verify).split("-")[1]:
@@ -479,6 +442,9 @@ def changeEmail(request, verify):
     return redirect("HomePage")
 
 def categories(request):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
     topLosers = Stock.objects.filter(TopLoser = True)[:4]
@@ -524,6 +490,9 @@ def categories(request):
     return render(request, "category.html", {"categories" : categories})
 
 def tradeHistory(request):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     usertradesdata = []
     usertrades = Trade.objects.filter(Trader = request.user)
     for i in usertrades:
@@ -531,6 +500,9 @@ def tradeHistory(request):
     return render(request, "trade-history.html", {"history" : zip(usertradesdata, usertrades)})
 
 def tradeDetails(request, symbol):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     stock = Stock.objects.get(Symbol = symbol)
     trader = Trade.objects.get(Trader = request.user, Stock = stock)
     user = UserDetail.objects.get(User = request.user)
@@ -539,6 +511,9 @@ def tradeDetails(request, symbol):
     return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user})
 
 def checkReturnRate(request, stock):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     share = Stock.objects.get(Symbol = str(stock).split("-")[0])
     if Trade.objects.filter(Trader = request.user, Stock = share).exists():
         return HttpResponse("You have already opted for his stock. Try again for next trading day.")
@@ -580,11 +555,17 @@ def checkReturnRate(request, stock):
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def watchList(request):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     userlist = UserDetail.objects.get(User = request.user)
     watchlist = userlist.Watchlist.all()
     return render(request, "watch-list.html", {"watch" : watchlist})
 
 def addWatchList(request, stock):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     userlist = UserDetail.objects.get(User = request.user)
     userlist.Watchlist.add(Stock.objects.get(Symbol = stock))
     userlist.save()
@@ -592,6 +573,9 @@ def addWatchList(request, stock):
     return redirect(f"/stock-preview/{stock}")
 
 def removeWatchList(request, stock):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     userlist = UserDetail.objects.get(User = request.user)
     userlist.Watchlist.remove(Stock.objects.get(Symbol = stock))
     userlist.save()
@@ -599,6 +583,9 @@ def removeWatchList(request, stock):
     return redirect("WatchList")
 
 def wallet(request):
+    if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
+        return redirect("SignIN")
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
 
@@ -625,3 +612,11 @@ def withdrawMoney(request):
         messages.success(request, "Money withdrawn.")
         return redirect("Wallet")
 
+def downloadApp(request):
+    return render(request, "download-app.html")
+
+def eLearning(request):
+    return render(request, "e-learning.html")
+
+def marketInfo(request):
+    return render(request, "market-info.html")

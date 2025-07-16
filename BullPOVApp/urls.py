@@ -43,4 +43,7 @@ urlpatterns = [
     path("wallet", wallet, name = "Wallet"),
     path("add-money", addMoney, name = "AddMoney"),
     path("withdraw-money", withdrawMoney, name = "WithdrawMoney"),
+    path("download-app", downloadApp, name = "DownloadApp"),
+    path("e-learning", eLearning, name = "eLearning"),
+    path("market-info", marketInfo, name = "MarketInfo"),
 ]

@@ -133,8 +133,13 @@
               </div>
 
               <div class="cart-btn-group">
+  {% if request.user.is_authenticated %}
   <button type="button" data-bs-toggle="modal" data-bs-target="#up" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
   <button type="button" data-bs-toggle="modal" data-bs-target="#down" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
+  {% else %}
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
+  {% endif %}
 </div>
 <style>
   .cart-btn-group {
@@ -175,12 +180,13 @@
           </div>
         </div>
         <!-- Product Details Accordion -->
-        <div class="row mt-5" data-aos="fade-up">
+        <center>
+          <div class="row mt-5" data-aos="fade-up">
           <div class="col-12">
             <div class="product-details-accordion">
               <!-- Description Accordion -->
               <div class="accordion-item">
-                <h2 class="accordion-header">
+                <h2 class="accordion-header" style="text-align: left;">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#description" aria-expanded="true" aria-controls="description">
                     Stock Details
                   </button>
@@ -188,12 +194,12 @@
                 <div id="description" class="accordion-collapse collapse show">
                   <div class="accordion-body">
                     <div class="product-description">
-                      <h4>Stock Description</h4>
-                      <p>{{desc}}</p>
+                      <h4 style="text-align: left;">Stock Description</h4>
+                      <p style="text-align: left;">{{desc}}</p>
 
                       <div class="row mt-4">
                         <div class="col-md-6">
-                          <h4>Stock Details</h4>
+                          <h4 style="text-align: left;">Stock Details</h4>
                           <ul class="feature-list">
                             <li><i class="bi bi-check-circle"></i> Sector: {{stock.Sector}}</li>
                             <li><i class="bi bi-check-circle"></i> Open Price: {{stock.OpeningPrice}}</li>
@@ -213,8 +219,10 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
+        </div>
+        </div>
+        </center>
+        </section>
 
 <!-- Button trigger modal -->
 
@@ -230,7 +238,7 @@
         <form action="/check-return-rate/{{stock.Symbol}}-UP" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
     <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}</div>
   </div>
   <div class="modal-footer">
@@ -248,15 +256,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Trade on {{stock.Symbol}} | Down</h1>
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Trade on {{stock.Symbol}} | DOWN</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form action="/check-return-rate/{{stock.Symbol}}-DOWN" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Your current wallet balance - ₹509</div>
+    <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}</div>
   </div>
   <div class="modal-footer">
         <button type="submit" style="width: 100%;" class="btn btn-outline-success">Check Return Rate</button>

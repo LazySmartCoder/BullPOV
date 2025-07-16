@@ -3,69 +3,64 @@
 {% load static %}
 {% block body %}
 
-<!-- Wallet Section -->
-<div class="wallet-container my-5">
-  <div class="wallet-card">
-    <h2 class="wallet-title">Wallet Balance</h2>
-
-    <div class="wallet-balance">
-        <span class="balance-amount">Liquid: <span style="color: green;">₹{{user.WalletBalance}}</span></span>
-      <span class="balance-amount">Invested: <span style="color: green;">₹{{user.InvestedBalance}}</span></span>
-    </div>
-
-    <div class="wallet-actions mt-4">
-      <button data-bs-toggle="modal" data-bs-target="#addmoney" class="btn btn-success">Add Money</button>
-      <button data-bs-toggle="modal" data-bs-target="#withdraw" class="btn btn-primary ms-2">Withdraw ({{user.WalletBalance}})</button>
-    </div>
-  </div>
+<section id="login" class="login section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+          <div class="col-lg-5 col-md-8" data-aos="zoom-in" data-aos-delay="200">
+            <div class="login-form-wrapper">
+              <div class="login-header text-center">
+                <h2>Your Wallet</h2>
+                <p>You can modify your bank details. This is your wallet.</p>
+                <h3>Liquid Balance: {{user.WalletBalance}}</h3>
+                <h3>Invested Amount: {{user.InvestedBalance}}</h3>
+              </div>
+<div class="cart-btn-group">
+              <button data-bs-toggle="modal" data-bs-target="#addmoney" type="button" class="cart-btn green-btn">Deposit</button>
+              <button data-bs-toggle="modal" data-bs-target="#withdraw" type="button" class="cart-btn red-btn">Withdraw</button>
 </div>
-
-
 <style>
-    .wallet-container {
+  .cart-btn-group {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  gap: 10px; /* space between buttons */
 }
 
-.wallet-card {
-  background: #f8f9fa;
-  border-radius: 16px;
-  padding: 30px;
-  max-width: 450px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
-.wallet-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
+.green-btn {
+  background-color: #28a745;
+  width: 50%
 }
 
-.wallet-balance {
-  text-align: center;
-  font-size: 20px;
-  margin-bottom: 20px;
+.green-btn:hover {
+  background-color: #218838;
 }
 
-.balance-amount {
-  font-weight: bold;
-  display: block;
-  font-size: 28px;
-  margin-top: 5px;
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+  width: 50%
 }
 
-.upi-section label {
-  font-weight: 500;
-}
-
-.wallet-actions button {
-  width: 48%;
+.red-btn:hover {
+  background-color: #c82333;
 }
 
 </style>
+</div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section><!-- /Login Section -->
 
 <!-- Modal -->
 <div class="modal fade" id="addmoney" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
