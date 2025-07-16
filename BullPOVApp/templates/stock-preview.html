@@ -128,7 +128,7 @@
                 <div class="stock-info">
                   <i class="bi bi-check-circle-fill"></i>
                   {% if stock.CurrentPrice > stock.ClosingPrice %}<span style="color: green;">Bullish</span>{% else %}<span style="color: red;">Bearish</span>{% endif %}
-                  <span class="stock-count">({{stock.TotalUsers}} Total Trades)</span>
+                  <span class="stock-count">({{totalamt}} Total Investment)</span>
                 </div>
               </div>
 
@@ -175,9 +175,13 @@
 }
 
 </style>
-<br>
 
+<br>  
+{% if request.user.is_authenticated %}
+<button type="button" onclick="window.location.href='/add-watch-list/{{stock.Symbol}}'" class="cart-btn red-btn" style="width: 100%; background-color: black;">Add to Watchlist</button>
+{% endif %}
           </div>
+
         </div>
         <!-- Product Details Accordion -->
         <center>

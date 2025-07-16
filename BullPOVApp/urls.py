@@ -25,7 +25,6 @@ urlpatterns = [
     path("user-verification", userVerification, name = "UserVerification"),
     # vu is verify user
     path("vu", verifyUser, name = "VerifyUser"),
-    path("market-data-updation", marketDataUpdation, name = "MarketDataUpdation"),
     path("search", search, name = "Search"),
     path("stock-preview/<str:symbol>", stockPreview, name = "StockPreview"),
     path("categories", categories, name = "Categories"),

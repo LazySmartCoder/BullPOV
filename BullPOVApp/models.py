@@ -27,7 +27,6 @@ class Stock(models.Model):
     LastUpdateTime = models.DateField(default=datetime.now())
     UPUsers = models.IntegerField(default=0)
     DownUsers = models.IntegerField(default=0)
-    TotalUsers = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.Name} | {self.Symbol}"

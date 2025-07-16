@@ -19,8 +19,12 @@
 
                 <!-- Order number and date -->
                 <div class="order-id">
-                  <h4>{{stock.Symbol}}</h4>
-                  <div class="order-date">YOU WON ₹650!!</div>
+                  <h4>{{stock.Name}}</h4>
+                  {% if trade.ActiveStatus %}
+                  <div class="order-date">Results are yet to be declared!</div>
+                  {% else %}
+                  <div class="order-date">YOU WON ₹{{trade.Return}}!!</div>
+                  {% endif %}
                 </div>
 
                 <!-- Order progress stepper -->
@@ -58,12 +62,22 @@
                       <span>₹0.00</span>
                     </li>
                     <li>
+                      {% if trade.ActiveStatus %}
                       <span>Profit / Loss</span>
-                      <span>₹150</span>
+                      <span>Pending</span>
+                      {% else %}
+                      <span>Profit / Loss</span>
+                      <span>₹{{trade.Return}}</span>
+                      {%endif  %}
                     </li>
                     <li class="total">
+                      {% if trade.ActiveStatus %}
                       <span>Total</span>
-                      <span>₹{{trade.Amount}}</span>
+                      <span>Pending</span>
+                      {% else %}
+                      <span>Total</span>
+                      <span>₹{{totalamt}}</span>
+                      {%endif  %}
                     </li>
                   </ul>
                 </div>
@@ -123,30 +137,7 @@
                 </div>
               </div>
 
-              <!-- Payment details -->
-              <div class="details-card" data-aos="fade-up">
-                <div class="card-header" data-toggle="collapse">
-                  <h3>
-                    <i class="bi bi-credit-card"></i>
-                    Payment Details
-                  </h3>
-                  <i class="bi bi-chevron-down toggle-icon"></i>
-                </div>
-                <div class="card-body">
-                  <div class="payment-method">
-                    <div class="payment-icon">
-                      <i class="bi bi-currency-rupee"></i>
-                    </div>
-                    <div class="payment-details">
-                      <div class="card-type">UPI</div>
-                      <div class="card-number">{{upi}}</div>
-                    </div>
-                  </div>
-                  <div class="billing-address mt-4">
-                    <h5>Payment received from this bank account.</h5>
-                  </div>
-                </div>
-              </div>
+              
               <!-- Payment details -->
               <div class="details-card" data-aos="fade-up">
                 <div class="card-header" data-toggle="collapse">

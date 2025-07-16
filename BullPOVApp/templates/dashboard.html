@@ -85,11 +85,11 @@
       <i class="bi bi-eye"></i>
       <!-- Hide label on mobile -->
       <span class="action-text d-none d-md-inline-block">Watchlist</span>
-      <span class="badge">{{ watchlist|length }}</span>
+      <span class="badge">{{ count }}</span>
     </button>
     <div class="dropdown-menu cart-dropdown-menu">
       <div class="dropdown-header">
-        <h6>Your Watchlist ({{ watchlist|length }})</h6>
+        <h6>Your Watchlist ({{ count }})</h6>
       </div>
       <div class="dropdown-body">
         <div class="cart-items">
@@ -107,6 +107,13 @@
                     </div>
               </a>
             {% endfor %}
+                                        <div class="dropdown-footer">
+                  <div class="cart-actions">
+                    <a href="/watch-list" class="btn btn-outline-primary">View Full Watchlist</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           {% else %}
             <h4 style="text-align: center;">Nothing in Watchlist. Browse Now!</h4>
           {% endif %}

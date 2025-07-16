@@ -1,25 +1,19 @@
-from django.shortcuts import render, redirect, HttpResponse
-from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from .models import *
 from django.contrib import messages
 from django.db.models import Q
 import string
-from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.header import Header
-from email.utils import formataddr
 import random
-import yfinance as yf
-from .stock_list import stocks
 from .MarketFeatures import *
-from SmartApi.smartConnect import SmartConnect
 
-# Some important functions
+# Some important functions and variables
 site_url = "localhost:8000"
+
 def is_valid_password(s):
     if len(s) < 8:
         return False
@@ -46,14 +40,12 @@ def sendEmail(sender, receiver, subject, message):
     except Exception as e:
         print(f"Error sending email: {e}")
 
-# BullPOV Code    
+# logical codes starts here
 def index(request):
-    if request.user.is_authenticated:
-        return redirect("Dashboard")
     topt = {}
     topTraded = Stock.objects.filter(Nifty50 = True)
     for i in topTraded:
-        topt[i.Symbol] = i.TotalUsers
+        topt[i.Symbol] = i.UPUsers + i.DownUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
     return render(request, "index.html", {"stocks" : topTraded})
@@ -216,11 +208,11 @@ def verifyUser(request):
 
 def ErrorPage(request, exception):
     # This is for handler 404
-    return render(request, "error page.html")
+    return render(request, "error-page.html")
 
 def ErrorOccured(request):
     # This is for handler 500
-    return render(request, "error page.html")
+    return render(request, "error-page.html")
 
 def contact(request):
     return render(request, "contact.html")
@@ -236,84 +228,21 @@ def contactSave(request):
         messages.success(request, "We have received your message / feedback. We will revert back via email.")
         return redirect("Contact")
 
-def dashboard(request):
+
+# calculation and hit order starts
+def checkReturnRate(request, stock):
     if request.user.is_authenticated == False:
+        messages.warning(request, "SignIN first.")
         return redirect("SignIN")
-    # indice data list access for the scroller
-    indice_results = {}
-    for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
-        change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
-        trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
-        indice_results[i.Name] = [i.CurrentPrice, i.PriceChange, trend]
-    
-    # top data to be displayed
-    topGainers = Stock.objects.filter(TopGainer = True)[:4]
-    topLosers = Stock.objects.filter(TopLoser = True)[:4]
-
-    topv = {}
-    topVolumes = Stock.objects.filter(Nifty50 = True)
-    for i in topVolumes:
-        topv[i.Symbol] = i.Volume
-    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
-    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
-
-    topt = {}
-    topTraded = Stock.objects.filter(Nifty50 = True)
-    for i in topTraded:
-        topt[i.Symbol] = i.TotalUsers
-    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
-    topTraded = Stock.objects.filter(Symbol__in=topTraded)
-
-    topm = {}
-    topMktCap = Stock.objects.filter(Nifty50 = True)
-    for i in topMktCap:
-        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
-    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
-    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
-
-    # getting user trades data to be displayed
-    usertradesdata = []
-    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4]
-    for i in usertrades:
-        usertradesdata.append(i.Stock)
-    if len(usertradesdata) == 0:
-        usertradesdata = None
-    print(get_day_high_low("TCS.NS"))
-    return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
-
-def search(request):
-    search_text = request.GET["search"]
-    results = Stock.objects.filter(
-    Q(Name__icontains=search_text) | Q(Symbol__icontains=search_text)
-)
-    return render(request, "search.html", {"search" : results, "searchText" : search_text, "count" : results.count()})
-
-def stockPreview(request, symbol):
-    stock = Stock.objects.get(Symbol = symbol)
-    if (stock.CurrentPrice - stock.ClosingPrice) > 0:
-        change = True
-    else:
-        change = False
-    try:
-        upPercent = stock.UPUsers / stock.TotalUsers * 100
-        downPercent = stock.DownUsers / stock.TotalUsers * 100
-    except ZeroDivisionError:
-        upPercent = 50
-        downPercent = 50
-    stockDesc = get_stock_description(stock.Name)
-    if request.user.is_authenticated:
-        user = UserDetail.objects.get(User = request.user)
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
-    else:
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "desc" : stockDesc})
-
-def hitOrder(request, stock):
+    share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+    if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
+        messages.success(request, "You can only place one order in a complete trading cycle.")
+        return redirect(f"/trade-details/{str(stock).split("-")[0]}")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
     if request.method == "POST":
-        amt = int(str(stock).split("-")[2])
-        share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+        amt = int(request.POST["amount"])
 
         # up party data
         totalAmtup = 0
@@ -326,40 +255,83 @@ def hitOrder(request, stock):
         retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
         for i in retrieve_down:
             totalAmtdown += i.Amount
-        
-        # our cut
-        # if (totalAmtdown + totalAmtup) / totalAmtup > 1.2:
-        #     totalcut = 10 / 100 * (totalAmtdown + totalAmtup)
-        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
-        # else:
-        #     totalcut = 5 / 100 * (totalAmtdown + totalAmtup)
-        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
-        remAmt = (totalAmtdown + totalAmtup)
 
+        def percentage_to_multiplier(percent):
+            multiplier = (percent / 100) + 1
+            return round(multiplier, 2)
         if predict == True:
             remAmt = totalAmtup + amt
             returnPercentage = amt / remAmt * 100
-            userReturn = returnPercentage / 100 * amt
+            if totalAmtdown != 0:
+                userReturn = returnPercentage / 100 * totalAmtdown
+            else:
+                userReturn = returnPercentage / 100 * 500
+            returnRate = percentage_to_multiplier(userReturn / amt * 100)
         if predict == False:
             remAmt = totalAmtdown + amt
             returnPercentage = amt / remAmt * 100
-            userReturn = returnPercentage / 100 * amt
+            if totalAmtup != 0:
+                userReturn = returnPercentage / 100 * totalAmtup
+            else:
+                userReturn = returnPercentage / 100 * 500
+            returnRate = percentage_to_multiplier(userReturn / amt * 100)
+        return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn + amt, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
+
+def hitOrder(request, stock):
+    predict = False
+    if str(stock).split("-")[1] == "UP":
+        predict = True
+    if request.method == "POST":
+        amt = float(str(stock).split("-")[2])
+        share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+        user = UserDetail.objects.get(User = request.user)
+        user.WalletBalance = user.WalletBalance - amt
+        user.InvestedBalance = user.InvestedBalance + amt
+        user.save()
+
+        # up party data
+        totalAmtup = 0
+        retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
+        for i in retrieve_up:
+            totalAmtup += i.Amount
+        
+        # down party data
+        totalAmtdown = 0
+        retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
+        for i in retrieve_down:
+            totalAmtdown += i.Amount
+
+        if predict == True:
+            share.UPUsers = share.UPUsers + 1
+            share.save()
+            remAmt = totalAmtup + amt
+            returnPercentage = amt / remAmt * 100
+            if totalAmtdown != 0:
+                userReturn = returnPercentage / 100 * totalAmtdown
+            else:
+                print("OK")
+                userReturn = returnPercentage / 100 * 500
+                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 500, DateTime = datetime.now(), Prediction = False, ActiveStatus = True, Return = userReturn)
+                defTrade.save()
+        if predict == False:
+            share.DownUsers = share.DownUsers + 1
+            share.save()
+            remAmt = totalAmtdown + amt
+            returnPercentage = amt / remAmt * 100
+            if totalAmtup != 0:
+                userReturn = returnPercentage / 100 * totalAmtup
+            else:
+                print("OK")
+                userReturn = returnPercentage / 100 * 500
+                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 500, DateTime = datetime.now(), Prediction = True, ActiveStatus = True, Return = userReturn)
+                defTrade.save()
         initTrade = Trade(Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Return = userReturn)
         initTrade.save()
         return redirect(f"/trade-details/{share.Symbol}")
+# calculations and hit orders ends    
 
-def marketDataUpdation(request):
-    update = Stock.objects.all()[:20]
-    # for i in update:
-    #     try:
-    #         i.MinPrice = get_day_high_low(i.Symbol)["low"]
-    #         i.MaxPrice = get_day_high_low(i.Symbol)["high"]
-    #         i.save()
-    #     except Exception as e:
-    #         continue
 
-    return HttpResponse("Market data has been updated.")
-
+# accounts management starts
 def account(request):
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
@@ -440,6 +412,87 @@ def changeEmail(request, verify):
     else:
         messages.warning(request, "Email not changed.")
     return redirect("HomePage")
+# accounts management ends
+
+# displaying market data in different paths starts
+def dashboard(request):
+    if request.user.is_authenticated == False:
+        return redirect("SignIN")
+    # indice data list access for the scroller
+    indice_results = {}
+    for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
+        change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
+        trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
+        indice_results[i.Name] = [i.CurrentPrice, i.PriceChange, trend]
+    
+    # top data to be displayed
+    topGainers = Stock.objects.filter(TopGainer = True)[:4]
+    topLosers = Stock.objects.filter(TopLoser = True)[:4]
+
+    topv = {}
+    topVolumes = Stock.objects.filter(Nifty50 = True)
+    for i in topVolumes:
+        topv[i.Symbol] = i.Volume
+    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
+    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
+
+    topt = {}
+    topTraded = Stock.objects.filter(Nifty50 = True)
+    for i in topTraded:
+        topt[i.Symbol] = i.UPUsers + i.DownUsers
+    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
+    topTraded = Stock.objects.filter(Symbol__in=topTraded)
+
+    topm = {}
+    topMktCap = Stock.objects.filter(Nifty50 = True)
+    for i in topMktCap:
+        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
+    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
+    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
+
+    # getting user trades data to be displayed
+    usertradesdata = []
+    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4]
+    for i in usertrades:
+        usertradesdata.append(i.Stock)
+    if len(usertradesdata) == 0:
+        usertradesdata = None
+
+    return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
+
+def search(request):
+    search_text = request.GET["search"]
+    results = Stock.objects.filter(
+    Q(Name__icontains=search_text) | Q(Symbol__icontains=search_text)
+)
+    return render(request, "search.html", {"search" : results, "searchText" : search_text, "count" : results.count()})
+
+def stockPreview(request, symbol):
+    stock = Stock.objects.get(Symbol = symbol)
+    trades = Trade.objects.filter(Stock = stock, Prediction = True, ActiveStatus = True)
+    totalamtup = 0
+    for i in trades:
+        totalamtup += i.Amount
+    trades = Trade.objects.filter(Stock = stock, Prediction = False, ActiveStatus = True)
+    totalamtdown = 0
+    for i in trades:
+        totalamtdown += i.Amount
+    if (stock.CurrentPrice - stock.ClosingPrice) > 0:
+        change = True
+    else:
+        change = False
+    try:
+        upPercent = totalamtup / (totalamtdown + totalamtup) * 100
+        downPercent = totalamtdown / (totalamtdown + totalamtup) * 100
+    except ZeroDivisionError:
+        upPercent = 50
+        downPercent = 50
+    stockDesc = get_stock_description(stock.Name)
+    if request.user.is_authenticated:
+        user = UserDetail.objects.get(User = request.user)
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc, "totalamt" : totalamtdown + totalamtup})
+    else:
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "desc" : stockDesc, "totalamt" : totalamtdown + totalamtup})
 
 def categories(request):
     if request.user.is_authenticated == False:
@@ -459,7 +512,7 @@ def categories(request):
     topt = {}
     topTraded = Stock.objects.filter(Nifty50 = True)
     for i in topTraded:
-        topt[i.Symbol] = i.TotalUsers
+        topt[i.Symbol] = i.UPUsers + i.DownUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
 
@@ -508,52 +561,11 @@ def tradeDetails(request, symbol):
     user = UserDetail.objects.get(User = request.user)
     upi = f"{user.UPI[:4]}***********{user.UPI[user.UPI.find("@"):]}"
     
-    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user})
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user, "totalamt" : trader.Return + trader.Amount})
+# displaying market data in different paths ends
 
-def checkReturnRate(request, stock):
-    if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
-        return redirect("SignIN")
-    share = Stock.objects.get(Symbol = str(stock).split("-")[0])
-    if Trade.objects.filter(Trader = request.user, Stock = share).exists():
-        return HttpResponse("You have already opted for his stock. Try again for next trading day.")
-    predict = False
-    if str(stock).split("-")[1] == "UP":
-        predict = True
-    if request.method == "POST":
-        amt = int(request.POST["amount"])
 
-        # up party data
-        totalAmtup = 0
-        retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
-        for i in retrieve_up:
-            totalAmtup += i.Amount
-        
-        # down party data
-        totalAmtdown = 0
-        retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
-        for i in retrieve_down:
-            totalAmtdown += i.Amount
-        
-        # our cut
-        # if (totalAmtdown + totalAmtup) / totalAmtup > 1.2:
-        #     totalcut = 10 / 100 * (totalAmtdown + totalAmtup)
-        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
-        # else:
-        #     totalcut = 5 / 100 * (totalAmtdown + totalAmtup)
-        #     remAmt = (totalAmtdown + totalAmtup) - totalcut
-        if predict == True:
-            remAmt = totalAmtup + amt
-            returnPercentage = amt / remAmt * 100
-            userReturn = returnPercentage / 100 * amt
-            returnRate = float(f"{returnPercentage / 10:.2f}")
-        if predict == False:
-            remAmt = totalAmtdown + amt
-            returnPercentage = amt / remAmt * 100
-            userReturn = returnPercentage / 100 * amt
-            returnRate = float(f"{returnPercentage / 10:.2f}")
-        return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
-
+# watchlist functions starts
 def watchList(request):
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
@@ -581,7 +593,10 @@ def removeWatchList(request, stock):
     userlist.save()
     messages.success(request, "Watch List Updated.")
     return redirect("WatchList")
+# watchlist functions ends
 
+
+# wallet functions starts
 def wallet(request):
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
@@ -611,6 +626,9 @@ def withdrawMoney(request):
         userdet.save()
         messages.success(request, "Money withdrawn.")
         return redirect("Wallet")
+# wallet functions ends
+
+
 
 def downloadApp(request):
     return render(request, "download-app.html")
