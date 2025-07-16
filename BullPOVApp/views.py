@@ -574,13 +574,12 @@ def tradeDetails(request, symbol):
     stock = Stock.objects.get(Symbol = symbol)
     trader = Trade.objects.get(Trader = request.user, Stock = stock)
     user = UserDetail.objects.get(User = request.user)
-    upi = f"{user.UPI[:4]}***********{user.UPI[user.UPI.find("@"):]}"
     if trader.Prediction:
         predict = "UP"
     else:
         predict = "DOWN"
     
-    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "upi" : upi, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict})
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict})
 # displaying market data in different paths ends
 
 
@@ -625,11 +624,9 @@ def wallet(request):
 
 def addMoney(request):
     if request.method == "POST":
-        upi = request.POST["upi"]
         amt = request.POST["amount"]
         userdet = UserDetail.objects.get(User = request.user)
         userdet.WalletBalance = userdet.WalletBalance + int(amt)
-        userdet.upi = upi
         userdet.save()
         messages.success(request, "Money added.")
         return redirect("Wallet")
