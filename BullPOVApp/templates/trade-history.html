@@ -19,9 +19,9 @@
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol|slice:':-3'}}.png" alt="Product" class="img-fluid" loading="lazy">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="Product" class="img-fluid" loading="lazy">
                       </div>
-                      <a href="/trade-details/{{stock.Symbol}}">
+                      <a href="/trade-details/{{stock.Symbol}}/{{predict.DateTime}}">
                         <div class="product-details">
                         <h6 class="product-title">{{stock.Symbol}}</h6>
                         <div class="product-meta">
@@ -44,14 +44,14 @@
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol|slice:':-3'}}.png" class="img-fluid" loading="lazy">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="img-fluid" loading="lazy">
                       </div>
-                      <a href="/trade-details/{{stock.Symbol}}">
+                      <a href="/trade-details/{{stock.Symbol}}/{{predict.DateTime}}">
                         <div class="product-details">
                         <h6 class="product-title">{{stock.Symbol}}</h6>
                         <div class="product-meta">
-                          <span class="product-color">Prediction: {{predict.Prediction}}</span>
-                          <span class="product-size">Amount: ₹{{stock.Amount|comma}}</span>
+                          {% if predict.Prediction %}<span class="product-color">Prediction: <span style="color: green;">UP</span></span>{% else %}<span class="product-color">Prediction: <span style="color: red;">DOWN</span></span>{% endif %}
+                          <span class="product-size">Amount: ₹{{predict.Amount|comma}}</span>
                         </div>
                       </div>
                       </a>

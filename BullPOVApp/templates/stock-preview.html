@@ -66,7 +66,7 @@
     container_id: "tradingview_chart",
     width: "100%",
     height: "500px",
-    symbol: "BSE:{{stock.Symbol|slice:':-3'}}", // Change to NSE:RELIANCE, NSE:NIFTY, etc.
+    symbol: "BSE:{{stock.Symbol}}", // Change to NSE:RELIANCE, NSE:NIFTY, etc.
     interval: "D",
     timezone: "Asia/Kolkata",
     theme: "dark",
@@ -97,7 +97,7 @@
               <!-- Product Meta -->
               <div class="product-meta">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="product-category"><img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol|slice:':-3'}}.png" alt="{{stock.Symbol}}">&nbsp; {{stock.Symbol}}</span>
+                  <span class="product-category"><img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="{{stock.Symbol}}">&nbsp; {{stock.Symbol}}</span>
                 </div>
 
                 <h1 class="product-title">{{stock.Name}}</h1>

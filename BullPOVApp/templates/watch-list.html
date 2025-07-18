@@ -12,14 +12,14 @@
             <div class="cart-items">
                 {% if watch %}
                 <h1 style="font-family: inherit">Your Watch List</h1>
-              {% for stock in watch %}
+              {% for stock in watch|slice:"::-1" %}
               <!-- Cart Item 3 -->
               <div class="cart-item">
                 <div class="row align-items-center">
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol|slice:':-3'}}.png" class="img-fluid" loading="lazy">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="img-fluid" loading="lazy">
                       </div>
                       <a href="/stock-preview/{{stock.Symbol}}">
                         <div class="product-details">

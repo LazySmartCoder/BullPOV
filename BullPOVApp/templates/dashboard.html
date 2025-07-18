@@ -99,7 +99,7 @@
               <a href="/stock-preview/{{w.Symbol}}">
                 <div class="cart-item">
                       <div class="cart-item-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{w.Symbol|slice:':-3'}}.png" alt="Product" class="img-fluid">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{w.Symbol}}.png" alt="Product" class="img-fluid">
                       </div>
                       <div class="cart-item-content">
                         <h6 class="cart-item-title">{{w.Name}}</h6>
@@ -386,20 +386,20 @@ updateTimer();
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{trade.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
                         <div class="add-to-cart-container">
                           <div class="cart-btn-group">
-  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
+  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}/nodate'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
 </div>
 
                         </div>
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}">{{trade.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/nodate">{{trade.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores|crores}}</strong>
                           <br>
@@ -430,7 +430,7 @@ updateTimer();
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toptraded.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -507,7 +507,7 @@ updateTimer();
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topvolume.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -581,7 +581,7 @@ updateTimer();
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topgainer.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -655,7 +655,7 @@ updateTimer();
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toploser.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -745,7 +745,7 @@ updateTimer();
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol|slice:':-3'}}.png" alt="Product" class="img-fluid" loading="lazy">
+                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol}}.png" alt="Product" class="img-fluid" loading="lazy">
                       </div>
                       <a href="/stock-preview/{{mkt.Symbol}}">
                         <div class="product-details">

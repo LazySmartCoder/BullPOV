@@ -250,7 +250,7 @@ def checkReturnRate(request, stock):
     share = Stock.objects.get(Symbol = str(stock).split("-")[0])
     if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
         messages.success(request, "Only one order/stock is allowed per trading cycle.")
-        return redirect(f"/trade-details/{str(stock).split("-")[0]}")
+        return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
@@ -299,7 +299,7 @@ def hitOrder(request, stock):
         share = Stock.objects.get(Symbol = str(stock).split("-")[0])
         if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
             messages.success(request, "Only one order/stock is allowed per trading cycle.")
-            return redirect(f"/trade-details/{str(stock).split("-")[0]}")
+            return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
         user = UserDetail.objects.get(User = request.user)
         user.WalletBalance = user.WalletBalance - amt
         user.InvestedBalance = user.InvestedBalance + amt
@@ -343,7 +343,7 @@ def hitOrder(request, stock):
                 defTrade.save()
         initTrade = Trade(Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Return = userReturn)
         initTrade.save()
-        return redirect(f"/trade-details/{share.Symbol}")
+        return redirect(f"/trade-details/{share.Symbol}/nodate")
 # calculations and hit orders ends    
 
 
@@ -370,7 +370,7 @@ def passwordChange(request):
             request.user.set_password(pass1)
             request.user.save()
             sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Password Changed", normal_text_templates("Your BullPOV password has been changed."))
-            messages.success(request, "Your password has been changed.")
+            messages.success(request, "Your password has been changed. SignIN Now!")
         else:
             messages.warning(request, 'The old password you entered is incorrect. To reset it, log out and click on "Forgot Password".')
         return redirect("HomePage")
@@ -473,9 +473,7 @@ def dashboard(request):
     for i in usertrades:
         usertradesdata.append(i.Stock)
     if len(usertradesdata) == 0:
-        usertradesdata = None
-
-    
+        usertradesdata = None    
 
     return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
 
@@ -506,10 +504,9 @@ def stockPreview(request, symbol):
     except ZeroDivisionError:
         upPercent = 50
         downPercent = 50
-    stockDesc = get_stock_description(stock.Name)
     if request.user.is_authenticated:
         user = UserDetail.objects.get(User = request.user)
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "desc" : stockDesc, "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
     else:
         return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "desc" : stockDesc, "totalamt" : totalamtdown + totalamtup})
 
@@ -569,14 +566,17 @@ def tradeHistory(request):
     usertrades = Trade.objects.filter(Trader = request.user)
     for i in usertrades:
         usertradesdata.append(i.Stock)
-    return render(request, "trade-history.html", {"history" : zip(usertradesdata, usertrades)})
+    return render(request, "trade-history.html", {"history" : zip(usertradesdata[::-1], usertrades[::-1])})
 
-def tradeDetails(request, symbol):
+def tradeDetails(request, symbol, date):
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
     stock = Stock.objects.get(Symbol = symbol)
-    trader = Trade.objects.get(Trader = request.user, Stock = stock)
+    if date != "nodate":
+        trader = Trade.objects.get(Trader = request.user, Stock = stock, DateTime = date)
+    else:
+        trader = Trade.objects.get(Trader = request.user, Stock = stock, ActiveStatus = True)
     user = UserDetail.objects.get(User = request.user)
     if trader.Prediction:
         predict = "UP"
