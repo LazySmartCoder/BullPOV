@@ -508,7 +508,7 @@ def stockPreview(request, symbol):
         user = UserDetail.objects.get(User = request.user)
         return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
     else:
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "desc" : stockDesc, "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
 
 def categories(request):
     if request.user.is_authenticated == False:

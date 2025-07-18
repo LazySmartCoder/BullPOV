@@ -45,4 +45,6 @@ urlpatterns = [
     path("download-app", downloadApp, name = "DownloadApp"),
     path("e-learning", eLearning, name = "eLearning"),
     path("market-info", marketInfo, name = "MarketInfo"),
+    path("error", ErrorPage, name = "ErrorPage"),
+    path("error-occured", ErrorOccured, name = "ErrorOccured"),
 ]
