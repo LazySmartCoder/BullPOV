@@ -9,6 +9,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import random
+from .emailTemplates import *
 import locale
 from .MarketFeatures import *
 
@@ -106,7 +107,7 @@ def register(request):
            veriotp = random.randint(100000, 999999)
            userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp)
            userdet.save()
-           sendEmail("no-reply@bullpov.com", email, "Verify your email", f"Your otp for email verfication is: {veriotp}")
+           sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(veriotp))
            messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
        else:
            messages.warning(request, "Something went wrong. Please try again later.")
@@ -126,7 +127,7 @@ def logIn(request):
                 request.session.set_expiry(0)
             messages.success(request, "Signed IN")
         else:
-            messages.warning(request, "Please fill in all fields correctly")
+            messages.warning(request, "Make sure all fields are filled out correctly.")
             return redirect("SignIN")
         return redirect("Dashboard")
     return redirect("ErrorPage")
@@ -139,10 +140,10 @@ def fu(request):
         email = request.POST["email"]
         if User.objects.filter(email = email).exists():
             username = User.objects.get(email = email).username
-            messages.success(request, "Your username has been displayed.")
+            messages.success(request, "Your username has been revealed.")
             return render(request, "sign-in.html", {"username" : username})
         else:
-            messages.warning(request, "No user found with this email.")
+            messages.warning(request, "No account found with this email address.")
         return redirect("ForgotUsername")
 
 def forgotpass(request):
@@ -157,11 +158,11 @@ def fp(request):
             forgotp = random.randint(1000, 9999)
             save_otp.OTPEmail = str(forgotp)
             save_otp.save()
-            sendEmail("no-reply@bullpov.com", email, "Password Recovery", f"tap this link - https://bullpov.com/password-recovery-verification/{email}-{forgotp}")
-            messages.success(request, "A password recovery email has been sent to your email.")
+            sendEmail("no-reply@bullpov.com", email, "BullPOV Password Recovery", password_recovery_template(email, forgotp))
+            messages.success(request, "A password recovery link has been sent to your email.")
             return redirect("HomePage")
         else:
-            messages.warning(request, "No user found with this email.")
+            messages.warning(request, "No account found with this email address.")
         return redirect("ForgotPassword")
     
 def passRecoverVerify(request, otp):
@@ -173,9 +174,9 @@ def passRecoverVerify(request, otp):
             messages.success(request, "Create New Password.")
             return render(request, "new-password.html", {"email" : email, "otp" : forotp})
         else:
-            messages.warning(request, "Password Recovery failed.")
+            messages.warning(request, "Password recovery failed. Please try again.")
     else:
-        messages.warning(request, "Password Recovery failed.")
+        messages.warning(request, "Password recovery failed. Please try again.")
     return redirect("HomePage")
 
 def pr(request, otp):
@@ -194,8 +195,8 @@ def pr(request, otp):
         user = User.objects.get(email = email)
         user.set_password(pass1)
         user.save()
-        sendEmail("no-reply@bullpov.com", email, "Password Recovered", "Your password has been changed.")
-        messages.success(request, "Password changed. You may SignIN now.")
+        sendEmail("no-reply@bullpov.com", email, "BullPOV Password Recovered", normal_text_templates("Your password has been recovered."))
+        messages.success(request, "Your password has been changed. You can now sign in.")
         return redirect("SignIN")
         
 def signout(request):
@@ -213,9 +214,9 @@ def verifyUser(request):
             userdet = UserDetail.objects.get(User = request.user)
             userdet.VerifiedAccount = True
             userdet.save()
-            messages.success(request, "Account verified successfully.")
+            messages.success(request, "Your account has been successfully verified.")
         else:
-            messages.warning(request, "Please enter the correct OTP.")
+            messages.warning(request, "Invalid OTP. Please try again.")
         return redirect("HomePage")
 
 def ErrorPage(request, exception):
@@ -237,7 +238,7 @@ def contactSave(request):
         message = request.POST["message"]
         conSave = Contact(Name = name, Email = email, Subject = subject, Message = message)
         conSave.save()
-        messages.success(request, "We have received your message / feedback. We will revert back via email.")
+        messages.success(request, "Thank you for your message. We'll get back to you via email shortly.")
         return redirect("Contact")
 
 
@@ -248,7 +249,7 @@ def checkReturnRate(request, stock):
         return redirect("SignIN")
     share = Stock.objects.get(Symbol = str(stock).split("-")[0])
     if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-        messages.success(request, "You can only place one order in a complete trading cycle.")
+        messages.success(request, "Only one order/stock is allowed per trading cycle.")
         return redirect(f"/trade-details/{str(stock).split("-")[0]}")
     predict = False
     if str(stock).split("-")[1] == "UP":
@@ -297,7 +298,7 @@ def hitOrder(request, stock):
         amt = float(str(stock).split("-")[2])
         share = Stock.objects.get(Symbol = str(stock).split("-")[0])
         if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-            messages.success(request, "You can only place one order in a complete trading cycle.")
+            messages.success(request, "Only one order/stock is allowed per trading cycle.")
             return redirect(f"/trade-details/{str(stock).split("-")[0]}")
         user = UserDetail.objects.get(User = request.user)
         user.WalletBalance = user.WalletBalance - amt
@@ -349,7 +350,7 @@ def hitOrder(request, stock):
 # accounts management starts
 def account(request):
     if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
+        messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "user-profile.html", {"user" : userdet, "url" : site_url})
@@ -360,17 +361,18 @@ def passwordChange(request):
         pass1 = request.POST["pass1"]
         pass2 = request.POST["pass2"]
         if pass1 != pass2:
-            messages.warning(request, "Password mismatch.")
+            messages.warning(request, "Passwords do not match. Please try again.")
             return redirect("/account")
         if not is_valid_password(pass1):
-            messages.warning(request, "Enter a strong password.")
+            messages.warning(request, "Enter a stronger password to continue.")
             return redirect("/account")
         if request.user.check_password(old):
             request.user.set_password(pass1)
             request.user.save()
+            sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Password Changed", normal_text_templates("Your BullPOV password has been changed."))
             messages.success(request, "Your password has been changed.")
         else:
-            messages.warning(request, 'Enter correct old password. If you forgot, logout and go to "Forgot Password" to change.')
+            messages.warning(request, 'The old password you entered is incorrect. To reset it, log out and click on "Forgot Password".')
         return redirect("HomePage")
 
 def deleteAcc(request):
@@ -378,8 +380,8 @@ def deleteAcc(request):
         pwd = request.POST["pwd"]
         if request.user.check_password(pwd):
             request.user.delete()
-            messages.warning(request, "Account Deleted.")
-            # send an email here
+            messages.warning(request, "Account has scheduled for deletion.")
+            sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Account Deleted", normal_text_templates("Account has scheduled for deletion."))
             return redirect("HomePage")
         else:
             messages.warning(request, "Incorrect Password.")
@@ -401,31 +403,31 @@ def updateProfile(request):
                 cotp = random.randint(1000, 9999)
                 userdet.OTPEmail = cotp
                 userdet.save()
-                sendEmail("no-reply@bullpov.com", email, "Change email", f"Your email will be changed as soon as you click this link: https://bullpov.com/change-email/{email}-{cotp}")
-                messages.success(request, "Your email will be changed as soon as you verify yourself.")
+                sendEmail("no-reply@bullpov.com", email, "BullPOV Email Updation", normal_text_templates(f"Your email will be changed as soon as you click this link: https://bullpov.com/change-email/{email}-{cotp}"))
+                messages.success(request, "Email Address change pending. Complete verification to proceed. An email has been sent to your old email address.")
             userdet.PhoneNumber = phone
             userdet.Address = address
             userdet.ProfilePhoto = pfp
             user.save()
             userdet.save()
-            sendEmail("no-reply@bullpov.com", email, "Profile Updated", "Your profile has been updated.")
-            messages.success(request, "Profile has been updated.")
+            sendEmail("no-reply@bullpov.com", email, "BullPOV Profile Updated", normal_text_templates("Your profile has been updated."))
+            messages.success(request, "Your profile has been updated.")
         else:
-            messages.warning(request, "Enter correct password.")
+            messages.warning(request, "Incorrect Password.")
         return redirect("/account")
 
 def changeEmail(request, verify):
     if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
+        messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
     user = request.user
     userdet = UserDetail.objects.get(User = user)
     if userdet.OTPEmail == str(verify).split("-")[1]:
         user.email = str(verify).split("-")[0]
         user.save()
-        messages.success(request, "Email has been changed.")
+        messages.success(request, "Email Address has been changed.")
     else:
-        messages.warning(request, "Email not changed.")
+        messages.warning(request, "Email Address Updation Failed.")
     return redirect("HomePage")
 # accounts management ends
 
@@ -473,6 +475,8 @@ def dashboard(request):
     if len(usertradesdata) == 0:
         usertradesdata = None
 
+    
+
     return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertradesdata})
 
 def search(request):
@@ -492,7 +496,7 @@ def stockPreview(request, symbol):
     totalamtdown = 0
     for i in trades:
         totalamtdown += i.Amount
-    if (stock.CurrentPrice - stock.ClosingPrice) > 0:
+    if (stock.CurrentPrice - stock.PreviousCloseToday) > 0:
         change = True
     else:
         change = False
@@ -511,7 +515,7 @@ def stockPreview(request, symbol):
 
 def categories(request):
     if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
+        messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
@@ -586,7 +590,7 @@ def tradeDetails(request, symbol):
 # watchlist functions starts
 def watchList(request):
     if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
+        messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
     userlist = UserDetail.objects.get(User = request.user)
     watchlist = userlist.Watchlist.all()
@@ -613,27 +617,27 @@ def removeWatchList(request, stock):
     return redirect("WatchList")
 # watchlist functions ends
 
-
 # wallet functions starts
 def wallet(request):
     if request.user.is_authenticated == False:
-        messages.warning(request, "SignIN first.")
+        messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
+    
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
 
 def addMoney(request):
     if request.method == "POST":
-        amt = request.POST["amount"]
+        amt = float(request.POST["amount"])
         userdet = UserDetail.objects.get(User = request.user)
-        userdet.WalletBalance = userdet.WalletBalance + int(amt)
+        userdet.WalletBalance = userdet.WalletBalance + amt
         userdet.save()
         messages.success(request, "Money added.")
         return redirect("Wallet")
 
 def withdrawMoney(request):
     if request.method == "POST":
-        amt = int(request.POST["amount"])
+        amt = float(request.POST["amount"])
         userdet = UserDetail.objects.get(User = request.user)
         if amt > userdet.WalletBalance:
             messages.warning(request, "Insufficient balance.")

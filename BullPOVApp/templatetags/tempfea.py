@@ -23,18 +23,25 @@ def crores(value):
 @register.filter
 def comma(value):
     try:
-        num = str(int(float(value)))  # handles float input
-        if len(num) <= 3:
-            return num
-        last3 = num[-3:]
-        rest = num[:-3]
-        # group digits in twos from the right
-        parts = []
-        while len(rest) > 2:
-            parts.insert(0, rest[-2:])
-            rest = rest[:-2]
-        if rest:
-            parts.insert(0, rest)
-        return ','.join(parts) + ',' + last3
+        # Separate the whole and decimal parts
+        float_val = float(value)
+        integer_part, dot, decimal_part = f"{float_val:.2f}".partition(".")
+        
+        # Format integer part in Indian comma style
+        if len(integer_part) <= 3:
+            formatted = integer_part
+        else:
+            last3 = integer_part[-3:]
+            rest = integer_part[:-3]
+            parts = []
+            while len(rest) > 2:
+                parts.insert(0, rest[-2:])
+                rest = rest[:-2]
+            if rest:
+                parts.insert(0, rest)
+            formatted = ','.join(parts) + ',' + last3
+        
+        # Combine with decimal part
+        return formatted + '.' + decimal_part
     except:
-        return value  # fallback if not a valid number
+        return str(value)  # fallback if value is invalid

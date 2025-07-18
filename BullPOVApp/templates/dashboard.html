@@ -116,7 +116,7 @@
               </div>
             </div>
           {% else %}
-            <h4 style="text-align: center;">Nothing in Watchlist. Browse Now!</h4>
+            <h4 style="text-align: center;">Empty Watchlist.</h4>
           {% endif %}
         </div>
       </div>
@@ -229,6 +229,87 @@
 </script>
     {% endif %}
     <!-- Announcement Bar -->
+    <div class="announcement-bar py-2" style="background-color: #dcfce7  ;">
+      <div class="container-fluid container-xl">
+        <div class="announcement-slider swiper init-swiper">
+          <script type="application/json" class="swiper-config">
+            {
+              "loop": true,
+              "speed": 600,
+              "autoplay": {
+                "delay": 1000
+              },
+              "slidesPerView": 1,
+              "effect": "slide",
+              "direction": "vertical"
+            }
+          </script>
+          <div class="swiper-wrapper" id="data">
+            <div class="swiper-slide" id="timer" style="color: #065f46"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+function updateTimer() {
+  const now = new Date();
+
+  const startMarket = new Date();
+  startMarket.setHours(9, 0, 0, 0);
+
+  const endMarket = new Date();
+  endMarket.setHours(15, 30, 0, 0); // 3:30 PM
+
+  const resultPrepStart = new Date();
+  resultPrepStart.setHours(15, 30, 0, 0);
+
+  const resultPrepEnd = new Date();
+  resultPrepEnd.setHours(16, 15, 0, 0); // 4:15 PM
+
+  const nextMarketOpen = new Date();
+  if (now.getHours() >= 16) {
+    nextMarketOpen.setDate(now.getDate() + 1);
+  }
+  nextMarketOpen.setHours(9, 0, 0, 0);
+
+  // Case 1: Market is open
+  if (now >= startMarket && now < endMarket) {
+    document.getElementById("timer").innerText = "🔴 Stock Market is Open!";
+    return;
+  }
+
+  // Case 2: Results being prepared
+  if (now >= resultPrepStart && now < resultPrepEnd) {
+    document.getElementById("timer").innerText = "🟡 Results are getting prepared...";
+    return;
+  }
+
+  // Case 3: Countdown to next day's market opening
+  const interval = setInterval(() => {
+    const current = new Date();
+    const diff = nextMarketOpen - current;
+
+    if (diff <= 0) {
+      clearInterval(interval);
+      document.getElementById("timer").innerText = "🟢 Stock Market is Open!";
+      return;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    document.getElementById("timer").innerText =
+      `🟢 ⏳ ${hours.toString().padStart(2, '0')}h ` +
+      `${minutes.toString().padStart(2, '0')}m ` +
+      `${seconds.toString().padStart(2, '0')}s until Market Opens!`;
+  }, 1000);
+}
+
+updateTimer();
+</script>
+
+    <!-- Announcement Bar -->
     <div class="announcement-bar py-2">
       <div class="container-fluid container-xl">
         <div class="announcement-slider swiper init-swiper">
@@ -305,7 +386,7 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{trade.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -349,7 +430,7 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toptraded.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -426,7 +507,7 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topvolume.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -500,7 +581,7 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topgainer.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -574,7 +655,7 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toploser.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -734,7 +815,7 @@ It’s a gamified gateway to real investing, built to spark financial curiosity 
                 </div>
 
               <div class="app-buttons mt-4">
-                <a href="#" class="app-btn">
+                <a href="/signup" class="app-btn">
                   <i class="bi bi-rocket-takeoff"></i>
                   <span>Get Started</span>
                 </a>

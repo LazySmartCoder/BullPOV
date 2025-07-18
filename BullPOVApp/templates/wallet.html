@@ -63,6 +63,7 @@
       </div>
     </section><!-- /Login Section -->
 
+
 <!-- Modal -->
 <div class="modal fade" id="addmoney" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -75,7 +76,7 @@
         <form action="/add-money" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" value="500" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input required type="text" class="form-control" name="amount" value="500" id="exampleInputEmail1" aria-describedby="emailHelp">
     <div id="emailHelp" class="form-text">Maximum Wallet Limit - ₹10,000</div>
   </div>
   <div class="modal-footer">
@@ -100,8 +101,8 @@
         <form action="/withdraw-money" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" value="{{suggest|floatformat:2}}" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Maximum Withdrawal Amount - ₹{{user.WalletBalance}}</div>
+    <input required type="text" class="form-control" name="amount" value="{{suggest|floatformat:2}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <div id="emailHelp" class="form-text">Maximum Withdrawal Amount - ₹{{user.WalletBalance|comma}}</div>
   </div>
   <div class="modal-footer">
         <button type="submit" style="width: 100%;" class="btn btn-outline-success">Proceed for Withdrawal</button>

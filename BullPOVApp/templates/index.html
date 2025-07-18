@@ -142,13 +142,13 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{s.Symbol}}</span>
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{s.Symbol|slice:':-3'}}.png" alt="Product Image" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{s.Symbol|slice:':-3'}}.png" class="main-img" loading="lazy">
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
                         <div class="add-to-cart-container">
                           <div class="cart-btn-group">
-                              <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+                              <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {% widthratio total_amount 100 %}</button>
                               <button type="button" onclick="window.location.href='/stock-preview/{{s.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
                             </div>
                             <style>
