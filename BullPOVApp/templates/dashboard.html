@@ -327,12 +327,19 @@ updateTimer();
           </script>
           <div class="swiper-wrapper" id="data">
             {% for name, figs in data.items %}
-            {% if figs.2 == "up" %}
-            <div class="swiper-slide">{{name}} - {{figs.0|floatformat:2}} (<i style="color: green;">{{figs.1|floatformat:2}}</i>)</div>
-            {% else %}
-            <div class="swiper-slide">{{name}} - {{figs.0|floatformat:2}} (<i style="color: red;">{{figs.1|floatformat:2}}</i>)</div>
-            {% endif %}
-            {% endfor %}
+    {% if figs.trend == "up" %}
+        <div class="swiper-slide">
+            {{ name }} - {{ figs.price|floatformat:2 }} 
+            (<i style="color: green;">{{ figs.change|floatformat:2 }}%</i>)
+        </div>
+    {% else %}
+    <div class="swiper-slide">
+            {{ name }} - {{ figs.price|floatformat:2 }} 
+            (<i style="color: red;">{{ figs.change|floatformat:2 }}%</i>)
+        </div>
+    {% endif %}
+{% endfor %}
+
           </div>
         </div>
       </div>
@@ -401,11 +408,11 @@ updateTimer();
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/nodate">{{trade.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.CurrentPrice > trade.ClosingPrice %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores|crores}}</strong>
+                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{trade.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{trade.Volume|comma|comma}}</strong>
+                          Volume: <strong>{{trade.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>

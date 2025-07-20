@@ -67,7 +67,11 @@
 <body>
 
   <div class="confirmation-container">
+    {% if predict == "UP" %}
     <h1><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on {{predict}}</h1>
+    {% else %}
+    <h1><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on <span style="color: red;">{{predict}}</span></h1>
+    {% endif %}
     <div class="company" style="color: black;">{{stock.Name}}</div>
     <div class="amount" style="color: black">Potential Earnings: ₹{{return|floatformat:2}}</div>
     <div class="return-rate" id="returnRate">

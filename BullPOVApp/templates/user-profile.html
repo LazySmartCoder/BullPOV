@@ -40,7 +40,8 @@
                         <form action="/delete-acc" method="POST">
                         <div class="p-3 py-5">
                             <div class="d-flex justify-content-between align-items-center experience"><span><h5 style="text-align: center;">Delete account?</h5></span></div><br>
-                            <div class="col-md-12"><label class="labels">Password</label><input type="password" class="form-control" placeholder="Enter password to delete account" value="" required name="pwd"></div> <br>
+                            <div class="col-md-12"><label class="labels">Password</label><input type="password" class="form-control" placeholder="Enter password to delete account" value="" required name="pwd"></div>
+                            <span style="color: red;">&nbsp;Your account will be deleted on spot!</span> <br><br>
                             <h5 style="text-align: center;"><a href=""><button type="submit" class="btn btn-outline-danger">Delete my account</button></a></h5>
                         </div>
                         {% csrf_token %}

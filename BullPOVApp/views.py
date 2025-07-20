@@ -67,10 +67,14 @@ def aboutUs(request):
     return render(request, "about-us.html")
 
 def signin(request):
-    return render(request, "sign-in.html")
+    if request.user.is_authenticated == False:
+        return render(request, "sign-in.html")
+    return redirect("ErrorPage")
 
 def signup(request):
-    return render(request, "sign-up.html")
+    if request.user.is_authenticated == False:
+        return render(request, "sign-up.html")
+    return redirect("ErrorPage")
 
 def register(request):
     if request.method == "POST":
@@ -79,6 +83,7 @@ def register(request):
        email = request.POST["email"]
        phone = request.POST["phone"]
        username = str(request.POST["username"]).lower()
+       address = request.POST["address"]
        pass1 = request.POST["pass1"]
        pass2 = request.POST["pass2"]
        if pass1 != pass2:
@@ -105,7 +110,7 @@ def register(request):
        if authenticating is not None:
            login(request, authenticating)
            veriotp = random.randint(100000, 999999)
-           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp)
+           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp, Address = address)
            userdet.save()
            sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(veriotp))
            messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
@@ -244,18 +249,25 @@ def contactSave(request):
 
 # calculation and hit order starts
 def checkReturnRate(request, stock):
+    now = datetime.now().time()
+    start_time = time(9, 0)
+    end_time = time(15, 30)
+    if start_time <= now <= end_time:
+        messages.warning(request, "Trading Pool is closed.")
+        return redirect("HomePage")
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
     share = Stock.objects.get(Symbol = str(stock).split("-")[0])
-    if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-        messages.success(request, "Only one order/stock is allowed per trading cycle.")
-        return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
     if request.method == "POST":
         amt = int(request.POST["amount"])
+        user = UserDetail.objects.get(User = request.user)
+        if amt > user.WalletBalance:
+            messages.success(request, "Deposit Money to continue.")
+            return redirect(f"/wallet")
 
         # up party data
         totalAmtup = 0
@@ -278,32 +290,44 @@ def checkReturnRate(request, stock):
             if totalAmtdown != 0:
                 userReturn = returnPercentage / 100 * totalAmtdown
             else:
-                userReturn = returnPercentage / 100 * 500
-            returnRate = percentage_to_multiplier(userReturn / amt * 100)
+                userReturn = returnPercentage / 100 * 248
+            returnRate = percentage_to_multiplier(userReturn / amt * 248)
         if predict == False:
             remAmt = totalAmtdown + amt
             returnPercentage = amt / remAmt * 100
             if totalAmtup != 0:
                 userReturn = returnPercentage / 100 * totalAmtup
             else:
-                userReturn = returnPercentage / 100 * 500
-            returnRate = percentage_to_multiplier(userReturn / amt * 100)
+                userReturn = returnPercentage / 100 * 248
+            returnRate = percentage_to_multiplier(userReturn / amt * 248)
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn + amt, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
+    now = datetime.now().time()
+    start_time = time(9, 0)
+    end_time = time(15, 30)
+    if start_time <= now <= end_time:
+        messages.warning(request, "Trading Pool is closed.")
+        return redirect("HomePage")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
     if request.method == "POST":
         amt = float(str(stock).split("-")[2])
-        share = Stock.objects.get(Symbol = str(stock).split("-")[0])
-        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-            messages.success(request, "Only one order/stock is allowed per trading cycle.")
-            return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
         user = UserDetail.objects.get(User = request.user)
+        share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+        if amt > user.WalletBalance:
+            messages.success(request, "Deposit Money to continue.")
+            return redirect(f"/wallet")
         user.WalletBalance = user.WalletBalance - amt
         user.InvestedBalance = user.InvestedBalance + amt
         user.save()
+        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
+            presentTrade = Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True)
+            presentTrade.Amount = presentTrade.Amount + amt
+            presentTrade.save()
+            messages.success(request, "You investment has been added, your returns will be calculated on the sum of your total investment.")
+            return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
 
         # up party data
         totalAmtup = 0
@@ -320,28 +344,16 @@ def hitOrder(request, stock):
         if predict == True:
             share.UPUsers = share.UPUsers + 1
             share.save()
-            remAmt = totalAmtup + amt
-            returnPercentage = amt / remAmt * 100
-            if totalAmtdown != 0:
-                userReturn = returnPercentage / 100 * totalAmtdown
-            else:
-                print("OK")
-                userReturn = returnPercentage / 100 * 500
-                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 500, DateTime = datetime.now(), Prediction = False, ActiveStatus = True, Return = userReturn)
+            if totalAmtdown == 0:
+                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 248, DateTime = datetime.now(), Prediction = False, ActiveStatus = True)
                 defTrade.save()
         if predict == False:
             share.DownUsers = share.DownUsers + 1
             share.save()
-            remAmt = totalAmtdown + amt
-            returnPercentage = amt / remAmt * 100
-            if totalAmtup != 0:
-                userReturn = returnPercentage / 100 * totalAmtup
-            else:
-                print("OK")
-                userReturn = returnPercentage / 100 * 500
-                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 500, DateTime = datetime.now(), Prediction = True, ActiveStatus = True, Return = userReturn)
+            if totalAmtup == 0:
+                defTrade = Trade(Trader = User.objects.get(username = "anni"), Stock = share, Amount = 248, DateTime = datetime.now(), Prediction = True, ActiveStatus = True)
                 defTrade.save()
-        initTrade = Trade(Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Return = userReturn)
+        initTrade = Trade(Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True)
         initTrade.save()
         return redirect(f"/trade-details/{share.Symbol}/nodate")
 # calculations and hit orders ends    
@@ -380,7 +392,7 @@ def deleteAcc(request):
         pwd = request.POST["pwd"]
         if request.user.check_password(pwd):
             request.user.delete()
-            messages.warning(request, "Account has scheduled for deletion.")
+            messages.warning(request, "Account has been scheduled for deletion.")
             sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Account Deleted", normal_text_templates("Account has scheduled for deletion."))
             return redirect("HomePage")
         else:
@@ -438,9 +450,19 @@ def dashboard(request):
     # indice data list access for the scroller
     indice_results = {}
     for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
-        change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
+        if i.OpeningPrice != 0:
+            change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
+        else:
+            change_percent = 0
+
         trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
-        indice_results[i.Name] = [i.CurrentPrice, i.PriceChange, trend]
+
+        indice_results[i.Name] = {
+            'price': i.CurrentPrice,
+            'change': change_percent,
+            'trend': trend,
+        }
+
     
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
