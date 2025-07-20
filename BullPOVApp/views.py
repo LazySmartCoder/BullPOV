@@ -249,12 +249,12 @@ def contactSave(request):
 
 # calculation and hit order starts
 def checkReturnRate(request, stock):
-    now = datetime.now().time()
-    start_time = time(9, 0)
-    end_time = time(15, 30)
-    if start_time <= now <= end_time:
-        messages.warning(request, "Trading Pool is closed.")
-        return redirect("HomePage")
+    # now = datetime.now().time()
+    # start_time = time(9, 0)
+    # end_time = time(15, 30)
+    # if start_time <= now <= end_time:
+    #     messages.warning(request, "Trading Pool is closed.")
+    #     return redirect("HomePage")
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
@@ -303,12 +303,12 @@ def checkReturnRate(request, stock):
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn + amt, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
-    now = datetime.now().time()
-    start_time = time(9, 0)
-    end_time = time(15, 30)
-    if start_time <= now <= end_time:
-        messages.warning(request, "Trading Pool is closed.")
-        return redirect("HomePage")
+    # now = datetime.now().time()
+    # start_time = time(9, 0)
+    # end_time = time(15, 30)
+    # if start_time <= now <= end_time:
+    #     messages.warning(request, "Trading Pool is closed.")
+    #     return redirect("HomePage")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
