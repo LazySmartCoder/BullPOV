@@ -48,12 +48,7 @@ def updateStocks(request):
     return HttpResponse("All stock data updated.")
 
 def dataClean(request):
-    # stock = Stock.objects.all()
-    # for i in stock:
-    #     i.PreviousCloseYesterday = i.PreviousCloseToday
-    #     i.save()
-
-    return HttpResponse(f"✅ Kept top 500 by Market Cap. Deleted others.")
+    return HttpResponse(f"Done Something.")
 
 def declareResults(request):
     stocks = Stock.objects.annotate(
@@ -150,4 +145,16 @@ def indiceUpdate(request):
 
         except Exception as e:
             print(f"Error fetching data for {symbol}: {e}")
+    return HttpResponse("Indices Updated!")
 
+def closeTrading(request):
+    user = User.objects.get(username = "anni")
+    user.last_name = "close"
+    user.save()
+    return HttpResponse("Trading Closed.")
+
+def openTrading(request):
+    user = User.objects.get(username = "anni")
+    user.last_name = "open"
+    user.save()
+    return HttpResponse("Trading Started.")

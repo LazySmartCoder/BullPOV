@@ -80,48 +80,6 @@
     </div>
   </div>
 
-  <!-- Watchlist -->
-  <div class="dropdown cart-dropdown me-2">
-    <button class="header-action-btn" data-bs-toggle="dropdown">
-      <i class="bi bi-eye"></i>
-      <!-- Hide label on mobile -->
-      <span class="action-text d-none d-md-inline-block">Watchlist</span>
-      <span class="badge">{{ count }}</span>
-    </button>
-    <div class="dropdown-menu cart-dropdown-menu">
-      <div class="dropdown-header">
-        <h6>Your Watchlist ({{ count }})</h6>
-      </div>
-      <div class="dropdown-body">
-        <div class="cart-items">
-          {% if watchlist %}
-            {% for w in watchlist %}
-              <a href="/stock-preview/{{w.Symbol}}">
-                <div class="cart-item">
-                      <div class="cart-item-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{w.Symbol}}.png" alt="Product" class="img-fluid">
-                      </div>
-                      <div class="cart-item-content">
-                        <h6 class="cart-item-title">{{w.Name}}</h6>
-                        <div class="cart-item-meta">Price: ₹{{w.CurrentPrice}}</div>
-                      </div>
-                    </div>
-              </a>
-            {% endfor %}
-                                        <div class="dropdown-footer">
-                  <div class="cart-actions">
-                    <a href="/watch-list" class="btn btn-outline-primary">View Full Watchlist</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {% else %}
-            <h4 style="text-align: center;">Empty Watchlist.</h4>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
   {% endif %}
 
   <!-- Mobile Nav Toggle (always visible) -->
@@ -250,64 +208,82 @@
         </div>
       </div>
     </div>
-    <script>
-function updateTimer() {
-  const now = new Date();
+<script>
+    // List of Indian national holidays (dd-mm format)
+    const nationalHolidays = [
+  "26-01", // Republic Day (falls Sun, no trading)
+  "26-02", // Mahashivratri
+  "14-03", // Holi
+  "31-03", // Eid‑Ul‑Fitr
+  "10-04", // Shri Mahavir Jayanti
+  "14-04", // Dr. B. R. Ambedkar Jayanti
+  "18-04", // Good Friday
+  "01-05", // Maharashtra Day
+  "06-07", // Muharram (falls Sun)
+  "07-06", // Bakri‑Eid (falls Sat)
+  "15-08", // Independence Day
+  "27-08", // Ganesh Chaturthi
+  "02-10", // Gandhi Jayanti / Dussehra
+  "21-10", // Diwali (Laxmi Pujan)
+  "22-10", // Diwali Balipratipada
+  "05-11", // Guru Nanak Jayanti
+  "25-12", // Christmas
+];
 
-  const startMarket = new Date();
-  startMarket.setHours(9, 0, 0, 0);
-
-  const endMarket = new Date();
-  endMarket.setHours(15, 30, 0, 0); // 3:30 PM
-
-  const resultPrepStart = new Date();
-  resultPrepStart.setHours(15, 30, 0, 0);
-
-  const resultPrepEnd = new Date();
-  resultPrepEnd.setHours(16, 15, 0, 0); // 4:15 PM
-
-  const nextMarketOpen = new Date();
-  if (now.getHours() >= 16) {
-    nextMarketOpen.setDate(now.getDate() + 1);
-  }
-  nextMarketOpen.setHours(9, 0, 0, 0);
-
-  // Case 1: Market is open
-  if (now >= startMarket && now < endMarket) {
-    document.getElementById("timer").innerText = "🔴 Stock Market is Open!";
-    return;
-  }
-
-  // Case 2: Results being prepared
-  if (now >= resultPrepStart && now < resultPrepEnd) {
-    document.getElementById("timer").innerText = "🟡 Results are getting prepared...";
-    return;
-  }
-
-  // Case 3: Countdown to next day's market opening
-  const interval = setInterval(() => {
-    const current = new Date();
-    const diff = nextMarketOpen - current;
-
-    if (diff <= 0) {
-      clearInterval(interval);
-      document.getElementById("timer").innerText = "🟢 Stock Market is Open!";
-      return;
+    function isHoliday(date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      return nationalHolidays.includes(`${day}-${month}`);
     }
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    function updateTimer() {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const currentMinutes = hour * 60 + minute;
 
-    document.getElementById("timer").innerText =
-      `🟢 ⏳ ${hours.toString().padStart(2, '0')}h ` +
-      `${minutes.toString().padStart(2, '0')}m ` +
-      `${seconds.toString().padStart(2, '0')}s until Market Opens!`;
-  }, 1000);
-}
+      const timerDiv = document.getElementById("timer");
 
-updateTimer();
-</script>
+      // Trading window times in minutes
+      const tradingStart = 16 * 60 + 30; // 4:30 PM
+      const marketOpen = 9 * 60;         // 9:00 AM
+      const marketClose = 15 * 60 + 30;  // 3:30 PM
+      const resultStart = marketClose;   // 3:30 PM
+      const resultEnd = tradingStart;    // 4:30 PM
+
+      // Handle weekends or holidays
+      if (day === 0 || day === 6 || isHoliday(now)) {
+        timerDiv.innerText = "🟢 BullPOV Trading Open";
+        return;
+      }
+
+      // 4:30 PM to next day 9:00 AM => Trading Time
+      if (currentMinutes >= tradingStart || currentMinutes < marketOpen) {
+        timerDiv.innerText = "🟢 BullPOV Trading Open";
+      }
+      // 9:00 AM to 3:30 PM => Show countdown
+      else if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+        const target = new Date();
+        target.setHours(16, 30, 0, 0); // today at 4:30 PM
+        const diff = target - now;
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        timerDiv.innerText = `🔴 BullPOV Trading Starts in ${hours}h ${minutes}m ${seconds}s`;
+      }
+      // 3:30 PM to 4:30 PM => Result time
+      else if (currentMinutes >= resultStart && currentMinutes < resultEnd) {
+        timerDiv.innerText = "🟡 Results are being declared...";
+      }
+    }
+
+    // Call immediately and then every second
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  </script>
 
     <!-- Announcement Bar -->
     <div class="announcement-bar py-2">

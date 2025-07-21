@@ -7,4 +7,6 @@ urlpatterns = [
     path("/data-clean", dataClean, name = "DataClean"),
     path("/declare-results", declareResults, name = "DeclareResults"),
     path("/indice-update", indiceUpdate, name = "IndiceUpdate"),
+    path("/close-trading", closeTrading, name = "CloseTrading"),
+    path("/open-trading", openTrading, name = "OpenTrading"),
 ]

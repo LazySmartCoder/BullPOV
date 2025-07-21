@@ -249,12 +249,9 @@ def contactSave(request):
 
 # calculation and hit order starts
 def checkReturnRate(request, stock):
-    # now = datetime.now().time()
-    # start_time = time(9, 0)
-    # end_time = time(15, 30)
-    # if start_time <= now <= end_time:
-    #     messages.warning(request, "Trading Pool is closed.")
-    #     return redirect("HomePage")
+    if User.objects.get(username = "anni").last_name == "close":
+        messages.warning(request, "Trading Pool is closed.")
+        return redirect("HomePage")
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
@@ -268,6 +265,9 @@ def checkReturnRate(request, stock):
         if amt > user.WalletBalance:
             messages.success(request, "Deposit Money to continue.")
             return redirect(f"/wallet")
+        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
+            messages.success(request, "Only one trade/stock is allowed per trading cycle.")
+            return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
 
         # up party data
         totalAmtup = 0
@@ -303,12 +303,9 @@ def checkReturnRate(request, stock):
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn + amt, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
-    # now = datetime.now().time()
-    # start_time = time(9, 0)
-    # end_time = time(15, 30)
-    # if start_time <= now <= end_time:
-    #     messages.warning(request, "Trading Pool is closed.")
-    #     return redirect("HomePage")
+    if User.objects.get(username = "anni").last_name == "close":
+        messages.warning(request, "Trading Pool is closed.")
+        return redirect("HomePage")
     predict = False
     if str(stock).split("-")[1] == "UP":
         predict = True
@@ -323,10 +320,7 @@ def hitOrder(request, stock):
         user.InvestedBalance = user.InvestedBalance + amt
         user.save()
         if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-            presentTrade = Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True)
-            presentTrade.Amount = presentTrade.Amount + amt
-            presentTrade.save()
-            messages.success(request, "You investment has been added, your returns will be calculated on the sum of your total investment.")
+            messages.success(request, "Only one trade/stock is allowed per trading cycle.")
             return redirect(f"/trade-details/{str(stock).split("-")[0]}/nodate")
 
         # up party data

@@ -39,15 +39,15 @@
                       <div class="stepper-icon">1</div>
                       <div class="stepper-text">Confirmed</div>
                     </div>
-                    <div class="stepper-item current">
+                    <div class="stepper-item completed">
                       <div class="stepper-icon">2</div>
                       <div class="stepper-text">Processing</div>
                     </div>
-                    <div class="stepper-item current">
+                    <div class="stepper-item completed">
                       <div class="stepper-icon">3</div>
                       <div class="stepper-text">Payment Received</div>
                     </div>
-                    <div class="stepper-item current">
+                    <div class="stepper-item completed">
                       <div class="stepper-icon">4</div>
                       <div class="stepper-text">Trade Issued</div>
                     </div>
@@ -106,7 +106,7 @@
                   </p>
                   <p class="shipping-method">
                     <i class="bi bi-calendar-check"></i>
-                    <span>Date: {{trade.DateTime}}</span>
+                    <span>Date: {{trade.DateTime|slice:"0:10:1"}}</span>
                   </p>
                 </div>
               </div>
