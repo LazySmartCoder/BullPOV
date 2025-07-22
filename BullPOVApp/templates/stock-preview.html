@@ -128,7 +128,7 @@
 
                 <div class="stock-info">
                   <i class="bi bi-check-circle-fill"></i>
-                  {% if stock.CurrentPrice > stock.ClosingPrice %}<span style="color: green;">Bullish</span>{% else %}<span style="color: red;">Bearish</span>{% endif %}
+                  {% if stock.CurrentPrice > stock.PreviousCloseToday %}<span style="color: green;">Bullish</span>{% else %}<span style="color: red;">Bearish</span>{% endif %}
                   <span class="stock-count">(₹{{totalamt|comma}} Total Investment)</span>
                 </div>
               </div>
@@ -208,7 +208,7 @@
                           <ul class="feature-list">
                             <li><i class="bi bi-check-circle"></i> Sector: {{stock.Sector}}</li>
                             <li><i class="bi bi-check-circle"></i> Open Price: ₹{{stock.OpeningPrice|comma}}</li>
-                            <li><i class="bi bi-check-circle"></i> Previous Close: ₹{{stock.ClosingPrice|comma}}</li>
+                            <li><i class="bi bi-check-circle"></i> Previous Close: ₹{{stock.PreviousCloseToday|comma}}</li>
                             <li><i class="bi bi-check-circle"></i> MktCap: {{stock.MktCap|crores}}</li>
                             <li><i class="bi bi-check-circle"></i> Volume: {{stock.Volume|comma}}</li>
                             <li><i class="bi bi-check-circle"></i> P/E Ratio: {{stock.PERatio}}</li>
@@ -244,7 +244,7 @@
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
     <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}</div>
+    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">
         <button type="submit" style="width: 100%;" class="btn btn-outline-success">Check Return Rate</button>
@@ -269,10 +269,10 @@
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
     <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}</div>
+    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">
-        <button type="submit" style="width: 100%;" class="btn btn-outline-success">Check Return Rate</button>
+        <button type="submit" style="width: 100%;" class="btn btn-outline-danger">Check Return Rate</button>
       </div>
       {% csrf_token %}
         </form>
