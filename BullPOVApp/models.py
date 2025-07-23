@@ -51,6 +51,7 @@ class UserDetail(models.Model):
         return self.User.username
 
 class Trade(models.Model):
+    TradeID = models.CharField(max_length=1000, default="")
     Trader = models.ForeignKey(User, related_name="TraderDetails", on_delete=models.CASCADE)
     Stock = models.ForeignKey(Stock, related_name="StockDetails", on_delete=models.CASCADE)
     Amount = models.FloatField(default=0)

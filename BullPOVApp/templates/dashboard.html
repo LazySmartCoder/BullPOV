@@ -100,6 +100,7 @@
             {% if request.user.is_authenticated %}
             <li><a href="/">Home</a></li>
             <li><a href="/about-us">About Us</a></li>
+            <li><a href="/explore">Explore Stocks</a></li>
             <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/market-info">Market Info</a></li>
             <li><a href="/e-learning">E - Learning</a></li>
@@ -110,7 +111,7 @@
             {% else %}
             <li><a href="/">Home</a></li>
             <li><a href="/about-us">About Us</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/explore">Explore Stocks</a></li>
             <li><a href="/market-info">Market Info</a></li>
             <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="/#how-it-works">How it works?</a></li>
@@ -364,7 +365,7 @@
 
                 {% if userTrades != None %}
                 <h1>Your Trades</h1>
-                {% for trade in userTrades %}
+                {% for trade, t in userTrades %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
@@ -375,7 +376,7 @@
                         </div>
                         <div class="add-to-cart-container">
                           <div class="cart-btn-group">
-  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}/nodate'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
+  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}/{{t.TradeID}}'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
 </div>
 
                         </div>

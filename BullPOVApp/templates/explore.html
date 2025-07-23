@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Explore | BullPOV{% endblock %}
+{% load static %}
+{% load tempfea %}
+{% block body %}
+
+<section id="category-product-list" class="category-product-list section">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+              <div class="row gy-4">
+                
+                {% for stock in stocks %}
+                <div class="col-lg-4">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{stock.Symbol}}</span>
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="main-img" loading="lazy">
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{stock.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{stock.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+
+
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-details/{{stock.Symbol}}/nodate">{{stock.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{stock.CurrentPrice|comma}} {% if stock.CurrentPrice > stock.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{stock.MktCap|crores}}</strong>
+                          <br>
+                          Sector: <strong>{{stock.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{stock.Volume|comma}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- End Product 1 -->
+                 {% endfor %}
+                
+        </div>
+    </section>
+
+{% endblock %}

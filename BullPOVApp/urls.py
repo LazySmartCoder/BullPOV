@@ -29,7 +29,7 @@ urlpatterns = [
     path("stock-preview/<str:symbol>", stockPreview, name = "StockPreview"),
     path("categories", categories, name = "Categories"),
     path("trade-history", tradeHistory, name = "TradeHistory"),
-    path("trade-details/<str:symbol>/<str:date>", tradeDetails, name = "TradeDetails"),
+    path("trade-details/<str:symbol>/<str:tid>", tradeDetails, name = "TradeDetails"),
     path("hit-order/<str:stock>", hitOrder, name = "HitOrder"),
     path("check-return-rate/<str:stock>", checkReturnRate, name = "CheckReturnRate"),
     path("update-profile", updateProfile, name = "UpdateProfile"),
@@ -47,4 +47,5 @@ urlpatterns = [
     path("market-info", marketInfo, name = "MarketInfo"),
     path("error", ErrorPage, name = "ErrorPage"),
     path("error-occured", ErrorOccured, name = "ErrorOccured"),
+    path("explore", explore, name = "Explore"),
 ]
