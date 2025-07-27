@@ -108,6 +108,9 @@ def declareResults(request):
                 user.InvestedBalance = user.InvestedBalance - j.Amount
                 user.WalletBalance = user.WalletBalance + j.Amount + j.Return
                 user.save()
+        i.UPUsers = 0
+        i.DownUsers = 0
+        i.save()
     return HttpResponse("Results Declared!")
 
 def indiceUpdate(request):

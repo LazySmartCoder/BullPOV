@@ -45,7 +45,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{s.Symbol}}</span>
+                      {% img s.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{s.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{s.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Stock(models.Model):
     Name = models.CharField(default="")
-    Logo = models.CharField(default="")
+    Logo = models.CharField()
     Symbol = models.CharField(default="")
     Sector = models.CharField(default="")
     Description = models.CharField(default="", max_length=10000)
@@ -60,7 +60,7 @@ class Trade(models.Model):
     ActiveStatus = models.BooleanField(default=False)
     Return = models.FloatField(default=0)
     Outcome = models.BooleanField(default=False) # False means Lose, True means Won!
-    Receipt = models.FileField(upload_to="Receipts/", default="")
+    Receipt = models.CharField(default="")
 
     def __str__(self):
         return f"{self.Trader} | {self.Stock}"
@@ -73,3 +73,14 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.Subject
+
+class Samachaar(models.Model):
+    Image = models.CharField(default="")
+    Name = models.CharField(default="")
+    Category = models.CharField(default="")
+    Date = models.CharField(default="")
+    Source = models.CharField(default="")
+    Link = models.CharField(default="")
+
+    def __str__(self):
+        return f"{self.Name} | {self.Source}"

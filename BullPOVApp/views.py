@@ -11,8 +11,10 @@ from email.mime.text import MIMEText
 import random
 from .emailTemplates import *
 import locale
+import requests
 from .MarketFeatures import *
 from reportlab.lib.pagesizes import A4
+from datetime import date
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -21,9 +23,50 @@ from reportlab.lib.units import inch
 site_url = "localhost:8000"
 locale.setlocale(locale.LC_ALL, 'en_IN.UTF-8')
 
+def get_global_index_data():
+    import yfinance as yf
+    # Top 6 indices with their Yahoo Finance symbols
+    indices = {
+        "^GSPC": "S&P 500",
+        "^DJI": "Dow Jones",
+        "^NSEI": "Nifty 50",
+        "^BSESN": "Sensex",
+        "^IXIC": "NASDAQ",
+        "^FTSE": "FTSE 100"
+    }
+
+    # Dictionary to store result
+    index_data = {}
+
+    for symbol, name in indices.items():
+        ticker = yf.Ticker(symbol)
+        data = ticker.history(period="2d")  # Ensure we get at least two days to calculate change
+
+        if not data.empty and len(data) >= 2:
+            ltp = round(data['Close'].iloc[-1], 2)
+            prev_close = round(data['Close'].iloc[-2], 2)
+            change = round(ltp - prev_close, 2)
+            percent_change = round((change / prev_close) * 100, 2) if prev_close != 0 else 0.0
+
+            index_data[symbol] = {
+                "name": name,
+                "ltp": ltp,
+                "change": change,
+                "percent_change": percent_change
+            }
+        else:
+            index_data[symbol] = {
+                "name": name,
+                "ltp": None,
+                "change": None,
+                "percent_change": None
+            }
+
+    return index_data
+
 def generate_bill_pdf(amount, username, name, tid, email, date, stock, prediction):
     try:
-        filename = f"{tid}-{username}.pdf"
+        filename = f"assets/Receipts/{username}-{tid}.pdf"
         c = canvas.Canvas(filename, pagesize=A4)
         width, height = A4
 
@@ -42,14 +85,15 @@ def generate_bill_pdf(amount, username, name, tid, email, date, stock, predictio
         y = height - 130
 
         details = [
+            (f"Transaction ID:", tid),
+            (f"Transaction Date:", date),
             (f"Name:", name),
             (f"Username:", username),
             (f"Email:", email),
-            (f"Transaction ID:", tid),
-            (f"Transaction Date:", date),
             (f"Stock Traded:", stock),
             (f"Your Prediction:", prediction),
             (f"Transaction Status:", "Success"),
+            (f"Amount Invested:", f"{amount:.2f} Rupees"),
             (f"Platform Fee:", "0.00 Rupees"),
             (f"Net Amount Paid:", f"{amount:.2f} Rupees")
         ]
@@ -79,16 +123,6 @@ def generate_bill_pdf(amount, username, name, tid, email, date, stock, predictio
     except Exception as e:
         return None
 
-def convert_to_crores(amount):
-    try:
-        # Convert to float to support decimals
-        amount = float(amount)
-        crores = amount / 1e7  # 1 crore = 1 crore = 1 * 10^7
-        formatted = locale.format_string("%.2f", crores, grouping=True)
-        return f"₹{formatted} Cr"
-    except Exception as e:
-        return f"Error: {e}"
-
 def is_valid_password(s):
     if len(s) < 8:
         return False
@@ -114,6 +148,7 @@ def sendEmail(sender, receiver, subject, message):
         return None
     except Exception as e:
         print(f"Error sending email: {e}")
+
 
 # logical codes starts here
 def index(request):
@@ -145,9 +180,13 @@ def register(request):
        email = request.POST["email"]
        phone = request.POST["phone"]
        username = str(request.POST["username"]).lower()
+       dob = request.POST["dob"]
        address = request.POST["address"]
        pass1 = request.POST["pass1"]
        pass2 = request.POST["pass2"]
+       if not (date.today() - date.fromisoformat("2010-07-18")).days >= 14 * 365:
+           messages.warning(request, "You are too young for this.")
+           return redirect("SignUP")
        if pass1 != pass2:
            messages.warning(request, "Passwords do not match. Please try again.")
            return redirect("SignUP")
@@ -157,9 +196,6 @@ def register(request):
            return render(request, "sign-up.html", {"username" : usern})
        if User.objects.filter(email=email).exists():
            messages.warning(request, "An user with this email is already registered with us.")
-           return redirect("SignUP")
-       if UserDetail.objects.filter(PhoneNumber = phone).exists():
-           messages.warning(request, "An user with this phone number is already registered with us.")
            return redirect("SignUP")
        if is_valid_password(pass1) == False:
            messages.warning(request, "Password must be at least 8 characters long and include letters, numbers, and special characters.")
@@ -174,7 +210,7 @@ def register(request):
            veriotp = random.randint(100000, 999999)
            userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp, Address = address)
            userdet.save()
-           sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(veriotp))
+           sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(fname, veriotp))
            messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
        else:
            messages.warning(request, "Something went wrong. Please try again later.")
@@ -221,11 +257,12 @@ def fp(request):
         email = request.POST["email"]
         if User.objects.filter(email = email).exists():
             userdet = User.objects.get(email = email)
+            name = userdet.first_name
             save_otp = UserDetail.objects.get(User = userdet)
             forgotp = random.randint(1000, 9999)
             save_otp.OTPEmail = str(forgotp)
             save_otp.save()
-            sendEmail("no-reply@bullpov.com", email, "BullPOV Password Recovery", password_recovery_template(email, forgotp))
+            sendEmail("no-reply@bullpov.com", email, "BullPOV Password Recovery", normal_text_templates(name, f"We received a request to reset your password for your account at BullPOV. To proceed, please click the link below:<br>https://bullpov.com/password-recovery-verification/{email}-{forgotp}"))
             messages.success(request, "A password recovery link has been sent to your email.")
             return redirect("HomePage")
         else:
@@ -260,9 +297,10 @@ def pr(request, otp):
            messages.warning(request, "Password must be at least 8 characters long and include letters, numbers, and special characters.")
            return render(request, "new-password.html", {"email" : email, "otp" : forotp})
         user = User.objects.get(email = email)
+        name = user.first_name
         user.set_password(pass1)
         user.save()
-        sendEmail("no-reply@bullpov.com", email, "BullPOV Password Recovered", normal_text_templates("Your password has been recovered."))
+        sendEmail("no-reply@bullpov.com", email, "Your Password Has Been Successfully Reset", normal_text_templates(name, "Just a quick note to let you know that your password was successfully reset. If you requested this, you’re all set, you can now log in with your new password. Your security is our priority. Stay safe and informed."))
         messages.success(request, "Your password has been changed. You can now sign in.")
         return redirect("SignIN")
         
@@ -281,6 +319,7 @@ def verifyUser(request):
             userdet = UserDetail.objects.get(User = request.user)
             userdet.VerifiedAccount = True
             userdet.save()
+            sendEmail("no-reply@bullpov.com", request.user.email, "Welcome to BullPOV!!", normal_text_templates(request.user.first_name, "Welcome aboard! We’re excited to have you at BullPOV, where we bring you the best content on stock market insights 📈, educational resources 🎓, and a seamless experience tailored just for you. To get started, explore the platform and discover curated content just for you. If you have any questions or feedback, feel free to reach out us at support@bullpov.com, we’re always here to help. Let’s grow together."))
             messages.success(request, "Your account has been successfully verified.")
         else:
             messages.warning(request, "Invalid OTP. Please try again.")
@@ -327,9 +366,6 @@ def checkReturnRate(request, stock):
         if amt > user.WalletBalance:
             messages.success(request, "Deposit Money to continue.")
             return redirect(f"/wallet")
-        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-            messages.success(request, "Only one trade/stock is allowed per trading cycle.")
-            return redirect(f"/trade-details/{str(stock).split("-")[0]}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
 
         # up party data
         totalAmtup = 0
@@ -349,20 +385,14 @@ def checkReturnRate(request, stock):
         if predict == True:
             remAmt = totalAmtup + amt
             returnPercentage = amt / remAmt * 100
-            if totalAmtdown != 0:
-                userReturn = returnPercentage / 100 * totalAmtdown
-            else:
-                userReturn = returnPercentage / 100 * 248
-            returnRate = percentage_to_multiplier(userReturn / amt * 248)
+            returnRate = percentage_to_multiplier(returnPercentage)
+            userReturn = amt * float(returnRate)
         if predict == False:
             remAmt = totalAmtdown + amt
             returnPercentage = amt / remAmt * 100
-            if totalAmtup != 0:
-                userReturn = returnPercentage / 100 * totalAmtup
-            else:
-                userReturn = returnPercentage / 100 * 248
-            returnRate = percentage_to_multiplier(userReturn / amt * 248)
-        return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn + amt, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
+            returnRate = percentage_to_multiplier(returnPercentage)
+            userReturn = amt * float(returnRate)
+        return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
     if User.objects.get(username = "anni").last_name == "close":
@@ -390,7 +420,6 @@ def hitOrder(request, stock):
         retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
         for i in retrieve_up:
             totalAmtup += i.Amount
-        
         # down party data
         totalAmtdown = 0
         retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
@@ -400,17 +429,13 @@ def hitOrder(request, stock):
         if predict == True:
             share.UPUsers = share.UPUsers + 1
             share.save()
-            if totalAmtdown == 0:
-                defTrade = Trade(TradeID = Trade.objects.all().count(), Trader = User.objects.get(username = "anni"), Stock = share, Amount = 248, DateTime = datetime.now(), Prediction = False, ActiveStatus = True)
-                defTrade.save()
         if predict == False:
             share.DownUsers = share.DownUsers + 1
             share.save()
-            if totalAmtup == 0:
-                defTrade = Trade(TradeID = Trade.objects.all().count(), Trader = User.objects.get(username = "anni"), Stock = share, Amount = 248, DateTime = datetime.now(), Prediction = True, ActiveStatus = True)
-                defTrade.save()
-        initTrade = Trade(TradeID = Trade.objects.all().count(), Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True)
+        initTrade = Trade(TradeID = Trade.objects.all().count(), Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Receipt = f"{request.user.username}-{Trade.objects.all().count()}")
+        generate_bill_pdf(amt, request.user.username, request.user.first_name, Trade.objects.all().count(), request.user.email, datetime.now().date(), share.Symbol, str(stock).split("-")[1])
         initTrade.save()
+        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, "Your order has been successfully placed! Now sit back and hold tight, results will be declared by 4:30 PM today. We wish you the best of luck!"))
         return redirect(f"/trade-details/{share.Symbol}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
 # calculations and hit orders ends    
 
@@ -435,9 +460,10 @@ def passwordChange(request):
             messages.warning(request, "Enter a stronger password to continue.")
             return redirect("/account")
         if request.user.check_password(old):
+            name = request.user.first_name
             request.user.set_password(pass1)
             request.user.save()
-            sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Password Changed", normal_text_templates("Your BullPOV password has been changed."))
+            sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Password Changed", normal_text_templates(name, "This is a quick confirmation that your BullPOV account password has been successfully changed. Stay safe."))
             messages.success(request, "Your password has been changed. SignIN Now!")
         else:
             messages.warning(request, 'The old password you entered is incorrect. To reset it, log out and click on "Forgot Password".')
@@ -447,9 +473,10 @@ def deleteAcc(request):
     if request.method == "POST":
         pwd = request.POST["pwd"]
         if request.user.check_password(pwd):
+            name = request.user.first_name
             request.user.delete()
             messages.warning(request, "Account has been scheduled for deletion.")
-            sendEmail("no-reply@bullpov.com", request.user.email, "BullPOV Account Deleted", normal_text_templates("Account has scheduled for deletion."))
+            sendEmail("no-reply@bullpov.com", request.user.email, "We're sorry to see you go", normal_text_templates(name, "We noticed you've deleted your account, and we're truly sorry to see you leave. If there’s anything we could’ve done better or any feedback you'd like to share, we’d love to hear from you, your input helps us improve. You’re always welcome back anytime. If you decide to return, just log in or create a new account — we’ll be here for you. Wishing you the very best ahead."))
             return redirect("HomePage")
         else:
             messages.warning(request, "Incorrect Password.")
@@ -471,14 +498,14 @@ def updateProfile(request):
                 cotp = random.randint(1000, 9999)
                 userdet.OTPEmail = cotp
                 userdet.save()
-                sendEmail("no-reply@bullpov.com", email, "BullPOV Email Updation", normal_text_templates(f"Your email will be changed as soon as you click this link: https://bullpov.com/change-email/{email}-{cotp}"))
-                messages.success(request, "Email Address change pending. Complete verification to proceed. An email has been sent to your old email address.")
+                sendEmail("no-reply@bullpov.com", email, "Verify your new email address to complete the update", normal_text_templates(request.user.first_name, f"You recently requested to update your email address on BullPOV. To confirm this change and keep your account secure, please verify your new email by clicking the link below:<br>https://bullpov.com/change-email/{email}-{cotp} <br>Thanks for helping us keep your account safe."))
+                messages.success(request, "Email Address change pending. Complete verification to proceed.")
             userdet.PhoneNumber = phone
             userdet.Address = address
             userdet.ProfilePhoto = pfp
             user.save()
             userdet.save()
-            sendEmail("no-reply@bullpov.com", email, "BullPOV Profile Updated", normal_text_templates("Your profile has been updated."))
+            sendEmail("no-reply@bullpov.com", email, "Your profile has been successfully updated", normal_text_templates(request.user.first_name, "Just letting you know, your profile information was updated successfully. We’ve saved the changes and everything looks good on our end. Thanks for staying with us."))
             messages.success(request, "Your profile has been updated.")
         else:
             messages.warning(request, "Incorrect Password.")
@@ -493,6 +520,7 @@ def changeEmail(request, verify):
     if userdet.OTPEmail == str(verify).split("-")[1]:
         user.email = str(verify).split("-")[0]
         user.save()
+        sendEmail("no-reply@bullpov.com", request.user.email, "Your email has been successfully updated", normal_text_templates(request.user.first_name, f"We wanted to let you know that the email address linked to your BullPOV account has been successfully updated. <br>New Email: {str(verify).split("-")[0]} <br>If you made this change, you're all set! Thanks for being a part of BullPOV."))
         messages.success(request, "Email Address has been changed.")
     else:
         messages.warning(request, "Email Address Updation Failed.")
@@ -505,7 +533,7 @@ def dashboard(request):
         return redirect("SignIN")
     # indice data list access for the scroller
     indice_results = {}
-    for i in Stock.objects.filter(Symbol__in=['^NSEI', '^BSESN', '^NSEBANK', '^CNXIT', '^NSEMDCP50']):
+    for i in Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50']):
         if i.OpeningPrice != 0:
             change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
         else:
@@ -553,15 +581,15 @@ def dashboard(request):
     if len(usertradesdata) == 0:
         usertradesdata = None    
     if len(usertrades) != 0:
-        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : zip(usertradesdata, usertrades)})
+        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : zip(usertradesdata, usertrades), "topIndices" : Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])})
     else:
-        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap})
+        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "topIndices" : Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])})
 
 
 def search(request):
     search_text = request.GET["search"]
     results = Stock.objects.filter(
-    Q(Name__icontains=search_text) | Q(Symbol__icontains=search_text)
+    Q(Name__icontains=search_text) | Q(Symbol__icontains=search_text) | Q(Sector__icontains=search_text)
 )
     return render(request, "search.html", {"search" : results, "searchText" : search_text, "count" : results.count()})
 
@@ -636,6 +664,9 @@ def categories(request):
 
     for stock in usertradesdata:
         categories.append({"type": "user-trades", "stock": stock})
+    
+    for stock in Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50']):
+        categories.append({"type": "top-indices", "stock": stock})
 
     return render(request, "category.html", {"categories" : categories})
 
@@ -710,7 +741,8 @@ def addMoney(request):
         userdet = UserDetail.objects.get(User = request.user)
         userdet.WalletBalance = userdet.WalletBalance + amt
         userdet.save()
-        messages.success(request, "Money added.")
+        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br>Deposited Amount: {amt}<br>Current Balance: {userdet.WalletBalance}<br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+        messages.success(request, "Money Deposited.")
         return redirect("Wallet")
 
 def withdrawMoney(request):
@@ -722,11 +754,10 @@ def withdrawMoney(request):
             return redirect("Wallet")
         userdet.WalletBalance = userdet.WalletBalance - amt
         userdet.save()
-        messages.success(request, "Money withdrawn.")
+        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br>Withdrawn Amount: {amt}<br>Current Balance: {userdet.WalletBalance}<br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
+        messages.success(request, "Money Withdrawn.")
         return redirect("Wallet")
 # wallet functions ends
-
-
 
 def downloadApp(request):
     return render(request, "download-app.html")
@@ -734,8 +765,8 @@ def downloadApp(request):
 def eLearning(request):
     return render(request, "e-learning.html")
 
-def marketInfo(request):
-    return render(request, "market-info.html")
+def samachaar(request):
+    return render(request, "samachaar.html", {"index_data" : get_global_index_data(), "news" : Samachaar.objects.all()[:10:-1]})
 
 def explore(request):
     return render(request, "explore.html", {"stocks" : Stock.objects.all()})

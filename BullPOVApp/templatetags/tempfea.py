@@ -1,5 +1,6 @@
 from django import template
 import locale
+from BullPOVApp.models import Stock
 
 register = template.Library()
 
@@ -45,3 +46,11 @@ def comma(value):
         return formatted + '.' + decimal_part
     except:
         return str(value)  # fallback if value is invalid
+
+@register.simple_tag
+def img(symbol):
+    url = f"https://assets-netstorage.groww.in/stock-assets/logos2/{symbol}.png"
+    if len(Stock.objects.get(Symbol = symbol).Logo) == 0 or Stock.objects.get(Symbol = symbol).Logo == "NIL":
+        return True
+    else:
+        return False

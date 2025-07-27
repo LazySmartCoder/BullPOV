@@ -4,6 +4,29 @@
 {% load tempfea %}
 {% block body %}
 
+<section id="search-results-header" class="search-results-header section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="search-results-header">
+          <div class="row align-items-center">
+            <div class="col-lg-12" data-aos="fade-left" data-aos-delay="300">
+                <form method="get" class="search-form" action="/search">
+                <div class="input-group">
+                  <input type="search" class="form-control" placeholder="Search Stocks..." name="search" value="" required="">
+                  <button class="btn search-btn" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
 <section id="category-product-list" class="category-product-list section">
             <div class="container" data-aos="fade-up" data-aos-delay="100">
               <div class="row gy-4">
@@ -13,7 +36,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{stock.Symbol}}</span>
+                      {% img stock.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{stock.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>

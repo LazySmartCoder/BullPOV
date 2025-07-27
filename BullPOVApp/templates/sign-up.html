@@ -42,12 +42,17 @@
 
                 <div class="form-group mb-3">
                   <label for="email">Phone Number</label>
-                  <input type="number" class="form-control" name="phone" id="email" required="" placeholder="+91 Country Code Numbers Only">
+                  <input type="number" class="form-control" name="phone" id="email" maxlength="10" placeholder="+91 Country Code Numbers Only">
                 </div>
 
                 <div class="form-group mb-3">
                   <label for="email">Set Username</label>
                   <input type="text" class="form-control" value="{{username}}" name="username" id="username" required="" placeholder="AjayTrader">
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="email">Date of Birth</label>
+                  <input type="date" class="form-control" name="dob" id="dob" required="" placeholder="Your DOB">
                 </div>
 
                 <div class="form-group mb-3">

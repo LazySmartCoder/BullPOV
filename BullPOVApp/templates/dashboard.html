@@ -100,21 +100,23 @@
             {% if request.user.is_authenticated %}
             <li><a href="/">Home</a></li>
             <li><a href="/about-us">About Us</a></li>
-            <li><a href="/explore">Explore Stocks</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/market-info">Market Info</a></li>
-            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="/#how-it-works">How it works?</a></li>
+            <li><a href="/explore">Explore Stocks</a></li>
+            <li><a href="/search?search=indice">Explore Indices</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/samachaar">Samachaar</a></li>
+            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="/#reviews">Reviews</a></li>
             <li><a href="/#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
             {% else %}
             <li><a href="/">Home</a></li>
             <li><a href="/about-us">About Us</a></li>
-            <li><a href="/explore">Explore Stocks</a></li>
-            <li><a href="/market-info">Market Info</a></li>
-            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="/#how-it-works">How it works?</a></li>
+            <li><a href="/explore">Explore Stocks</a></li>
+            <li><a href="/search?search=indice">Explore Indices</a></li>
+            <li><a href="/samachaar">Samachaar</a></li>
+            <li><a href="/e-learning">E - Learning</a></li>
             <li><a href="/#reviews">Reviews</a></li>
             <li><a href="/#faqs">FAQs</a></li>
             <li><a href="/contact">Contact Us</a></li>
@@ -210,81 +212,87 @@
       </div>
     </div>
 <script>
-    // List of Indian national holidays (dd-mm format)
-    const nationalHolidays = [
-  "26-01", // Republic Day (falls Sun, no trading)
-  "26-02", // Mahashivratri
-  "14-03", // Holi
-  "31-03", // Eid‑Ul‑Fitr
-  "10-04", // Shri Mahavir Jayanti
-  "14-04", // Dr. B. R. Ambedkar Jayanti
-  "18-04", // Good Friday
-  "01-05", // Maharashtra Day
-  "06-07", // Muharram (falls Sun)
-  "07-06", // Bakri‑Eid (falls Sat)
-  "15-08", // Independence Day
-  "27-08", // Ganesh Chaturthi
-  "02-10", // Gandhi Jayanti / Dussehra
-  "21-10", // Diwali (Laxmi Pujan)
-  "22-10", // Diwali Balipratipada
-  "05-11", // Guru Nanak Jayanti
-  "25-12", // Christmas
-];
+  // List of Indian national holidays (dd-mm format)
+  const nationalHolidays = [
+    "26-01", "26-02", "14-03", "31-03", "10-04", "14-04", "18-04", "01-05",
+    "06-07", "07-06", "15-08", "27-08", "02-10", "21-10", "22-10", "05-11", "25-12"
+  ];
 
-    function isHoliday(date) {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      return nationalHolidays.includes(`${day}-${month}`);
-    }
+  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-    function updateTimer() {
-      const now = new Date();
-      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const currentMinutes = hour * 60 + minute;
+  function isHoliday(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return nationalHolidays.includes(`${day}-${month}`);
+  }
 
-      const timerDiv = document.getElementById("timer");
-
-      // Trading window times in minutes
-      const tradingStart = 16 * 60 + 30; // 4:30 PM
-      const marketOpen = 9 * 60;         // 9:00 AM
-      const marketClose = 15 * 60 + 30;  // 3:30 PM
-      const resultStart = marketClose;   // 3:30 PM
-      const resultEnd = tradingStart;    // 4:30 PM
-
-      // Handle weekends or holidays
-      if (day === 0 || day === 6 || isHoliday(now)) {
-        timerDiv.innerText = "🟢 BullPOV Trading Open";
-        return;
-      }
-
-      // 4:30 PM to next day 9:00 AM => Trading Time
-      if (currentMinutes >= tradingStart || currentMinutes < marketOpen) {
-        timerDiv.innerText = "🟢 BullPOV Trading Open";
-      }
-      // 9:00 AM to 3:30 PM => Show countdown
-      else if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
-        const target = new Date();
-        target.setHours(16, 30, 0, 0); // today at 4:30 PM
-        const diff = target - now;
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        timerDiv.innerText = `🔴 BullPOV Trading Starts in ${hours}h ${minutes}m ${seconds}s`;
-      }
-      // 3:30 PM to 4:30 PM => Result time
-      else if (currentMinutes >= resultStart && currentMinutes < resultEnd) {
-        timerDiv.innerText = "🟡 Results are being declared...";
+  function getNextTradingDayName(currentDate) {
+    const nextDate = new Date(currentDate);
+    for (let i = 0; i < 10; i++) {
+      nextDate.setDate(nextDate.getDate() + 1);
+      const day = nextDate.getDay();
+      if (day !== 0 && day !== 6 && !isHoliday(nextDate)) {
+        return weekdays[day];
       }
     }
+    return "Unknown";
+  }
 
-    // Call immediately and then every second
-    updateTimer();
-    setInterval(updateTimer, 1000);
-  </script>
+  function updateTimer() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const currentMinutes = hour * 60 + minute;
+
+    const timerDiv = document.getElementById("timer");
+
+    // Trading window times in minutes
+    const tradingStart = 16 * 60 + 30; // 4:30 PM
+    const marketOpen = 9 * 60;         // 9:00 AM
+    const marketClose = 15 * 60 + 30;  // 3:30 PM
+    const resultStart = marketClose;
+    const resultEnd = tradingStart;
+
+    const todayIsHoliday = isHoliday(now);
+
+    // If it's weekend or holiday
+    if (day === 0 || day === 6 || todayIsHoliday) {
+      const nextTradingDay = getNextTradingDayName(now);
+      timerDiv.innerText = `🟢 BullPOV Trading Open for ${nextTradingDay}`;
+      return;
+    }
+
+    // 4:30 PM to next day 9:00 AM => Trading Time
+    if (currentMinutes >= tradingStart || currentMinutes < marketOpen) {
+      const nextTradingDay = getNextTradingDayName(now);
+      const showDay = (currentMinutes < marketOpen && !todayIsHoliday && day !== 0 && day !== 6)
+                      ? weekdays[day] // early morning today
+                      : nextTradingDay;
+      timerDiv.innerText = `🟢 BullPOV Trading Open for ${showDay}`;
+    }
+    // 9:00 AM to 3:30 PM => Show countdown
+    else if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+      const target = new Date();
+      target.setHours(16, 30, 0, 0); // today at 4:30 PM
+      const diff = target - now;
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      timerDiv.innerText = `🔴 BullPOV Trading Starts in ${hours}h ${minutes}m ${seconds}s`;
+    }
+    // 3:30 PM to 4:30 PM => Result time
+    else if (currentMinutes >= resultStart && currentMinutes < resultEnd) {
+      timerDiv.innerText = "🟡 Results are being declared...";
+    }
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+</script>
+
 
     <!-- Announcement Bar -->
     <div class="announcement-bar py-2">
@@ -370,7 +378,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{trade.Symbol}}</span>
+                      {% img trade.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{trade.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -383,7 +396,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/nodate">{{trade.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/{{t.TradeID}}">{{trade.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.CurrentPrice > trade.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores}}</strong>
                           <br>
@@ -414,7 +427,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toptraded.Symbol}}</span>
+                      {% img toptraded.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{toptraded.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -484,6 +502,86 @@
 </div>
 
 
+                <h1>Top Indices</h1>
+                {% for topindice in topIndices %}
+                <div class="col-lg-4">
+                  <div class="product-box">
+                    <div class="product-thumb">
+                      <span class="product-label">{{topindice.Symbol}}</span>
+                      {% img topindice.Symbol as image_exists %}
+                      {% if image_exists %}
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topindice.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{topindice.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
+                      <div class="product-overlay">
+                        <div class="product-quick-actions">
+                        </div>
+                        <div class="add-to-cart-container">
+                          <div class="cart-btn-group">
+  <button type="button" onclick="window.location.href='/stock-preview/{{topindice.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
+  <button type="button" onclick="window.location.href='/stock-preview/{{topindice.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
+</div>
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="product-content">
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topindice.Symbol}}">{{topindice.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{topindice.CurrentPrice|comma}} {% if topindice.CurrentPrice > topindice.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap|crores}}</strong>
+                          <br>
+                          Sector: <strong>{{topindice.Sector}}</strong>
+                          <br>
+                          Volume: <strong>{{topindice.Volume|comma}}</strong>
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- End Product 1 -->
+                 {% endfor %}
+                <div class="col-lg-4">
+  <div class="product-box d-flex justify-content-center align-items-center" style="height: 100%; min-height: 300px;">
+    <i class="bi bi-arrow-right-circle" style="font-size: 2rem;"></i>
+    <a href="/categories">
+      <h3 class="text-center m-0">&nbsp;See more...</h3>
+    </a>
+  </div>
+</div>
+
 
                 <h1>Top Volumes</h1>
                 {% for topvolume in topVolumes %}
@@ -491,7 +589,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topvolume.Symbol}}</span>
+                      {% img topvolume.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topvolume.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{topvolume.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -565,7 +668,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{topgainer.Symbol}}</span>
+                      {% img topgainer.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{topgainer.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{topgainer.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -639,7 +747,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{toploser.Symbol}}</span>
+                      {% img toploser.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toploser.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{toploser.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
@@ -729,7 +842,12 @@
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol}}.png" alt="Product" class="img-fluid" loading="lazy">
+                        {% img mkt.Symbol as image_exists %}
+                      {% if image_exists %}
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{mkt.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       </div>
                       <a href="/stock-preview/{{mkt.Symbol}}">
                         <div class="product-details">

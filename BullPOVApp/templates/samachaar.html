@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Samachaar Padhein | BullPOV{% endblock %}
+{% load static %}
+{% load tempfea %}
+{% block body %}
+<br>
+  <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Top Global Indices</h2>
+        <p>Stay updated with top global indices to make smarter stock trend predictions.</p>
+      </div><!-- End Section Title -->
+
+    <!-- Hero Section -->
+<section class="ecommerce-hero-2 hero section" id="hero">
+
+  <div class="container" style="margin-top: -50px;">
+    <div class="hero-slider swiper init-swiper" data-aos="fade-up">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide slide-new">
+          <div class="row align-items-center">
+            <div class="col-lg-12 image-col" data-aos="fade-left" data-aos-delay="200">
+              <div class="product-showcase">
+                <div class="product-grid">
+
+                  {% for symbol, details in index_data.items %}
+                  <div class="product-item" data-aos="fade-up">
+                    <div class="product-image">
+                      <img src="
+                        {% if 'USA' in details.name or 'NASDAQ' in details.name or 'Dow' in details.name or 'S&P' in details.name %}
+                          https://assets-netstorage.groww.in/stock-assets/logos/USFLAG.png
+                        {% elif 'FTSE' in details.name %}
+                          https://assets-netstorage.groww.in/stock-assets/logos/UKFLAG.png
+                        {% elif 'Nifty ' in details.name %}
+                          https://assets-netstorage.groww.in/stock-assets/logos/GIDXNIFTY.png
+                        {% elif 'Sensex' in details.name %}
+                          https://assets-netstorage.groww.in/stock-assets/logos/GIDXBSESN.png
+                        {% endif %}
+                      " alt="{{ details.name }}">
+                    </div>
+                    <div class="product-info">
+                      <h4>{{ details.name }}</h4>
+                      <span class="price">
+                        {{ details.ltp|comma }}
+                        {% if details.change %}
+                          {% if details.change > 0 %}
+                            <span style="color: green;">(+{{ details.percent_change }}%)</span>
+                          {% elif details.change < 0 %}
+                            <span style="color: red;">({{ details.percent_change }}%)</span>
+                          {% else %}
+                            <span>(0.00%)</span>
+                          {% endif %}
+                        {% endif %}
+                      </span>
+                    </div>
+                  </div>
+                  {% endfor %}
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+    <!-- Recent Posts Section -->
+    <section id="recent-posts" class="recent-posts section">
+
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <h2>Recent News Articles</h2>
+        <p>Stay ahead of the market with the latest top news to help you better predict stock trends</p>
+      </div><!-- End Section Title -->
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-4">
+
+          {% for n in news %}
+          <div class="col-lg-4">
+            <article>
+
+              <div class="post-img position-relative">
+                <img src="{{n.Image}}" alt="" class="img-fluid" loading="lazy">
+                <div class="post-content">
+                  <p class="post-category">{{n.Category}}</p>
+                  <h2 class="title">
+                    <a href="{{n.Link}}">{{n.Name}}</a>
+                  </h2>
+                  <div class="post-meta">
+                    <time datetime="2025-02-14">{{n.Date}}</time>
+                    <span class="px-2">•</span>
+                    <span>{{n.Source}}</span>
+                  </div>
+                </div>
+              </div>
+
+            </article>
+          </div><!-- End post list item -->
+          {% endfor %}
+
+        </div>
+      </div>
+
+    </section>
+
+
+{% endblock %}

@@ -15,6 +15,7 @@
                 <li class="filter-active" data-filter="*">All</li>
                 <li data-filter=".user-trades">Your Trades</li>
                 <li data-filter=".top-traded">Top Traded</li>
+                <li data-filter=".top-indices">Top Indices</li>
                 <li data-filter=".top-volumes">Top Volumes</li>
                 <li data-filter=".top-gainers">Top Gainers</li>
                 <li data-filter=".top-losers">Top Losers</li>
@@ -33,7 +34,12 @@
                   <div class="product-box">
                     <div class="product-thumb">
                       <span class="product-label">{{c.stock.Symbol}}</span>
+                      {% img c.stock.Symbol as image_exists %}
+                      {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{c.stock.Symbol}}.png" class="main-img" loading="lazy">
+                      {% else %}
+                      <img src="{{c.stock.Logo}}" class="main-img" loading="lazy">
+                      {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
