@@ -308,7 +308,7 @@
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
     <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}. <a href="/wallet">Add Money!</a></div>
+    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance|floatformat:2}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">
         <button type="submit" style="width: 100%;" class="btn btn-outline-success">Check Return Rate</button>
@@ -333,7 +333,7 @@
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
     <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance}}. <a href="/wallet">Add Money!</a></div>
+    <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance|floatformat:2}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">
         <button type="submit" style="width: 100%;" class="btn btn-outline-danger">Check Return Rate</button>

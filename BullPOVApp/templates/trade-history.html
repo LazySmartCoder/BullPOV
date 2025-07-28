@@ -19,7 +19,12 @@
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="Product" class="img-fluid" loading="lazy">
+                        {% img stock.Symbol as image_exists %}
+                      {% if image_exists %}
+                      <img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="{{stock.Symbol}}">
+                      {% else %}
+                      <img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="{{stock.Logo}}" alt="{{stock.Symbol}}">
+                      {% endif %}
                       </div>
                       <a href="/trade-details/{{stock.Symbol}}/{{predict.TradeID}}">
                         <div class="product-details">
@@ -44,7 +49,12 @@
                   <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="img-fluid" loading="lazy">
+                        {% img stock.Symbol as image_exists %}
+                      {% if image_exists %}
+                      <img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="{{stock.Symbol}}">
+                      {% else %}
+                      <img style="width: 50px; border-radius: 10px; margin-top: -4px;" src="{{stock.Logo}}" alt="{{stock.Symbol}}">
+                      {% endif %}
                       </div>
                       <a href="/trade-details/{{stock.Symbol}}/{{predict.TradeID}}">
                         <div class="product-details">

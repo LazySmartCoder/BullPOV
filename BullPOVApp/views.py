@@ -435,7 +435,7 @@ def hitOrder(request, stock):
         initTrade = Trade(TradeID = Trade.objects.all().count(), Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Receipt = f"{request.user.username}-{Trade.objects.all().count()}")
         generate_bill_pdf(amt, request.user.username, request.user.first_name, Trade.objects.all().count(), request.user.email, datetime.now().date(), share.Symbol, str(stock).split("-")[1])
         initTrade.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, "Your order has been successfully placed! Now sit back and hold tight, results will be declared by 4:30 PM today. We wish you the best of luck!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, "Your order has been successfully placed! <br>Now sit back and hold tight, results will be declared soon. <br>We wish you the best of luck!"))
         return redirect(f"/trade-details/{share.Symbol}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
 # calculations and hit orders ends    
 
@@ -575,7 +575,7 @@ def dashboard(request):
 
     # getting user trades data to be displayed
     usertradesdata = []
-    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4]
+    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4:-1]
     for i in usertrades:
         usertradesdata.append(i.Stock)
     if len(usertradesdata) == 0:
@@ -643,7 +643,7 @@ def categories(request):
 
     # getting user trades data to be displayed
     usertradesdata = []
-    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4]
+    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[::-1]
     for i in usertrades:
         usertradesdata.append(i.Stock)
 
@@ -741,7 +741,7 @@ def addMoney(request):
         userdet = UserDetail.objects.get(User = request.user)
         userdet.WalletBalance = userdet.WalletBalance + amt
         userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br>Deposited Amount: {amt}<br>Current Balance: {userdet.WalletBalance}<br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
         messages.success(request, "Money Deposited.")
         return redirect("Wallet")
 
@@ -754,7 +754,7 @@ def withdrawMoney(request):
             return redirect("Wallet")
         userdet.WalletBalance = userdet.WalletBalance - amt
         userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br>Withdrawn Amount: {amt}<br>Current Balance: {userdet.WalletBalance}<br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
         messages.success(request, "Money Withdrawn.")
         return redirect("Wallet")
 # wallet functions ends
