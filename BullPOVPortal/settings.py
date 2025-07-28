@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,17 +78,12 @@ WSGI_APPLICATION = 'BullPOVPortal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'BullPOV_Database.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    'default': dj_database_url.config(default='postgresql://bullpov_user:FABh1m70kN5cb4PU3Si5DevcHK6D7xmc@dpg-d23oeore5dus73asrt20-a/bullpov')
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'BullPOV_Database.sqlite3',
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
