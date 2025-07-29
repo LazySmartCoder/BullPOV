@@ -12,12 +12,45 @@ import random
 from .emailTemplates import *
 import locale
 import requests
-from .MarketFeatures import *
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .credentials import *
 from reportlab.lib.pagesizes import A4
 from datetime import date
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+
+from django.shortcuts import HttpResponse
+from django.db import connections, transaction
+import sqlite3
+from pathlib import Path
+
+def neon(request):
+    # Path to your SQLite database
+    sqlite_db_path = Path(__file__).resolve().parent.parent / "db.sqlite3"
+
+    # Connect to SQLite using sqlite3 module
+    sqlite_conn = sqlite3.connect(sqlite_db_path)
+    sqlite_cursor = sqlite_conn.cursor()
+
+    # Get data from SQLite
+    sqlite_cursor.execute("SELECT * FROM BullPOVApp_trade;")
+    rows = sqlite_cursor.fetchall()
+    columns = [col[0] for col in sqlite_cursor.description]
+
+    # Insert data into Neon (PostgreSQL, your default DB)
+    with transaction.atomic():
+        for row in rows:
+            data = dict(zip(columns, row))
+
+            # Optional: Exclude 'id' if it's auto-incremented in PostgreSQL
+            data.pop('id', None)
+
+            Trade.objects.create(**data)
+
+    sqlite_conn.close()
+
+    return HttpResponse("✅ Data migrated from SQLite file to Neon DB.")
 
 # Some important functions and variables
 site_url = "localhost:8000"
@@ -184,7 +217,7 @@ def register(request):
        address = request.POST["address"]
        pass1 = request.POST["pass1"]
        pass2 = request.POST["pass2"]
-       if not (date.today() - date.fromisoformat("2010-07-18")).days >= 14 * 365:
+       if not (date.today() - date.fromisoformat(dob)).days >= 14 * 365:
            messages.warning(request, "You are too young for this.")
            return redirect("SignUP")
        if pass1 != pass2:
@@ -208,9 +241,9 @@ def register(request):
        if authenticating is not None:
            login(request, authenticating)
            veriotp = random.randint(100000, 999999)
-           userdet = UserDetail(User = request.user, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp, Address = address)
+           userdet = UserDetail(User = request.user, DOB = dob, Newsletters = ("newsletter" in request.POST), PhoneNumber = phone, VerificationOTP = veriotp, Address = address)
            userdet.save()
-           sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(fname, veriotp))
+           sendEmail("no-reply@bullpov.com", email, f"Email Verification OTP - {veriotp}", otp_verification_template(fname, str(veriotp)))
            messages.success(request, "Congrats!!! Your BullPOV account has been created successfully. Please verify yourself.")
        else:
            messages.warning(request, "Something went wrong. Please try again later.")
@@ -395,26 +428,25 @@ def checkReturnRate(request, stock):
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
-    if User.objects.get(username = "anni").last_name == "close":
-        messages.warning(request, "Trading Pool is Closed.")
-        return redirect("HomePage")
-    predict = False
-    if str(stock).split("-")[1] == "UP":
-        predict = True
-    if request.method == "POST":
+    if request.user.is_authenticated:
+        if User.objects.get(username = "anni").last_name == "close":
+            messages.warning(request, "Trading Pool is Closed.")
+            return redirect("HomePage")
+        predict = False
+        if str(stock).split("-")[1] == "UP":
+            predict = True
         amt = float(str(stock).split("-")[2])
         user = UserDetail.objects.get(User = request.user)
         share = Stock.objects.get(Symbol = str(stock).split("-")[0])
+        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
+            messages.success(request, "Only one trade/stock is allowed per trading cycle.")
+            return redirect(f"/trade-details/{str(stock).split("-")[0]}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
         if amt > user.WalletBalance:
             messages.success(request, "Deposit Money to continue.")
             return redirect(f"/wallet")
         user.WalletBalance = user.WalletBalance - amt
         user.InvestedBalance = user.InvestedBalance + amt
         user.save()
-        if Trade.objects.filter(Trader = request.user, Stock = share, ActiveStatus = True).exists():
-            messages.success(request, "Only one trade/stock is allowed per trading cycle.")
-            return redirect(f"/trade-details/{str(stock).split("-")[0]}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
-
         # up party data
         totalAmtup = 0
         retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
@@ -425,7 +457,6 @@ def hitOrder(request, stock):
         retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
         for i in retrieve_down:
             totalAmtdown += i.Amount
-
         if predict == True:
             share.UPUsers = share.UPUsers + 1
             share.save()
@@ -434,8 +465,8 @@ def hitOrder(request, stock):
             share.save()
         initTrade = Trade(TradeID = Trade.objects.all().count(), Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Receipt = f"{request.user.username}-{Trade.objects.all().count()}")
         generate_bill_pdf(amt, request.user.username, request.user.first_name, Trade.objects.all().count(), request.user.email, datetime.now().date(), share.Symbol, str(stock).split("-")[1])
+        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, f"Your order has been successfully placed! <br><br>Stock: {share.Name}<br>Amount: ₹{amt}<br>Trade Receipt:- https://bullpov.com/assets/Receipts/{request.user.username}-{Trade.objects.all().count()}<br><br>Now sit back and hold tight, results will be declared soon. <br>We wish you the best of luck!"))
         initTrade.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, "Your order has been successfully placed! <br>Now sit back and hold tight, results will be declared soon. <br>We wish you the best of luck!"))
         return redirect(f"/trade-details/{share.Symbol}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
 # calculations and hit orders ends    
 
@@ -769,4 +800,18 @@ def samachaar(request):
     return render(request, "samachaar.html", {"index_data" : get_global_index_data(), "news" : Samachaar.objects.all()[:10:-1]})
 
 def explore(request):
-    return render(request, "explore.html", {"stocks" : Stock.objects.all()})
+    stocks = Stock.objects.all()
+    paginator = Paginator(stocks, 9)
+    page = request.GET.get('page', '1')
+    try:
+        page_number = int(page)
+        if page_number < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        page_number = 1  # Default to page 1 on error
+
+    try:
+        page_obj = paginator.page(page_number)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    return render(request, "explore.html", {'page_obj': page_obj})

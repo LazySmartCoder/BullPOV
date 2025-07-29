@@ -48,4 +48,5 @@ urlpatterns = [
     path("error", ErrorPage, name = "ErrorPage"),
     path("error-occured", ErrorOccured, name = "ErrorOccured"),
     path("explore", explore, name = "Explore"),
+    path("neon", neon, name = "neon"),
 ]

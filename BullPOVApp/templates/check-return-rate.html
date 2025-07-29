@@ -70,7 +70,7 @@
     {% if predict == "UP" %}
     <h1><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on {{predict}}</h1>
     {% else %}
-    <h1><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on <span style="color: red;">{{predict}}</span></h1>
+    <h1 style="color: red;"><i class="bi bi-bar-chart-fill"></i> {{rate|floatformat:2}}x on {{predict}}</h1>
     {% endif %}
     <div class="company" style="color: black;">{{stock.Name}}</div>
     <div class="amount" style="color: black">Potential Earnings: ₹{{return|floatformat:2}}</div>
@@ -78,10 +78,23 @@
   <small style="color: black;">Place live order at <span id="liveTime"></span></small>
 </div>
 
-<form action="/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}" method="post">
-        <button type="submit" class="place-order-btn">Place Order</button>
-{% csrf_token %}
-</form>
+<center>
+          <main>
+  <div class="slide-button__container">
+        <span class="slide-button__text">Swipe to Place Trade</span>
+        <div class="slide-button__completed-overlay">
+          <span class="slide-button__text">Sheeeesh!!!</span>
+        </div>
+    <div class="slide-button__control">
+      <svg xmlns="http://www.w3.org/2000/svg" width="47.418" height="82.64" viewBox="0 0 47.418 82.64">
+  <path class="arrow" d="M13.878,82.457,5.979,75.4a1.763,1.763,0,0,1,0-2.5L33.835,41.625,5.874,10.349a1.763,1.763,0,0,1,0-2.5l7.9-7.052a1.763,1.763,0,0,1,2.5,0L52.77,41.625,16.381,82.316a1.763,1.763,0,0,1-2.5.141Z" transform="translate(-5.352 -0.272)"/>
+          <path class="arrow arrow__completed" d="M13.878,82.457,5.979,75.4a1.763,1.763,0,0,1,0-2.5L33.835,41.625,5.874,10.349a1.763,1.763,0,0,1,0-2.5l7.9-7.052a1.763,1.763,0,0,1,2.5,0L52.77,41.625,16.381,82.316a1.763,1.763,0,0,1-2.5.141Z" transform="translate(-5.352 -0.272)"/>
+</svg>
+    </div>
+  </div>
+</main>
+</center>
+
 <p style="color: red;">Note: Once executed, this order cannot be reversed or refunded.</p>
 </div>
 
@@ -106,4 +119,177 @@
   // Initial call and then update every second
   updateTime();
   setInterval(updateTime, 1000);
+</script>
+
+<style>
+
+.slide-button__container {
+  position: relative;
+  background: var(--slide-button-color-bg);
+  width: 300px;
+  height: 50px;
+  border-radius: 5px;
+  padding: 4px;
+  box-sizing: border-box;
+  font-family: Avenir, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-weight: 500;
+  color: #1B1F3B;
+  font-size: 1.2em;
+  outline: none;
+  overflow: hidden;
+}
+
+.slide-button__control {
+  width: 60px;
+  height: 100%;
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  border-radius: 5px;
+  background: var(--slide-button-control-control-bg);
+  outline: none;
+  z-index: 2;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+.slide-button__control svg {
+  height: 100%;
+}
+
+.slide-button__control svg .arrow:not(.arrow__completed) {
+  fill: var(--slide-button-color-bg);
+}
+
+.slide-button__control svg .arrow.arrow__completed {
+  fill: #1B1F3B;
+  opacity: 0;
+}
+
+.slide-button__text {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  left: 0;
+  top: 50%;
+  transform:  translateY(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.slide-button__completed-overlay {
+  width: 100%;
+  height: 100%;
+  background: var(--slide-button-completed-color-bg);
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+.slide-button__container {
+  position: relative;
+  overflow: hidden;
+  width: 100%; /* or fixed width like 300px */
+}
+
+.slide-button__control {
+  position: absolute;
+  left: 0; /* Make sure it starts from the left */
+  top: 0;
+  will-change: transform;
+}
+
+</style>
+<!-- GSAP Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- Draggable Plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+
+<!-- TweenMax (Optional, if you want to use TweenMax syntax specifically) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+
+<script>
+  const COLORS = {
+    '--color-bg': '#0F0F13',
+    '--slide-button-color-bg': '#00BFFF',
+    '--slide-button-completed-color-bg': '#1ddb4f',
+    '--slide-button-color-text': '#FFF',
+    '--slide-button-control-control-bg': '#0F0F13'
+  };
+
+  const $container = document.querySelector('.slide-button__container');
+  const $control = document.querySelector('.slide-button__control');
+  const $text = document.querySelector('.slide-button__text');
+  const $completedOverlay = document.querySelector('.slide-button__completed-overlay');
+  const $completedArrow = document.querySelector('.arrow.arrow__completed');
+
+  let drag, slidingWidth = 0;
+
+  function setColors() {
+    const root = document.documentElement;
+    for (const prop in COLORS) {
+      root.style.setProperty(prop, COLORS[prop]);
+    }
+  }
+
+  function setupDraggable() {
+    // If already initialized, kill previous instance
+    if (drag) drag.kill();
+
+    // Calculate width dynamically (important for responsive)
+    const controlWidth = $control.offsetWidth;
+    const containerWidth = $container.offsetWidth;
+    slidingWidth = containerWidth - controlWidth;
+
+    // Set initial position to left (x: 0)
+    TweenMax.set($control, { x: 0 });
+    TweenMax.set($text, { opacity: 1 });
+    TweenMax.set($completedOverlay, { opacity: 0 });
+    TweenMax.set($completedArrow, { opacity: 0 });
+
+    [drag] = Draggable.create($control, {
+      bounds: { minX: 0, maxX: slidingWidth },
+      type: 'x',
+      onDrag() {
+        const percent = this.x / this.maxX;
+        const completedOpacity = Math.pow(percent, 4);
+
+        $text.style.opacity = 1 - percent * 1.5;
+        $completedOverlay.style.opacity = completedOpacity;
+        $completedArrow.style.opacity = completedOpacity;
+      },
+      onDragEnd() {
+        const isSlideCompleted = this.x > this.maxX * 0.9;
+        const destinationX = isSlideCompleted ? this.maxX : 0;
+        const toCompleteOpacity = isSlideCompleted ? 0 : 1;
+        const completedOpacity = isSlideCompleted ? 1 : 0;
+        const ease = isSlideCompleted ? 'power1.out' : 'back.out(1.05)';
+
+        TweenMax.to(this.target, 0.3, { x: destinationX, ease: ease });
+        TweenMax.to($text, 0.2, { opacity: toCompleteOpacity });
+        TweenMax.to($completedOverlay, 0.2, { opacity: completedOpacity });
+        TweenMax.to($completedArrow, 0.2, { opacity: completedOpacity });
+
+        if (isSlideCompleted) {
+          drag.disable();
+          setTimeout(() => {
+            window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
+          }, 300);
+        }
+      }
+    });
+  }
+
+  // Call setup on page load and when screen resizes
+  window.addEventListener('load', () => {
+    setColors();
+    setupDraggable();
+  });
+
+  window.addEventListener('resize', () => {
+    setupDraggable();
+  });
 </script>

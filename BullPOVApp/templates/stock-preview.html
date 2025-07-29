@@ -307,7 +307,7 @@
         <form action="/check-return-rate/{{stock.Symbol}}-UP" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input required type="number" class="form-control" min="1" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
     <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance|floatformat:2}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">
@@ -332,7 +332,7 @@
         <form action="/check-return-rate/{{stock.Symbol}}-DOWN" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
-    <input required type="number" class="form-control" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <input required type="number" class="form-control" min="1" name="amount" max="{{user.WalletBalance}}" id="exampleInputEmail1" aria-describedby="emailHelp">
     <div id="emailHelp" class="form-text">Your current wallet balance - ₹{{user.WalletBalance|floatformat:2}}. <a href="/wallet">Add Money!</a></div>
   </div>
   <div class="modal-footer">

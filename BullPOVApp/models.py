@@ -25,7 +25,6 @@ class Stock(models.Model):
     Nifty50 = models.BooleanField(default=False)
     TopGainer = models.BooleanField(default=False)
     TopLoser = models.BooleanField(default=False)
-    LastUpdateTime = models.DateField(default=datetime.now())
     UPUsers = models.IntegerField(default=0)
     DownUsers = models.IntegerField(default=0)
 
@@ -35,6 +34,7 @@ class Stock(models.Model):
 class UserDetail(models.Model):
     User = models.ForeignKey(User, related_name="OtherUserDetails", on_delete=models.CASCADE)
     ProfilePhoto = models.ImageField(upload_to='ProfilePhotos/', default='/default.png')
+    DOB = models.CharField(default="")
     Newsletters = models.BooleanField(default=False)
     OTPEmail = models.CharField(default="")
     OTPPhone = models.CharField(default="")

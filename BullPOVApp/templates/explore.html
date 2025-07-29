@@ -31,7 +31,7 @@
             <div class="container" data-aos="fade-up" data-aos-delay="100">
               <div class="row gy-4">
                 
-                {% for stock in stocks %}
+                {% for stock in page_obj %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
@@ -90,7 +90,7 @@
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-details/{{stock.Symbol}}/nodate">{{stock.Name}}</a></h2>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{stock.Symbol}}">{{stock.Name}}</a></h2>
                         <h4 style="text-align: left;">₹{{stock.CurrentPrice|comma}} {% if stock.CurrentPrice > stock.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{stock.MktCap|crores}}</strong>
                           <br>
@@ -105,6 +105,27 @@
                  {% endfor %}
                 
         </div>
+    </section>
+    <section id="blog-pagination" class="blog-pagination section">
+
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <ul>
+            {% if page_obj.has_previous %}
+            <li><a>{{ page_obj.previous_page_number }}</a></li>
+            {% endif %}
+            {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            <li><a>{{ page_obj.number }}</a></li>
+            {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+            <li><a>{{ page_obj.paginator.num_pages }}</a></li>
+          </ul>
+        </div>
+      </div>
+
     </section>
 
 {% endblock %}
