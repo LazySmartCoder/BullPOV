@@ -743,8 +743,8 @@ def addWatchList(request, stock):
     userlist = UserDetail.objects.get(User = request.user)
     userlist.Watchlist.add(Stock.objects.get(Symbol = stock))
     userlist.save()
-    messages.success(request, "Watch List Updated.")
-    return redirect(f"/stock-preview/{stock}")
+    messages.success(request, "Watchlist Updated.")
+    return redirect(f"/watch-list")
 
 def removeWatchList(request, stock):
     if request.user.is_authenticated == False:
@@ -753,7 +753,7 @@ def removeWatchList(request, stock):
     userlist = UserDetail.objects.get(User = request.user)
     userlist.Watchlist.remove(Stock.objects.get(Symbol = stock))
     userlist.save()
-    messages.success(request, "Watch List Updated.")
+    messages.success(request, "Watchlist Updated.")
     return redirect("WatchList")
 # watchlist functions ends
 
@@ -769,6 +769,9 @@ def wallet(request):
 def addMoney(request):
     if request.method == "POST":
         amt = float(request.POST["amount"])
+        if amt > 10000:
+            messages.warning(request, "Max Deposit Limit is ₹10,000/-")
+            return redirect("Wallet")
         userdet = UserDetail.objects.get(User = request.user)
         userdet.WalletBalance = userdet.WalletBalance + amt
         userdet.save()

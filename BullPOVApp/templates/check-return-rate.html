@@ -84,7 +84,7 @@
 <center>
           <main>
   <div class="slide-button__container">
-        <span class="slide-button__text">Swipe to Place Trade</span>
+        <span class="slide-button__text">Place Trade</span>
         <div class="slide-button__completed-overlay">
           <span class="slide-button__text">Sheeeesh!!!</span>
         </div>
@@ -239,54 +239,56 @@
   }
 
   function setupDraggable() {
-    // If already initialized, kill previous instance
     if (drag) drag.kill();
 
-    // Calculate width dynamically (important for responsive)
-    const controlWidth = $control.offsetWidth;
-    const containerWidth = $container.offsetWidth;
-    slidingWidth = containerWidth - controlWidth;
+    // Ensure layout is updated before measuring
+    requestAnimationFrame(() => {
+      const controlWidth = $control.offsetWidth;
+      const containerWidth = $container.offsetWidth;
+      slidingWidth = containerWidth - controlWidth;
 
-    // Set initial position to left (x: 0)
-    TweenMax.set($control, { x: 0 });
-    TweenMax.set($text, { opacity: 1 });
-    TweenMax.set($completedOverlay, { opacity: 0 });
-    TweenMax.set($completedArrow, { opacity: 0 });
+      // Make sure button is always inside container even on small screens
+      if (slidingWidth < 0) slidingWidth = 0;
 
-    [drag] = Draggable.create($control, {
-      bounds: { minX: 0, maxX: slidingWidth },
-      type: 'x',
-      onDrag() {
-        const percent = this.x / this.maxX;
-        const completedOpacity = Math.pow(percent, 4);
+      TweenMax.set($control, { x: 0 });
+      TweenMax.set($text, { opacity: 1 });
+      TweenMax.set($completedOverlay, { opacity: 0 });
+      TweenMax.set($completedArrow, { opacity: 0 });
 
-        $text.style.opacity = 1 - percent * 1.5;
-        $completedOverlay.style.opacity = completedOpacity;
-        $completedArrow.style.opacity = completedOpacity;
-      },
-      onDragEnd() {
-        const isSlideCompleted = this.x > this.maxX * 0.9;
-        const destinationX = isSlideCompleted ? this.maxX : 0;
-        const toCompleteOpacity = isSlideCompleted ? 0 : 1;
-        const completedOpacity = isSlideCompleted ? 1 : 0;
-        const ease = isSlideCompleted ? 'power1.out' : 'back.out(1.05)';
+      [drag] = Draggable.create($control, {
+        bounds: { minX: 0, maxX: slidingWidth },
+        type: 'x',
+        onDrag() {
+          const percent = this.x / this.maxX;
+          const completedOpacity = Math.pow(percent, 4);
 
-        TweenMax.to(this.target, 0.3, { x: destinationX, ease: ease });
-        TweenMax.to($text, 0.2, { opacity: toCompleteOpacity });
-        TweenMax.to($completedOverlay, 0.2, { opacity: completedOpacity });
-        TweenMax.to($completedArrow, 0.2, { opacity: completedOpacity });
+          $text.style.opacity = 1 - percent * 1.5;
+          $completedOverlay.style.opacity = completedOpacity;
+          $completedArrow.style.opacity = completedOpacity;
+        },
+        onDragEnd() {
+          const isSlideCompleted = this.x > this.maxX * 0.9;
+          const destinationX = isSlideCompleted ? this.maxX : 0;
+          const toCompleteOpacity = isSlideCompleted ? 0 : 1;
+          const completedOpacity = isSlideCompleted ? 1 : 0;
+          const ease = isSlideCompleted ? 'power1.out' : 'back.out(1.05)';
 
-        if (isSlideCompleted) {
-          drag.disable();
-          setTimeout(() => {
-            window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
-          }, 300);
+          TweenMax.to(this.target, 0.3, { x: destinationX, ease: ease });
+          TweenMax.to($text, 0.2, { opacity: toCompleteOpacity });
+          TweenMax.to($completedOverlay, 0.2, { opacity: completedOpacity });
+          TweenMax.to($completedArrow, 0.2, { opacity: completedOpacity });
+
+          if (isSlideCompleted) {
+            drag.disable();
+            setTimeout(() => {
+              window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
+            }, 300);
+          }
         }
-      }
+      });
     });
   }
 
-  // Call setup on page load and when screen resizes
   window.addEventListener('load', () => {
     setColors();
     setupDraggable();
@@ -296,3 +298,4 @@
     setupDraggable();
   });
 </script>
+
