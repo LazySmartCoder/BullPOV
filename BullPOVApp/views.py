@@ -7,8 +7,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 import smtplib
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta
 from email.mime.text import MIMEText
+from django.utils import timezone
+from datetime import timedelta
 import random
 from .emailTemplates import *
 import locale
@@ -20,7 +21,6 @@ from datetime import date
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-
 from django.shortcuts import HttpResponse
 from django.db import connections, transaction
 import sqlite3
@@ -317,8 +317,10 @@ def signout(request):
     return redirect("HomePage")
         
 def userVerification(request):
-    if (datetime.now() - request.user.date_joined >= timedelta(minutes=5)) and (UserDetail.objects.get(User = request.user).VerifiedAccount == False):
-        UserDetail.objects.get(User = request.user).delete()
+    if (timezone.now() - request.user.date_joined >= timedelta(minutes=5)) and (UserDetail.objects.get(User=request.user).VerifiedAccount == False):
+        request.user.delete()
+        messages.success(request, "OTP Expired. SignUP again.")
+        return redirect("HomePage")
     return render(request, "user-verification.html")
 
 def verifyUser(request):
