@@ -352,7 +352,15 @@ def verifyUser(request):
             userdet = UserDetail.objects.get(User = request.user)
             userdet.VerifiedAccount = True
             userdet.save()
-            sendEmail("no-reply@bullpov.com", request.user.email, "Welcome to BullPOV!!", normal_text_templates(request.user.first_name, "Welcome aboard! We’re excited to have you at BullPOV, where we bring you the best content on stock market insights 📈, educational resources 🎓, and a seamless experience tailored just for you. To get started, explore the platform and discover curated content just for you. If you have any questions or feedback, feel free to reach out us at support@bullpov.com, we’re always here to help. Let’s grow together."))
+            sendEmail("no-reply@bullpov.com", request.user.email, "Welcome to BullPOV!!", normal_text_templates(request.user.first_name, """Welcome to BullPOV, India’s first skill-based stock trend prediction platform!<br>
+We’re excited to have you on board.<br>
+Here, you can study real market data, predict tomorrow’s stock trends, and win real money based on your skills. No luck, no gambling, just your knowledge and smart thinking.
+<br>Start spotting trends after 4:30 PM                                                                                                         
+<br>Predict Up or Down before 9:00 AM                                                                                                    
+<br>Get results by 4:30 PM next day                                                                                                 
+<br>Learn. Play. Earn.<br>
+Let’s turn your market instinct into real rewards.
+<br>Happy Trading!"""))
             messages.success(request, "Your account has been successfully verified.")
         else:
             messages.warning(request, "Invalid OTP. Please try again.")
@@ -465,7 +473,7 @@ def hitOrder(request, stock):
             share.save()
         initTrade = Trade(TradeID = Trade.objects.all().count(), Trader = request.user, Stock = share, Amount = amt, DateTime = datetime.now(), Prediction = predict, ActiveStatus = True, Receipt = f"{request.user.username}-{Trade.objects.all().count()}")
         generate_bill_pdf(amt, request.user.username, request.user.first_name, Trade.objects.all().count(), request.user.email, datetime.now().date(), share.Symbol, str(stock).split("-")[1])
-        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, f"Your order has been successfully placed! <br><br>Stock: {share.Name}<br>Amount: ₹{amt}<br>Trade Receipt:- https://bullpov.com/assets/Receipts/{request.user.username}-{Trade.objects.all().count()}<br><br>Now sit back and hold tight, results will be declared soon. <br>We wish you the best of luck!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, f"{str(stock).split("-")[0]} trade placed on BullPOV!!", normal_text_templates(request.user.first_name, f"Your order has been successfully placed! <br><br>Stock: {share.Name}<br>Amount: ₹{amt}<br>Trade Receipt:- https://bullpov.com/assets/Receipts/{request.user.username}-{Trade.objects.all().count()}.pdf<br><br>Now sit back and hold tight, results will be declared soon. <br>We wish you the best of luck!"))
         initTrade.save()
         return redirect(f"/trade-details/{share.Symbol}/{Trade.objects.get(Trader = request.user, Stock = share, ActiveStatus = True).TradeID}")
 # calculations and hit orders ends    
@@ -529,7 +537,7 @@ def updateProfile(request):
                 cotp = random.randint(1000, 9999)
                 userdet.OTPEmail = cotp
                 userdet.save()
-                sendEmail("no-reply@bullpov.com", email, "Verify your new email address to complete the update", normal_text_templates(request.user.first_name, f"You recently requested to update your email address on BullPOV. To confirm this change and keep your account secure, please verify your new email by clicking the link below:<br>https://bullpov.com/change-email/{email}-{cotp} <br>Thanks for helping us keep your account safe."))
+                sendEmail("no-reply@bullpov.com", email, "Verify your new email address to complete the update", normal_text_templates(request.user.first_name, f"You recently requested to update your email address on BullPOV. To confirm this change and keep your account secure, please verify your new email by clicking the link below:<br>https://bullpov.com/change-email/{email}-{cotp} <br><br>Thanks for helping us keep your account safe."))
                 messages.success(request, "Email Address change pending. Complete verification to proceed.")
             userdet.PhoneNumber = phone
             userdet.Address = address
@@ -551,7 +559,7 @@ def changeEmail(request, verify):
     if userdet.OTPEmail == str(verify).split("-")[1]:
         user.email = str(verify).split("-")[0]
         user.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Your email has been successfully updated", normal_text_templates(request.user.first_name, f"We wanted to let you know that the email address linked to your BullPOV account has been successfully updated. <br>New Email: {str(verify).split("-")[0]} <br>If you made this change, you're all set! Thanks for being a part of BullPOV."))
+        sendEmail("no-reply@bullpov.com", request.user.email, "Your email has been successfully updated", normal_text_templates(request.user.first_name, f"We wanted to let you know that the email address linked to your BullPOV account has been successfully updated. <br><br>New Email: {str(verify).split("-")[0]} <br><br>If you made this change, you're all set! Thanks for being a part of BullPOV."))
         messages.success(request, "Email Address has been changed.")
     else:
         messages.warning(request, "Email Address Updation Failed.")
@@ -775,7 +783,7 @@ def addMoney(request):
         userdet = UserDetail.objects.get(User = request.user)
         userdet.WalletBalance = userdet.WalletBalance + amt
         userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
         messages.success(request, "Money Deposited.")
         return redirect("Wallet")
 
@@ -788,7 +796,7 @@ def withdrawMoney(request):
             return redirect("Wallet")
         userdet.WalletBalance = userdet.WalletBalance - amt
         userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
+        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br><br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
         messages.success(request, "Money Withdrawn.")
         return redirect("Wallet")
 # wallet functions ends

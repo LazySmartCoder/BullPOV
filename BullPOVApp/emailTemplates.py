@@ -35,7 +35,7 @@ def otp_verification_template(name, otp):
                     <tr>
                         <td class="container" style="padding: 40px;">
                         <p style="font-size: 18px; line-height: 1.6;">
-                            Namaste {}!
+                            Namaste {},
                         </p>
                         <p style="font-size: 16px; line-height: 1.6;">
                             Welcome to BullPOV!
@@ -110,7 +110,7 @@ def normal_text_templates(name, text):
                     <tr>
                         <td class="container" style="padding: 40px;">
                         <p style="font-size: 18px; line-height: 1.6;">
-                            Namaste {}
+                            Namaste {},
                         </p>
                         <p style="font-size: 16px; line-height: 1.6;">
                             {}
