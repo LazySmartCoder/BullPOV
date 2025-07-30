@@ -455,16 +455,6 @@ def hitOrder(request, stock):
         user.WalletBalance = user.WalletBalance - amt
         user.InvestedBalance = user.InvestedBalance + amt
         user.save()
-        # up party data
-        totalAmtup = 0
-        retrieve_up = Trade.objects.filter(Stock = share, Prediction = True, ActiveStatus = True)
-        for i in retrieve_up:
-            totalAmtup += i.Amount
-        # down party data
-        totalAmtdown = 0
-        retrieve_down = Trade.objects.filter(Stock = share, Prediction = False, ActiveStatus = True)
-        for i in retrieve_down:
-            totalAmtdown += i.Amount
         if predict == True:
             share.UPUsers = share.UPUsers + 1
             share.save()
