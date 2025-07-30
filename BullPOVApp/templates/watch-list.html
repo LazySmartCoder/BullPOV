@@ -5,46 +5,55 @@
 {% block body %}
 
 <section id="cart" class="cart section">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
+        <div class="cart-items">
+          {% if watch %}
+          <h1 style="font-family: inherit">Your Watchlist</h1>
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row">
-          <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
-            <div class="cart-items">
-                {% if watch %}
-                <h1 style="font-family: inherit">Your Watch List</h1>
-              {% for stock in watch|slice:"::-1" %}
-              <!-- Cart Item 3 -->
-              <div class="cart-item">
-                <div class="row align-items-center">
-                  <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
-                    <div class="product-info d-flex align-items-center">
-                      <div class="product-image">
-                        <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" class="img-fluid" loading="lazy">
-                      </div>
-                      <a href="/stock-preview/{{stock.Symbol}}">
-                        <div class="product-details">
-                        <h6 class="product-title">{{stock.Symbol}}</h6>
-                        <div class="product-meta">
-                          <span class="product-color">Price: ₹{{stock.CurrentPrice|comma}}</span>
-                          <span class="product-size">MktkCap: {{stock.MktCap|crores}}</span>
-                        </div>
-                    </a>
-                        <button onclick="window.location.href='/remove-watch-list/{{stock.Symbol}}'" class="remove-item" type="button" style="color: red;">
-                          <i class="bi bi-check2-circle"></i> Remove Stock
-                        </button>
-                      </div>
-                    </div>
+          {% for stock in watch|slice:"::-1" %}
+          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #f9f9f9; border: 1px solid #e0e0e0;">
+            <div class="row align-items-center">
+              <div class="col-lg-6 col-12">
+                <div class="product-info d-flex align-items-center">
+                  <div class="product-image me-3">
+                    {% img stock.Symbol as image_exists %}
+                    {% if image_exists %}
+                      <img style="width: 50px; border-radius: 10px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="{{stock.Symbol}}">
+                    {% else %}
+                      <img style="width: 50px; border-radius: 10px;" src="{{stock.Logo}}" alt="{{stock.Symbol}}">
+                    {% endif %}
                   </div>
+
+                  <a href="/stock-preview/{{stock.Symbol}}" class="text-decoration-none w-100">
+                    <div class="product-details">
+                      <h6 class="product-title mb-1">{{stock.Symbol}}</h6>
+                      <div class="product-meta">
+                        <span class="product-color d-block">
+                          <span>Price: ₹{{stock.CurrentPrice|comma}} &nbsp;</span>
+                          <span>MktCap: {{stock.MktCap|crores}}</span>
+                      </div>
+
+                      <button class="remove-item mt-2 btn btn-sm btn-outline-success" type="button" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/remove-watch-list/{{stock.Symbol}}'">
+                        <span style="color: red; margin-top: -20px;"><i class="bi bi-trash"></i> Remove Stock</span>
+                      </button>
+
+                    </div>
+                  </a>
                 </div>
-              </div><!-- End Cart Item -->
-              
-              {% endfor %}
-              {% else %}
-              <h1 style="text-align: center; font-family: inherit;">No stocks in Watch List. Add now!!</h1>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+              <h1 style="text-align: center; font-family: inherit; color: black;">No stocks in Watch List. <a href="/explore">Explore Now!</a></h1>
               {% endif %}
 
+        </div>
       </div>
-
-    </section>
+    </div>
+  </div>
+</section>
 
 {% endblock %}

@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 import smtplib
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 import random
 from .emailTemplates import *
@@ -24,33 +25,6 @@ from django.shortcuts import HttpResponse
 from django.db import connections, transaction
 import sqlite3
 from pathlib import Path
-
-def neon(request):
-    # Path to your SQLite database
-    sqlite_db_path = Path(__file__).resolve().parent.parent / "db.sqlite3"
-
-    # Connect to SQLite using sqlite3 module
-    sqlite_conn = sqlite3.connect(sqlite_db_path)
-    sqlite_cursor = sqlite_conn.cursor()
-
-    # Get data from SQLite
-    sqlite_cursor.execute("SELECT * FROM BullPOVApp_trade;")
-    rows = sqlite_cursor.fetchall()
-    columns = [col[0] for col in sqlite_cursor.description]
-
-    # Insert data into Neon (PostgreSQL, your default DB)
-    with transaction.atomic():
-        for row in rows:
-            data = dict(zip(columns, row))
-
-            # Optional: Exclude 'id' if it's auto-incremented in PostgreSQL
-            data.pop('id', None)
-
-            Trade.objects.create(**data)
-
-    sqlite_conn.close()
-
-    return HttpResponse("✅ Data migrated from SQLite file to Neon DB.")
 
 # Some important functions and variables
 site_url = "localhost:8000"
@@ -343,6 +317,8 @@ def signout(request):
     return redirect("HomePage")
         
 def userVerification(request):
+    if (datetime.now() - request.user.date_joined >= timedelta(minutes=5)) and (UserDetail.objects.get(User = request.user).VerifiedAccount == False):
+        UserDetail.objects.get(User = request.user).delete()
     return render(request, "user-verification.html")
 
 def verifyUser(request):
@@ -816,3 +792,9 @@ def explore(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
     return render(request, "explore.html", {'page_obj': page_obj})
+
+def tac(request):
+    return render(request, "tac.html")
+
+def privacyPolicy(request):
+    return render(request, "privacy-policy.html")

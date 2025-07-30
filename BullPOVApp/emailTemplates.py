@@ -45,7 +45,7 @@ def otp_verification_template(name, otp):
                             {}
                         </div>
                         <p style="font-size: 14px; color: #555;">
-                            This code is valid for only 10 minutes.
+                            This code is valid for only 5 minutes.
                             Please do not share it with anyone.
                             Thanks for joining us!
                         </p>
