@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from .models import *
 from django.contrib import messages
 from django.db.models import Q
+from django.views.decorators.http import require_POST
+from django.utils.encoding import force_str
 import string
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
@@ -27,6 +29,10 @@ from django.db import connections, transaction
 import sqlite3
 from pathlib import Path
 from cashfree_pg.api_client import Cashfree
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponseForbidden
+import hmac, hashlib, json
+from django.conf import settings
 
 # Some important functions and variables
 site_url = "localhost:8000"
@@ -740,81 +746,67 @@ def wallet(request):
     if request.user.is_authenticated == False:
         messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
-    
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
 
-Cashfree.XClientId = '1032514dc2c30325fe7444306234152301'
-Cashfree.XClientSecret = 'cfsk_ma_prod_96165f356ad185da70efc4d959eb5375_75b7f4a3'
-Cashfree.XEnvironment = Cashfree.PRODUCTION
-BASE_URL = "https://api.cashfree.com/pg"
 def addMoney(request):
+    # if request.method == "POST":
+    #     amt = float(request.POST["amount"])
+    #     if amt > 10000:
+    #         messages.warning(request, "Max Deposit Limit is ₹10,000/-")
+    #         return redirect("Wallet")
+    #     userdet = UserDetail.objects.get(User = request.user)
+    #     userdet.WalletBalance = userdet.WalletBalance + amt
+    #     userdet.save()
+    #     sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+    #     messages.success(request, "Money Deposited.")
+    ctxn = WalletTxn(User = request.user)
+    ctxn.LoggedINEmail = request.user.email
+    ctxn.save()
+    return redirect("https://payments.cashfree.com/forms?code=BullPOV")
+
+@csrf_exempt
+@require_POST
+def cashfree_webhook(request):
     if request.method == "POST":
-        amt = float(request.POST["amount"])
-        if amt > 10000:
-            messages.warning(request, "Max Deposit Limit is ₹10,000/-")
-            return redirect("Wallet")
-        data = {
-            "link_id": "order123",
-            "link_amount": float(amt),
-            "link_currency": "INR",
-            "link_purpose": "Test Order",
-            "customer_details": {
-                "customer_name": request.user.username,
-                "customer_email": request.user.email,
-                "customer_phone": "6355853038"
-            },
-            "link_meta": {
-                "return_url": "https://bullpov.com/payment/return/"
-            }
-        }
+        try:
+            payload = json.loads(request.body)
+            
+            data = payload.get("data", {})
+            order = data.get("order", {})
 
-        headers = {
-            "Content-Type": "application/json",
-            "x-api-version": "2025-01-01",
-            "x-client-id": Cashfree.XClientId,
-            "x-client-secret": Cashfree.XClientSecret
-        }
+            customer_details = order.get("customer_details", {})
+            customer_name = customer_details.get("customer_name")
+            customer_email = customer_details.get("customer_email")
+            customer_phone = customer_details.get("customer_phone")
+            order_id = order.get("order_id")
+            order_amount = order.get("order_amount")
+            payment_status = order.get("order_status")
+            txn = WalletTxn.objects.filter(LoggedINEmail = customer_email).last()
 
-        response = requests.post(BASE_URL + "/links", json=data, headers=headers)
-        response_data = response.json()
+            user = User.objects.get(email = customer_email)
+            if payment_status == "PAID":
+                if txn.LoggedINEmail == customer_email:
+                    userdet = UserDetail.objects.get(User = user)
+                    userdet.WalletBalance = userdet.WalletBalance + float(order_amount)
+                    userdet.save()
+                    txn.Amount = order_amount
+                    txn.Action = True
+                    txn.OrderID = order_id
+                    txn.TxnID = payload['data']['order']['transaction_id']
+                    txn.Status = "SUCCESS"
+                    sendEmail("no-reply@bullpov.com", user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{order_amount}<br>Current Balance: ₹{float(round(int(userdet.WalletBalance), 2))}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+                else:
+                    sendEmail("no-reply@bullpov.com", user.email, "Refund Initiated for Your Recent Transaction", normal_text_templates(user.first_name, f"We noticed a mismatch in your recent transaction with us. Please don’t worry, we've already initiated a refund for the full amount you paid. The refund should reflect in your bank account or original payment method within 5–7 business days, depending on your bank or payment provider. <br>If you have any questions or need further assistance, feel free to reply to this email or reach out to our support team."))
+            else:
+                return JsonResponse({"message": "Payment not successful"}, status=400)
 
-        link_url = response_data.get("link_url")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-        if link_url:
-            return redirect(link_url)
-        else:
-            return JsonResponse({
-                "success": False,
-                "message": "Payment link creation failed",
-                "error": response_data
-            })
-        # userdet = UserDetail.objects.get(User = request.user)
-        # userdet.WalletBalance = userdet.WalletBalance + amt
-        # userdet.save()
-        # sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
-        # messages.success(request, "Money Deposited.")
-        # return redirect("Wallet")
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
-def payment_return(request):
-    # Cashfree will redirect here; you receive query params like link_id
-    link_id = request.GET.get('link_id')
-    # now get link details
-    url = Cashfree.XEnvironment.gateway + f"/pg/links/{link_id}"
-    headers = {
-      "x-api-version": "2025-01-01",
-      "x-client-id": Cashfree.XClientId,
-      "x-client-secret": Cashfree.XClientSecret
-    }
-    import requests
-    resp = requests.get(url, headers=headers)
-    info = resp.json()
-    status = info.get("link_status")
-    amount_paid = info.get("link_amount_paid")
-    if status == "PAID" or amount_paid >= info.get("link_amount"):
-        return HttpResponse("Payment Done")
-    else:
-        return HttpResponse("Payment Failed")
+
 
 def withdrawMoney(request):
     if request.method == "POST":
@@ -823,10 +815,8 @@ def withdrawMoney(request):
         if amt > userdet.WalletBalance:
             messages.warning(request, "Insufficient balance.")
             return redirect("Wallet")
-        userdet.WalletBalance = userdet.WalletBalance - amt
-        userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br><br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
-        messages.success(request, "Money Withdrawn.")
+        sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Processed!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully processed, and the amount is on its way to your linked account. <br><br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{float(round(int(userdet.WalletBalance), 2))}<br><br>Expected Credit Time: 1–3 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
+        messages.success(request, "Withdrawal Request Successfully Processed")
         return redirect("Wallet")
 # wallet functions ends
 

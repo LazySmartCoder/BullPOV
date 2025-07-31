@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-gh=cu)#0tepx^c8r73_4l5)xxa0bqq(27cqfzlguglrmh$r%)_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "bullpov.com", "www.bullpov.com", "beta.bullpov.com", ".onrender.com"]
+ALLOWED_HOSTS = ["localhost", "bullpov.com", "www.bullpov.com", "beta.bullpov.com", ".onrender.com", "f859c104c034.ngrok-free.app"]
 
 
 # Application definition
@@ -63,10 +63,10 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'BullPOVApp.context_processors.globalWatchlist',
             ],
         },
     },

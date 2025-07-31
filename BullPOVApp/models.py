@@ -84,3 +84,15 @@ class Samachaar(models.Model):
 
     def __str__(self):
         return f"{self.Name} | {self.Source}"
+
+class WalletTxn(models.Model):
+    User = models.ForeignKey(User, related_name="TxnDetails", on_delete=models.CASCADE)
+    Amount = models.FloatField(default=0)
+    Action = models.BooleanField(default=False) # True for deposit, and False for withdrawal
+    LoggedINEmail = models.CharField(default="")
+    OrderID = models.CharField(default="")
+    TxnID = models.CharField(default="")
+    Status = models.CharField(default="")
+
+    def __str__(self):
+        return f"{self.User.username} | {self.Amount} | {self.Action}"

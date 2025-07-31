@@ -1,28 +1,21 @@
 import requests
-import random
 
-def send_whatsapp_otp_via_fast2sms(phone_number, api_url):
-    """
-    phone_number: str, including country code (e.g., '919812345678')
-    api_url: base API URL from Fast2SMS with placeholders for OTP and number
-    """
-    otp = str(random.randint(100000, 999999))
-    url = api_url.format(phone_number=phone_number, otp=otp)
+url = "https://api.cashfree.com/pg/links"
 
-    resp = requests.get(url)
-    print("Status code:", resp.status_code)
-    print("Response:", resp.text)
-    return otp
+payload = {
+    "link_amount": 9,
+    "customer_details": { "customer_phone": "6355853038" },
+    "link_currency": "INR",
+    "link_purpose": "fees",
+    "link_id": "hi7"
+}
+headers = {
+    "x-client-id": "1032514dc2c30325fe7444306234152301",
+    "x-client-secret": "cfsk_ma_prod_5976d2eeb14ad82fc05be1f5ba5280b3_286c1636",
+    "x-api-version": "2025-01-01",
+    "Content-Type": "application/json"
+}
 
-# Example usage:
-# Replace api_url with the one Fast2SMS provides (example format shown)
-api_url = (
-    "https://fast2sms.com/whatsapp/otp?"
-    "apikey=fVj1IFml7HnhyO9NcYqCaQLziRbodZkUXx2P8w6gMvTS40puWDVOutxaWR9pHvJerk7D5hCgyqB4KfIb&"
-    "mobile_number={phone_number}&"
-    "message_id=YOUR_TEMPLATE_ID&"
-    "variables_values={otp}"
-)
+response = requests.post(url, json=payload, headers=headers)
 
-sent_otp = send_whatsapp_otp_via_fast2sms("+916355853038", api_url)
-print("OTP sent:", sent_otp)
+print(response.json())

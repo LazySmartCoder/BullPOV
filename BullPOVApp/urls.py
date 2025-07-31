@@ -41,7 +41,6 @@ urlpatterns = [
     path("add-watch-list/<str:stock>", addWatchList, name = "AddWatchList"),
     path("wallet", wallet, name = "Wallet"),
     path("add-money", addMoney, name = "AddMoney"),
-    path('payment/return/', payment_return, name='payment_return'),
     path("withdraw-money", withdrawMoney, name = "WithdrawMoney"),
     path("download-app", downloadApp, name = "DownloadApp"),
     path("e-learning", eLearning, name = "eLearning"),
@@ -51,4 +50,5 @@ urlpatterns = [
     path("explore", explore, name = "Explore"),
     path("tac", tac, name = "Tac"),
     path("privacy-policy", privacyPolicy, name = "PrivacyPolicy"),
+    path("payment/webhook/", cashfree_webhook, name = "cashfree_webhook"),
 ]

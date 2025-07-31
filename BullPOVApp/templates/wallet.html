@@ -12,11 +12,11 @@
               <div class="login-header text-center">
                 <h2>Your Wallet</h2>
                 <p>You can modify your bank details. This is your wallet.</p>
-                <h3>Liquid Balance: ₹{{user.WalletBalance|comma}}</h3>
+                <h3>Current Balance: ₹{{user.WalletBalance|comma}}</h3>
                 <h3>Invested Amount: ₹{{user.InvestedBalance|comma}}</h3>
               </div>
 <div class="cart-btn-group">
-              <button data-bs-toggle="modal" data-bs-target="#addmoney" type="button" class="cart-btn green-btn">Deposit</button>
+              <button onclick="window.location.href='/add-money'" type="button" class="cart-btn green-btn">Deposit</button>
               <button data-bs-toggle="modal" data-bs-target="#withdraw" type="button" class="cart-btn red-btn">Withdraw</button>
 </div>
 <style>
@@ -113,5 +113,5 @@
     </div>
   </div>
 </div>
-
+<button onclick="initiateCheckout()">Initiate Checkout</button>
 {% endblock %}
