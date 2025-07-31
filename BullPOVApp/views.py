@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from .models import *
 from django.contrib import messages
 from django.db.models import Q
@@ -25,6 +26,7 @@ from django.shortcuts import HttpResponse
 from django.db import connections, transaction
 import sqlite3
 from pathlib import Path
+from cashfree_pg.api_client import Cashfree
 
 # Some important functions and variables
 site_url = "localhost:8000"
@@ -742,18 +744,77 @@ def wallet(request):
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
 
+Cashfree.XClientId = '1032514dc2c30325fe7444306234152301'
+Cashfree.XClientSecret = 'cfsk_ma_prod_96165f356ad185da70efc4d959eb5375_75b7f4a3'
+Cashfree.XEnvironment = Cashfree.PRODUCTION
+BASE_URL = "https://api.cashfree.com/pg"
 def addMoney(request):
     if request.method == "POST":
         amt = float(request.POST["amount"])
         if amt > 10000:
             messages.warning(request, "Max Deposit Limit is ₹10,000/-")
             return redirect("Wallet")
-        userdet = UserDetail.objects.get(User = request.user)
-        userdet.WalletBalance = userdet.WalletBalance + amt
-        userdet.save()
-        sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
-        messages.success(request, "Money Deposited.")
-        return redirect("Wallet")
+        data = {
+            "link_id": "order123",
+            "link_amount": float(amt),
+            "link_currency": "INR",
+            "link_purpose": "Test Order",
+            "customer_details": {
+                "customer_name": request.user.username,
+                "customer_email": request.user.email,
+                "customer_phone": "6355853038"
+            },
+            "link_meta": {
+                "return_url": "https://bullpov.com/payment/return/"
+            }
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "x-api-version": "2025-01-01",
+            "x-client-id": Cashfree.XClientId,
+            "x-client-secret": Cashfree.XClientSecret
+        }
+
+        response = requests.post(BASE_URL + "/links", json=data, headers=headers)
+        response_data = response.json()
+
+        link_url = response_data.get("link_url")
+
+        if link_url:
+            return redirect(link_url)
+        else:
+            return JsonResponse({
+                "success": False,
+                "message": "Payment link creation failed",
+                "error": response_data
+            })
+        # userdet = UserDetail.objects.get(User = request.user)
+        # userdet.WalletBalance = userdet.WalletBalance + amt
+        # userdet.save()
+        # sendEmail("no-reply@bullpov.com", request.user.email, "Money Successfully Deposited to Your BullPOV Account!", normal_text_templates(request.user.first_name, f"Great news! Your deposit has been successfully credited to your BullPOV wallet. <br><br>Deposited Amount: ₹{amt}<br>Current Balance: ₹{round(int(userdet.WalletBalance), 2)}<br><br>You can now use this amount to place trades on BullPOV. Happy Trading!"))
+        # messages.success(request, "Money Deposited.")
+        # return redirect("Wallet")
+
+def payment_return(request):
+    # Cashfree will redirect here; you receive query params like link_id
+    link_id = request.GET.get('link_id')
+    # now get link details
+    url = Cashfree.XEnvironment.gateway + f"/pg/links/{link_id}"
+    headers = {
+      "x-api-version": "2025-01-01",
+      "x-client-id": Cashfree.XClientId,
+      "x-client-secret": Cashfree.XClientSecret
+    }
+    import requests
+    resp = requests.get(url, headers=headers)
+    info = resp.json()
+    status = info.get("link_status")
+    amount_paid = info.get("link_amount_paid")
+    if status == "PAID" or amount_paid >= info.get("link_amount"):
+        return HttpResponse("Payment Done")
+    else:
+        return HttpResponse("Payment Failed")
 
 def withdrawMoney(request):
     if request.method == "POST":
