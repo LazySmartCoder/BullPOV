@@ -1000,28 +1000,29 @@ def walletTxnHistory(request):
         page_txn = paginator.page(paginator.num_pages)
     return render(request, "txn-history.html", {"txn" : page_txn})
 
-def refundTxn(request, oid):
-    txn = WalletTxn.objects.get(OrderID = oid)
-    is_within_5_min = (datetime.now() - txn.DateTime) <= timedelta(minutes=5)
-    if is_within_5_min == False:
-        return redirect("HomePage")
-    url = f"https://api.cashfree.com/pg/orders/{oid}"
+# def refundTxn(request, oid):
+#     txn = WalletTxn.objects.get(OrderID = oid)
+#     txn_time = timezone.make_aware(datetime.fromisoformat(txn.DateTime))
+#     is_within_5_min = (timezone.now() - txn_time) <= timedelta(minutes=5)
+#     if not is_within_5_min:
+#         return redirect("HomePage")
+#     url = f"https://api.cashfree.com/pg/orders/{oid}"
 
-    payload = {
-        "refund_amount": txn.Amount,
-        "refund_id": str(random.randint(100000, 999999))
-    }
-    headers = {
-        "x-client-id": "1032514dc2c30325fe7444306234152301",
-        "x-client-secret": "cfsk_ma_prod_c7c76f38c9ef7134f84ba1df857e0874_e16973e8",
-        "x-api-version": "2025-01-01",
-        "Content-Type": "application/json"
-    }
-    ctxn = WalletTxn(ID = WalletTxn.objects.all().count(), User = txn.User, Amount = txn.Amount, Action = False, OrderID = str(random.randint(100000, 999999)), TxnID = str(random.randint(100000, 999999)), Status = "SUCCESS", DateTime = datetime.now())
-    ctxn.save()
-    response = requests.post(url, json=payload, headers=headers)
-    messages.success(request, f"Refund of ₹{txn.Amount} initiated")
-    return redirect("Wallet")
+#     payload = {
+#         "refund_amount": txn.Amount,
+#         "refund_id": str(random.randint(100000, 999999))
+#     }
+#     headers = {
+#         "x-client-id": "1032514dc2c30325fe7444306234152301",
+#         "x-client-secret": "cfsk_ma_prod_c7c76f38c9ef7134f84ba1df857e0874_e16973e8",
+#         "x-api-version": "2025-01-01",
+#         "Content-Type": "application/json"
+#     }
+#     ctxn = WalletTxn(ID = WalletTxn.objects.all().count(), User = txn.User, Amount = txn.Amount, Action = False, OrderID = str(random.randint(100000, 999999)), TxnID = str(random.randint(100000, 999999)), Status = "SUCCESS", DateTime = datetime.now())
+#     ctxn.save()
+#     response = requests.post(url, json=payload, headers=headers)
+#     messages.success(request, f"Refund of ₹{txn.Amount} initiated")
+#     return redirect("Wallet")
 # wallet functions ends
 
 def downloadApp(request):

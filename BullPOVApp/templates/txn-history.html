@@ -51,13 +51,9 @@
                       <button class="remove-item mt-2 btn btn-sm btn-outline-success" type="button" onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/txn-receipt/{{t.ID}}'">
                         <span style="color: green; margin-top: -20px;"><i class="bi bi-receipt"></i> Download Receipt</span> &nbsp;
                       </button>
-                      {% if t.Action %}
-                      <button id="refund-btn-{{t.ID}}" class="remove-item mt-2 btn btn-sm btn-outline-success"
-        style="display: none;" type="button"
-        onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/refund-txn/{{t.OrderID}}'">
-  <span style="color: red;"><i class="bi bi-arrow-clockwise"></i> Refund</span>
-</button>
-{% endif %}
+                      <!-- <button id="refundBtn" class="remove-item mt-2 btn btn-sm btn-outline-success" type="button" onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/refund-txn/{{t.OrderID}}'">
+                        <span style="color: red; margin-top: -20px;"><i class="bi bi-arrow-clockwise"></i> Refund</span>
+                        </button> -->
 
                     </div>
                   </a>
@@ -65,23 +61,23 @@
               </div>
             </div>
           </div>
-          <script>
-  // Replace this with the actual time from your backend in ISO format
-  const txnTime = new Date("{{ t.DateTime|date:'Y-m-d H:i:s' }}"); // example: 2025-08-02 15:30:00
+<!-- <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const txnTimeStr = "{{ t.DateTime }}"; // "2025-08-02 17:20:43.709915"
+    
+    // Convert to a format that JS can parse — replace space with 'T' and remove microseconds
+    const safeStr = txnTimeStr.split('.')[0].replace(' ', 'T');
+    const txnTime = new Date(safeStr);
+    const now = new Date();
 
-  // Get current time
-  const now = new Date();
+    const diffMs = now - txnTime;
+    const diffMinutes = diffMs / (1000 * 60);
 
-  // Calculate difference in milliseconds
-  const diff = now - txnTime;
-
-  // If the time difference is less than 5 minutes (300000 ms), show the button
-  if (diff <= 5 * 60 * 1000) {
-    document.getElementById("refund-btn-{{t.ID}}").style.display = "inline-block";
-  } else {
-    document.getElementById("refund-btn-{{t.ID}}").style.display = "none";
-  }
-</script>
+    if (diffMinutes > 5) {
+      document.getElementById('refundBtn').style.display = 'none';
+    }
+  });
+</script> -->
           {% endfor %}
 
         </div>
