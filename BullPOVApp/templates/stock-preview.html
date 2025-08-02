@@ -199,11 +199,11 @@
 
               <div class="cart-btn-group">
   {% if request.user.is_authenticated %}
-  <button type="button" data-bs-toggle="modal" data-bs-target="#up" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
-  <button type="button" data-bs-toggle="modal" data-bs-target="#down" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
+  <button type="button" data-bs-toggle="modal" data-bs-target="#up" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}x</button>
+  <button type="button" data-bs-toggle="modal" data-bs-target="#down" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}x</button>
   {% else %}
-  <button type="button" onclick="window.location.href='/signin'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
-  <button type="button" onclick="window.location.href='/signin'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}x</button>
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}x</button>
   {% endif %}
 </div>
 <style>
@@ -243,7 +243,7 @@
 
 <br>  
 {% if request.user.is_authenticated %}
-<button type="button" onclick="window.location.href='/add-watch-list/{{stock.Symbol}}'" class="cart-btn red-btn" style="width: 100%; background-color: black;">Add to Watchlist</button>
+<button type="button" onclick="window.location.href='/add-watch-list/{{stock.Symbol}}'" class="cart-btn red-btn" style="width: 100%; background-color: black; margin-top: -20px;">Add to Watchlist</button>
 {% endif %}
           </div>
 

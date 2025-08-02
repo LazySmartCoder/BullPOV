@@ -769,6 +769,9 @@ def stockPreview(request, symbol):
         totalamtup += i.Amount
     trades = Trade.objects.filter(Stock = stock, Prediction = False, ActiveStatus = True)
     totalamtdown = 0
+    def percentage_to_multiplier(percent):
+        multiplier = (percent / 100) + 1
+        return round(multiplier, 2)
     for i in trades:
         totalamtdown += i.Amount
     if (stock.CurrentPrice - stock.PreviousCloseToday) > 0:
@@ -783,9 +786,9 @@ def stockPreview(request, symbol):
         downPercent = 50
     if request.user.is_authenticated:
         user = UserDetail.objects.get(User = request.user)
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : percentage_to_multiplier(upPercent), "down" : percentage_to_multiplier(downPercent), "totalamt" : totalamtdown + totalamtup})
     else:
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : percentage_to_multiplier(upPercent), "down" : percentage_to_multiplier(downPercent), "totalamt" : totalamtdown + totalamtup})
 
 def categories(request):
     if request.user.is_authenticated == False:
@@ -931,7 +934,7 @@ def create_order(id, amt, phone):
 def addMoney(request):
     if request.method == "POST":
         amt = float(request.POST["amount"])
-        if amt > 10000:
+        if amt + float(UserDetail.objects.get(User = request.user).WalletBalance) > 10000:
             messages.warning(request, "Max Deposit Limit is ₹10,000/-")
             return redirect("Wallet")
         session_id = create_order(id = f"{request.user.username}{random.randint(100000, 999999)}", amt = amt, phone = "6355853038")
@@ -977,24 +980,46 @@ def withdrawMoney(request):
         return redirect("Wallet")
     
 def walletTxnHistory(request):
+    txn = WalletTxn.objects.filter(User = request.user, Action = True, Status = "PENDING")
+    for t in txn:
+        t.Status = "CANCELLED"
+        t.save()
     txn = WalletTxn.objects.filter(User = request.user)
-    return render(request, "txn-history.html", {"txn" : txn})
+    paginator = Paginator(txn, 10)
+    page = request.GET.get('page', '1')
+    try:
+        page_number = int(page)
+        if page_number < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        page_number = 1  # Default to page 1 on error
+
+    try:
+        page_txn = paginator.page(page_number)
+    except EmptyPage:
+        page_txn = paginator.page(paginator.num_pages)
+    return render(request, "txn-history.html", {"txn" : page_txn})
 
 def refundTxn(request, oid):
     txn = WalletTxn.objects.get(OrderID = oid)
-    url = f"https://api.cashfree.com/pg/orders/{oid}/refunds"
+    is_within_5_min = (datetime.now() - txn.DateTime) <= timedelta(minutes=5)
+    if is_within_5_min == False:
+        return redirect("HomePage")
+    url = f"https://api.cashfree.com/pg/orders/{oid}"
+
+    payload = {
+        "refund_amount": txn.Amount,
+        "refund_id": str(random.randint(100000, 999999))
+    }
     headers = {
         "x-client-id": "1032514dc2c30325fe7444306234152301",
-        "x-client-secret": "cfsk_ma_prod_5976d2eeb14ad82fc05be1f5ba5280b3_286c1636",
+        "x-client-secret": "cfsk_ma_prod_c7c76f38c9ef7134f84ba1df857e0874_e16973e8",
         "x-api-version": "2025-01-01",
         "Content-Type": "application/json"
     }
-    payload = {
-        "refund_amount": txn.Amount,
-        "refund_note": "Refund of Deposit",
-        "refund_id": f"refund_{uuid.uuid4().hex[:8]}"
-    }
-    requests.post(url, headers=headers, json=payload)
+    ctxn = WalletTxn(ID = WalletTxn.objects.all().count(), User = txn.User, Amount = txn.Amount, Action = False, OrderID = str(random.randint(100000, 999999)), TxnID = str(random.randint(100000, 999999)), Status = "SUCCESS", DateTime = datetime.now())
+    ctxn.save()
+    response = requests.post(url, json=payload, headers=headers)
     messages.success(request, f"Refund of ₹{txn.Amount} initiated")
     return redirect("Wallet")
 # wallet functions ends

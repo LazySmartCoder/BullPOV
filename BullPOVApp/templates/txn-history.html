@@ -51,11 +51,13 @@
                       <button class="remove-item mt-2 btn btn-sm btn-outline-success" type="button" onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/txn-receipt/{{t.ID}}'">
                         <span style="color: green; margin-top: -20px;"><i class="bi bi-receipt"></i> Download Receipt</span> &nbsp;
                       </button>
+                      {% if t.Action %}
                       <button id="refund-btn-{{t.ID}}" class="remove-item mt-2 btn btn-sm btn-outline-success"
         style="display: none;" type="button"
         onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/refund-txn/{{t.OrderID}}'">
   <span style="color: red;"><i class="bi bi-arrow-clockwise"></i> Refund</span>
 </button>
+{% endif %}
 
                     </div>
                   </a>
@@ -87,5 +89,26 @@
     </div>
   </div>
 </section>
+<section id="blog-pagination" class="blog-pagination section">
+
+      <div class="container">
+        <div class="d-flex justify-content-center">
+          <ul>
+            {% if txn.has_previous %}
+            <li><a>{{ txn.previous_page_number }}</a></li>
+            {% endif %}
+            {% if txn.has_previous %}
+            <li><a href="?page={{ txn.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            <li><a>{{ txn.number }}</a></li>
+            {% if txn.has_next %}
+            <li><a href="?page={{ txn.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+            <li><a>{{ txn.paginator.num_pages }}</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
 
 {% endblock %}
