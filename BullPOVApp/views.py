@@ -52,10 +52,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 import os
 
-def generate_transaction_receipt_pdf(amount, action, order_id, txn_id, status, username, name, email, date):
+def generate_transaction_receipt_pdf(id, amount, action, order_id, txn_id, status, username, name, email, date):
     try:
-        os.makedirs("assets/Receipts", exist_ok=True)
-        filename = f"assets/Receipts/Transaction/{username}-{txn_id}.pdf"
+        filename = f"assets/Receipts/Transaction/{username}-{id}.pdf"
         c = canvas.Canvas(filename, pagesize=A4)
         width, height = A4
 
@@ -83,7 +82,7 @@ def generate_transaction_receipt_pdf(amount, action, order_id, txn_id, status, u
         # Subtitle
         c.setFont("Helvetica", 11)
         c.setFillColor(colors.grey)
-        c.drawString(card_margin + 75, card_top - 65, f"Issued by BullPOV EdTech Company | Txn ID: {txn_id}")
+        c.drawString(card_margin + 75, card_top - 65, f"Issued by BullPOV EdTech Company | Receipt ID: {id}")
 
         # Divider
         c.setStrokeColor(colors.lightgrey)
@@ -97,18 +96,19 @@ def generate_transaction_receipt_pdf(amount, action, order_id, txn_id, status, u
         spacing = 24
 
         left_data = [
-            ("Order ID", order_id),
+            ("Name", name),
             ("Transaction ID", txn_id),
             ("Date", date),
             ("Status", status),
             ("Action", action),
+            ("Order ID", order_id),
         ]
 
         right_data = [
-            ("Name", name),
             ("Username", username),
             ("Email", email),
             ("Amount", f"{amount:.2f} Rs"),
+            ("Service Charge", f"0.0 Rs"),
             ("Net Paid", f"{amount:.2f} Rs"),
         ]
 
@@ -248,7 +248,7 @@ def generate_trade_bill_pdf(amount, username, name, tid, email, date, stock, pre
             ("Prediction", prediction),
             ("Stock", stock),
             ("Trade Amount", f"{amount:.2f} Rs"),
-            ("Platform Fee", f"0 Rupees"),
+            ("Platform Fee", f"0.0 Rs"),
             ("Net Paid", f"{amount:.2f} Rs"),
         ]
 
@@ -918,7 +918,7 @@ def create_order(id, amt, phone):
         order_currency="INR",
         customer_details=customerDetails,
         order_meta={
-            "return_url": "https://00d9fcb315ae.ngrok-free.app/payment-status?order_id={order_id}"
+            "return_url": "https://bullpov.com/payment-status?order_id={order_id}"
         }
     )
 
@@ -984,7 +984,7 @@ def walletTxnHistory(request):
     for t in txn:
         t.Status = "CANCELLED"
         t.save()
-    txn = WalletTxn.objects.filter(User = request.user)
+    txn = WalletTxn.objects.filter(User = request.user)[::-1]
     paginator = Paginator(txn, 10)
     page = request.GET.get('page', '1')
     try:
@@ -1061,7 +1061,7 @@ def tradeReceipt(request, tid):
     prediction = "UP"
     if trade.Prediction == False:
         prediction = "DOWN"
-    generate_trade_bill_pdf(trade.Amount, trade.Trader.username, trade.Trader.first_name, tid, trade.Trader.email, datetime.now().date(), trade.Stock.Symbol, prediction)
+    generate_trade_bill_pdf(trade.Amount, trade.Trader.username, trade.Trader.first_name, tid, trade.Trader.email, str(trade.DateTime)[:10], trade.Stock.Symbol, prediction)
     return redirect(f"/assets/Receipts/Trade/{trade.Trader.username}-{tid}.pdf")
 
 def txnReceipt(request, id):
@@ -1069,5 +1069,5 @@ def txnReceipt(request, id):
     action = "DEPOSIT"
     if txn.Action == False:
         action = "WITHDRAW"
-    generate_transaction_receipt_pdf(txn.Amount, action, txn.OrderID, txn.TxnID, txn.Status, txn.User.username, txn.User.first_name, txn.User.email, str(txn.DateTime)[:10])
+    print(generate_transaction_receipt_pdf(id, txn.Amount, action, txn.OrderID, txn.TxnID, txn.Status, txn.User.username, txn.User.first_name, txn.User.email, str(txn.DateTime)[:10]))
     return redirect(f"/assets/Receipts/Transaction/{txn.User.username}-{id}.pdf")

@@ -53,6 +53,6 @@ urlpatterns = [
     path("payment-status", check_payment_status, name = "PaymentStatus"),
     path("wallet-transaction-history", walletTxnHistory, name = "WalletTxnHistory"),
     path("trade-receipt/<str:tid>", tradeReceipt, name = "TradeReceipt"),
-    path("txn-receipt/<str:tid>", txnReceipt, name = "TxnReceipt"),
+    path("txn-receipt/<str:id>", txnReceipt, name = "TxnReceipt"),
     path("refund-txn/<str:oid>", refundTxn, name = "RefundTxn"),
 ]

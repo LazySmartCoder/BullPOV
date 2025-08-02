@@ -1,0 +1,137 @@
+what is bullpov?
+
+bullpov is a platform where people will predict skillfully on whether
+a share will rise of fall on the same day.
+
+we will display more than 50 shares from indian stock market - Bull50
+
+vision - making stock market more fun to explore and invest. we are trying 
+to build more excitement amongst netizens about stock market. we also aim to make 
+people keep a keen eye on economic and finacial news so that they can have the best
+knowledge about the indian economy and financial markets. making stock market more used to and common
+investment platform for people so they can get motivated to invest in real stocks.
+
+our tagline - Khojo, Parkho, Khelo
+
+
+
+
+
+
+**BullPOV Terms and Conditions**
+
+**Effective Date:** \[Insert Date]
+
+Welcome to BullPOV, a platform owned and operated by BullPOV EdTech Company, Bengaluru. These Terms and Conditions ("Terms") govern your access to and use of the BullPOV website, application, and services (collectively, the "Platform"). By registering or using BullPOV, you agree to be legally bound by these Terms.
+
+---
+
+### 1. Definitions
+
+* **Platform**: Refers to BullPOV's website, app, and services.
+* **User**: Any individual who registers and uses the BullPOV platform.
+* **Prediction**: The directional call (up/down) made by users on listed stocks.
+* **Wallet**: A virtual space on the platform where deposits and winnings are managed.
+
+---
+
+### 2. Nature of the Platform
+
+BullPOV is a skill-based simulation platform designed for educational purposes. It allows users to:
+
+* Predict stock trends after market hours.
+* Participate in a skill-based game using real market data.
+* Read curated stock market news and insights.
+
+We list 490+ stocks from the **Bombay Stock Exchange (BSE)** and selected Nifty indices from the **National Stock Exchange (NSE)**. This is **not a trading platform**, but a **simulation tool with real-time data**.
+
+---
+
+### 3. Eligibility
+
+* Users must be **14 years or older**.
+* Platform usage is limited to **Indian residents** only.
+
+---
+
+### 4. Trading & Prediction Window
+
+* The stock prediction (trading) time is **from 4:30 PM to 9:00 AM** the next day.
+* Results are declared every trading day after **4:30 PM**.
+
+---
+
+### 5. Payments and Wallet
+
+* Users can deposit money using any acceptable mode of payment listed in the Wallet section.
+* Winnings are credited to the BullPOV wallet within **up to 4 business days**.
+* Users can withdraw funds anytime via their wallet.
+* Once a prediction is placed, it **cannot be reversed or refunded**.
+
+---
+
+### 6. Fair Use and Restrictions
+
+* Multiple or fake accounts are **strictly prohibited**.
+* BullPOV reserves the right to ban or terminate accounts found violating policies.
+* Legal action may be taken against users misusing the platform.
+* Users are expected to maintain ethical and fair usage of the platform.
+
+---
+
+### 7. Game of Skill Disclaimer
+
+BullPOV is a **Game of Skill**, not chance. Winnings are based entirely on the user’s knowledge, research, and decision-making. The platform is **not involved in gambling or betting**.
+
+---
+
+### 8. No Commission Policy
+
+* BullPOV does **not charge any commission** on user winnings.
+
+---
+
+### 9. Refund and Delisting Policy
+
+* No refunds will be issued once a prediction is placed.
+* If a stock is suspended or delisted, users will be credited with the size of their stake.
+* Delisted stocks will be removed from the platform promptly.
+
+---
+
+### 10. Data Collection and Communication
+
+* BullPOV **collects personal user data** to provide its services.
+* We may send **marketing emails and messages** to users.
+
+---
+
+### 11. Limitation of Liability
+
+* BullPOV is **not responsible** for any losses due to market fluctuations or incorrect predictions.
+* The platform is for **educational and entertainment purposes** only.
+
+---
+
+### 12. Platform Modifications
+
+* BullPOV reserves the right to modify, update, or discontinue any part of the platform.
+* Users will be informed of any major changes in advance.
+
+---
+
+### 13. Governing Law
+
+* These Terms shall be governed by and interpreted in accordance with the laws of India.
+* Any disputes will be subject to the jurisdiction of the **Karnataka High Court**.
+
+---
+
+### 14. Contact Us
+
+For any questions, concerns, or feedback, please contact us at:
+**[support@bullpov.com](mailto:support@bullpov.com)**
+
+---
+
+Thank you for being a part of the BullPOV community. Predict smart. Learn better. Win real.
