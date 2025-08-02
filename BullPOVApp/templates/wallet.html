@@ -11,14 +11,16 @@
             <div class="login-form-wrapper">
               <div class="login-header text-center">
                 <h2>Your Wallet</h2>
-                <p>You can modify your bank details. This is your wallet.</p>
+                <p>You can easily keep a track of your funds.</p>
                 <h3>Current Balance: ₹{{user.WalletBalance|comma}}</h3>
                 <h3>Invested Amount: ₹{{user.InvestedBalance|comma}}</h3>
               </div>
 <div class="cart-btn-group">
-              <button onclick="window.location.href='/add-money'" type="button" class="cart-btn green-btn">Deposit</button>
+              <button data-bs-toggle="modal" data-bs-target="#addmoney" type="button" class="cart-btn green-btn">Deposit</button>
               <button data-bs-toggle="modal" data-bs-target="#withdraw" type="button" class="cart-btn red-btn">Withdraw</button>
-</div>
+
+            </div><br>
+            <button type="button" onclick="window.location.href='/wallet-transaction-history'" class="cart-btn red-btn" style="width: 100%; background-color: black;">View Transaction History</button>
 <style>
   .cart-btn-group {
   display: flex;
@@ -69,7 +71,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add Money to Wallet</h1>
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Deposit Money to Wallet</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -80,7 +82,7 @@
     <div id="emailHelp" class="form-text">Maximum Deposit Limit - ₹10,000</div>
   </div>
   <div class="modal-footer">
-        <button type="submit" style="width: 100%;" class="btn btn-outline-success">Proceed to Add Money</button>
+        <button type="submit" style="width: 100%;" class="btn btn-outline-success">Proceed to Deposit Money</button>
       </div>
       {% csrf_token %}
         </form>
@@ -101,6 +103,7 @@
         <form action="/withdraw-money" method="post">
           <div class="mb-3">
     <label for="exampleInputEmail1" class="form-label">Amount</label>
+    <input required type="text" class="form-control" name="upi" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="{{request.user.first_name}}'s UPI ID Only"><br>
     <input required type="text" class="form-control" name="amount" value="{{suggest|floatformat:2}}" id="exampleInputEmail1" aria-describedby="emailHelp">
     <div id="emailHelp" class="form-text">Maximum Withdrawal Amount - ₹{{user.WalletBalance|comma}}</div>
   </div>
@@ -113,5 +116,4 @@
     </div>
   </div>
 </div>
-<button onclick="initiateCheckout()">Initiate Checkout</button>
 {% endblock %}

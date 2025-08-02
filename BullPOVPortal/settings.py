@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-gh=cu)#0tepx^c8r73_4l5)xxa0bqq(27cqfzlguglrmh$r%)_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "bullpov.com", "www.bullpov.com", "beta.bullpov.com", ".onrender.com", "f859c104c034.ngrok-free.app"]
+ALLOWED_HOSTS = ["localhost", "bullpov.com", "www.bullpov.com", "beta.bullpov.com"]
 
 
 # Application definition

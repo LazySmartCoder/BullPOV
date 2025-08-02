@@ -70,6 +70,7 @@ class Contact(models.Model):
     Email = models.EmailField(default="")
     Subject = models.CharField(default="")
     Message = models.TextField(default="")
+    DateTime = models.CharField(default="")
 
     def __str__(self):
         return self.Subject
@@ -86,13 +87,20 @@ class Samachaar(models.Model):
         return f"{self.Name} | {self.Source}"
 
 class WalletTxn(models.Model):
+    # if the payment is done: SUCCESS
+    # if the payment fails: FAILED
+    # if users aborts: ABORTED
+    # if status is pending: PENDING
+    # if users cancels payment: CANCELLED
+    ID = models.CharField(default="")
     User = models.ForeignKey(User, related_name="TxnDetails", on_delete=models.CASCADE)
     Amount = models.FloatField(default=0)
     Action = models.BooleanField(default=False) # True for deposit, and False for withdrawal
-    LoggedINEmail = models.CharField(default="")
     OrderID = models.CharField(default="")
     TxnID = models.CharField(default="")
     Status = models.CharField(default="")
+    WithdrawalUPI = models.CharField(default="")
+    DateTime = models.CharField(default="")
 
     def __str__(self):
-        return f"{self.User.username} | {self.Amount} | {self.Action}"
+        return f"{self.User.username} | {self.Amount} | {self.Action} | {self.Status}"

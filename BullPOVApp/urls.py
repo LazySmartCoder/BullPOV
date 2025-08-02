@@ -50,5 +50,9 @@ urlpatterns = [
     path("explore", explore, name = "Explore"),
     path("tac", tac, name = "Tac"),
     path("privacy-policy", privacyPolicy, name = "PrivacyPolicy"),
-    path("payment/webhook/", cashfree_webhook, name = "cashfree_webhook"),
+    path("payment-status", check_payment_status, name = "PaymentStatus"),
+    path("wallet-transaction-history", walletTxnHistory, name = "WalletTxnHistory"),
+    path("trade-receipt/<str:tid>", tradeReceipt, name = "TradeReceipt"),
+    path("txn-receipt/<str:tid>", txnReceipt, name = "TxnReceipt"),
+    path("refund-txn/<str:oid>", refundTxn, name = "RefundTxn"),
 ]

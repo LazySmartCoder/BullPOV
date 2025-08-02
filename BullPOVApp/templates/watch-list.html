@@ -3,17 +3,21 @@
 {% load static %}
 {% load tempfea %}
 {% block body %}
-
-<section id="cart" class="cart section">
+  {% if watch %}
+<div class="container section-title" data-aos="fade-up">
+  <br>
+        <h2>My Watchlist</h2>
+        <p>Organize and monitor your personalized watchlist.</p>
+      </div><!-- End Section Title -->
+<section id="cart" class="cart section" style="margin-top: -110px;">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
   <div class="container" data-aos="fade-up" data-aos-delay="100">
     <div class="row">
       <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
         <div class="cart-items">
-          {% if watch %}
-          <h1 style="font-family: inherit">Your Watchlist</h1>
 
           {% for stock in watch|slice:"::-1" %}
-          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #f9f9f9; border: 1px solid #e0e0e0;">
+          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff; border: 1px solid #e0e0e0;">
             <div class="row align-items-center">
               <div class="col-lg-6 col-12">
                 <div class="product-info d-flex align-items-center">
@@ -47,7 +51,9 @@
           </div>
           {% endfor %}
           {% else %}
-              <h1 style="text-align: center; font-family: inherit; color: black;">No stocks in Watch List. <a href="/explore">Explore Now!</a></h1>
+            <h1 style="text-align: center;"><img style="width: 200px;" src="https://cdn.dribbble.com/userupload/41772487/file/original-51ca5dd3751bea24534049ef0154fbb2.gif" alt=""></h1>
+              <h1 style="text-align: center; font-family: inherit; color: black;"><button onclick="window.location.href='/explore'" class="btn btn-dark">Add Stocks to Watchlist</button></h1>
+              <br>
               {% endif %}
 
         </div>

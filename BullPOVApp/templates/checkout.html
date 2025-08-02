@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  {% load static %}
+  <link href="{% static 'assets/img/Logo Circle.png' %}" rel="icon">
+  <link href="{% static 'assets/img/Logo Circle.png' %}" rel="apple-touch-icon">
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <title>Checkout | BullPOV</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f0f0;
+    }
+
+    .button-container {
+      border: 1px solid black;
+      border-radius: 15px;
+      display: flex;
+      padding: 10px;
+      width: fit-content;
+      cursor: pointer;
+      background: #000;
+    }
+
+    .text-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 10px;
+      justify-content: center;
+      margin-right: 10px;
+    }
+
+    .logo-container {
+      width: 40px;
+      height: 40px;
+    }
+
+    .seconday-logo-container {
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .deposit-text {
+      font-family: Arial;
+      color: #fff;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .powered-text {
+      font-family: Arial;
+      color: #fff;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+    <button id="renderBtn" style="border: none;">
+      <div class="button-container">
+        <div>
+          <img src="https://cashfree-checkoutcartimages-prod.cashfree.com/NOBG%20Oppositen8ulu5t8r8l0_prod.png" alt="logo" class="logo-container">
+        </div>
+        <div class="text-container">
+          <div class="deposit-text">
+            Deposit ₹{{amt}}
+          </div>
+          <div class="powered-text">
+            Powered By BullPOV
+          </div>
+        </div>
+      </div>
+    </button>
+
+
+  <script>
+    const cashfree = Cashfree({
+      mode: "production",
+    });
+    document.getElementById("renderBtn").addEventListener("click", () => {
+      let checkoutOptions = {
+        paymentSessionId: "{{id}}",
+        redirectTarget: "_self",
+      };
+      cashfree.checkout(checkoutOptions);
+    });
+  </script>
+
+</body>
+</html>

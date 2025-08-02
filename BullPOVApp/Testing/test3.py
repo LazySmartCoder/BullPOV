@@ -1,63 +1,104 @@
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 import os
 
-def generate_bill_pdf(amount, username, name, tid, email, date, stock, prediction):
+def generate_transaction_receipt_pdf(amount, action, order_id, txn_id, status, username, name, email, date):
     try:
-        filename = f"{tid}-{username}.pdf"
+        os.makedirs("assets/Receipts", exist_ok=True)
+        filename = f"assets/Receipts/Transaction/{username}-{txn_id}.pdf"
         c = canvas.Canvas(filename, pagesize=A4)
         width, height = A4
 
-        # Title Header
-        c.setFillColor(colors.HexColor("#1F4E79"))  # Deep Blue
-        c.setFont("Helvetica-Bold", 22)
-        c.drawCentredString(width / 2.0, height - 80, "BullPOV Transaction Receipt")
+        # Background
+        c.setFillColor(colors.HexColor("#F4F6F8"))  # Light grey
+        c.rect(0, 0, width, height, fill=1, stroke=0)
 
-        # Divider line
-        c.setStrokeColor(colors.black)
-        c.line(50, height - 90, width - 50, height - 90)
+        # Card container
+        card_margin = 40
+        card_top = height - 60
+        card_bottom = 80
+        c.setFillColor(colors.white)
+        c.roundRect(card_margin, card_bottom, width - 2*card_margin, card_top - card_bottom, 10, fill=1)
 
-        # General Info
-        c.setFont("Helvetica", 12)
-        c.setFillColor(colors.black)
-        y = height - 130
+        # Logo
+        logo_path = "assets/Logo.png"
+        if os.path.exists(logo_path):
+            c.drawImage(logo_path, card_margin + 15, card_top - 70, width=50, height=50, mask='auto')
 
-        details = [
-            (f"Name:", name),
-            (f"Username:", username),
-            (f"Email:", email),
-            (f"Transaction ID:", tid),
-            (f"Transaction Date:", date),
-            (f"Stock Traded:", stock),
-            (f"Your Prediction:", prediction),
-            (f"Transaction Status:", "Success"),
-            (f"Platform Fee:", "0.00 Rupees"),
-            (f"Net Amount Paid:", f"{amount:.2f} Rupees")
+        # Title
+        c.setFont("Helvetica-Bold", 20)
+        c.setFillColor(colors.HexColor("#1F4E79"))
+        c.drawString(card_margin + 75, card_top - 50, "BullPOV - Transaction Receipt")
+
+        # Subtitle
+        c.setFont("Helvetica", 11)
+        c.setFillColor(colors.grey)
+        c.drawString(card_margin + 75, card_top - 65, f"Issued by BullPOV EdTech Company | Txn ID: {txn_id}")
+
+        # Divider
+        c.setStrokeColor(colors.lightgrey)
+        c.setLineWidth(0.5)
+        c.line(card_margin + 15, card_top - 80, width - card_margin - 15, card_top - 80)
+
+        # Two-column layout
+        left_x = card_margin + 30
+        right_x = width / 2 + 10
+        y = card_top - 110
+        spacing = 24
+
+        left_data = [
+            ("Order ID", order_id),
+            ("Transaction ID", txn_id),
+            ("Date", date),
+            ("Status", status),
+            ("Action", action),
         ]
 
-        for label, value in details:
-            c.setFont("Helvetica-Bold", 11)
-            c.drawString(75, y, f"{label}")
-            c.setFont("Helvetica", 11)
-            c.drawString(200, y, str(value))
-            y -= 25
+        right_data = [
+            ("Name", name),
+            ("Username", username),
+            ("Email", email),
+            ("Amount", f"{amount:.2f} Rs"),
+            ("Net Paid", f"{amount:.2f} Rs"),
+        ]
 
-        # Footer Note
-        c.setFont("Helvetica-Oblique", 10)
+        # Left column
+        for label, value in left_data:
+            c.setFont("Helvetica-Bold", 10)
+            c.setFillColor(colors.HexColor("#1F4E79"))
+            c.drawString(left_x, y, f"{label}")
+            c.setFont("Helvetica", 10)
+            c.setFillColor(colors.black)
+            c.drawString(left_x + 130, y, str(value))
+            y -= spacing
+
+        # Right column
+        y = card_top - 110
+        for label, value in right_data:
+            c.setFont("Helvetica-Bold", 10)
+            c.setFillColor(colors.HexColor("#1F4E79"))
+            c.drawString(right_x, y, f"{label}")
+            c.setFont("Helvetica", 10)
+            c.setFillColor(colors.black)
+            c.drawString(right_x + 130, y, str(value))
+            y -= spacing
+
+        # Note
+        c.setFont("Helvetica-Oblique", 9)
         c.setFillColor(colors.gray)
-        c.drawString(75, y - 10, "Note: This is a system-generated receipt and does not require a signature.")
+        c.drawString(card_margin + 30, card_bottom + 30, "Note: This receipt is auto-generated and does not require a signature.")
 
-        # Branding Footer
-        c.setFont("Helvetica-Bold", 10)
+        # Footer
+        c.setFont("Helvetica-Bold", 9)
         c.setFillColor(colors.HexColor("#1F4E79"))
-        c.drawRightString(width - 50, 40, "Generated by BullPOV")
+        c.drawCentredString(width / 2, 50, "Generated by BullPOV | www.bullpov.com")
 
-        c.showPage()
         c.save()
-
         return None
 
     except Exception as e:
+        print("PDF Generation Failed:", e)
         return None
+    
+generate_transaction_receipt_pdf(500, "DEPOSIT", "jfldsa", "78r94", "SUCCESS", "JFDKS", "jfkdla", "jdflsa", "jfkl")

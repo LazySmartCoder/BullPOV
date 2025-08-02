@@ -1,67 +1,41 @@
 # import requests
-# import json
-# cashfree_apikey = "1032514dc2c30325fe7444306234152301"
-# cashfree_sk = "cfsk_ma_prod_96165f356ad185da70efc4d959eb5375_75b7f4a3"
-# # ✅ Use your Production credentials here
-# XClientId = cashfree_apikey
-# XClientSecret = cashfree_sk
 
-# # ✅ Use production URL
 # url = "https://api.cashfree.com/pg/links"
 
-# # Headers
-# headers = {
-#     "Content-Type": "application/json",
-#     "x-api-version": "2022-09-01",
-#     "x-client-id": XClientId,
-#     "x-client-secret": XClientSecret
-# }
-
-# # Payment link data
-# data = {
-#     "customer_details": {
-#         "customer_id": "cust001",
-#         "customer_email": "test@example.com",
-#         "customer_phone": "9740168962"
-#     },
-#     "link_notify": {
-#         "send_sms": True,
-#         "send_email": True
-#     },
-#     "link_meta": {
-#         "return_url": "https://yourdomain.com/payment/return"
-#     },
-#     "link_amount": 199.00,
+# payload = {
+#     "link_id": "543",
+#     "link_amount": 10,
 #     "link_currency": "INR",
-#     "link_purpose": "Test Payment"
+#     "link_purpose": "Wallet Deposit",
+#     "customer_details": { "customer_phone": "6355853038" }
+# }
+# headers = {
+#     "x-client-id": "1032514dc2c30325fe7444306234152301",
+#     "x-client-secret": "cfsk_ma_prod_c7c76f38c9ef7134f84ba1df857e0874_e16973e8",
+#     "x-api-version": "2025-01-01",
+#     "Content-Type": "application/json"
 # }
 
-# # Make the request
-# response = requests.post(url, headers=headers, data=json.dumps(data))
+# response = requests.post(url, json=payload, headers=headers)
 
-# # Print the response
-# print("Status Code:", response.status_code)
-# print("Response:", response.text)
+# print(response.json())
+
+from cashfree_pg.models.create_order_request import CreateOrderRequest
+from cashfree_pg.api_client import Cashfree
+from cashfree_pg.models.customer_details import CustomerDetails
 
 
-import requests
+Cashfree.XClientId = "1032514dc2c30325fe7444306234152301"
+Cashfree.XClientSecret = "cfsk_ma_prod_c7c76f38c9ef7134f84ba1df857e0874_e16973e8"
+Cashfree.XEnvironment = Cashfree.PRODUCTION
+x_api_version = "2023-08-01"
 
-url = "https://api.cashfree.com/pg/links"
-
-payload = {
-    "link_id": "ghtryh",
-    "link_amount": 10,
-    "link_currency": "INR",
-    "link_purpose": "fees",
-    "customer_details": { "customer_phone": "9740168962" }
-}
-headers = {
-    "x-client-id": "1032514dc2c30325fe7444306234152301",
-    "x-client-secret": "cfsk_ma_prod_5976d2eeb14ad82fc05be1f5ba5280b3_286c1636",
-    "x-api-version": "2022-09-01",
-    "Content-Type": "application/json"
-}
-
-response = requests.post(url, json=payload, headers=headers)
-
-print(response.json())
+def create_order():
+        customerDetails = CustomerDetails(customer_id="123", customer_phone="6355853038")
+        createOrderRequest = CreateOrderRequest(order_amount=10, order_currency="INR", customer_details=customerDetails)
+        try:
+            api_response = Cashfree().PGCreateOrder(x_api_version, createOrderRequest, None, None)
+            print(api_response.data)
+        except Exception as e:
+            print(e)
+create_order()

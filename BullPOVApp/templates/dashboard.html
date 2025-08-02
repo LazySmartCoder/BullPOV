@@ -259,7 +259,7 @@
     // If it's weekend or holiday
     if (day === 0 || day === 6 || todayIsHoliday) {
       const nextTradingDay = getNextTradingDayName(now);
-      timerDiv.innerText = `🟢 BullPOV Trading Open for ${nextTradingDay}`;
+      timerDiv.innerText = `🟢 BullPOV Trading Active for ${nextTradingDay}`;
       return;
     }
 
@@ -269,7 +269,7 @@
       const showDay = (currentMinutes < marketOpen && !todayIsHoliday && day !== 0 && day !== 6)
                       ? weekdays[day] // early morning today
                       : nextTradingDay;
-      timerDiv.innerText = `🟢 BullPOV Trading Open for ${showDay}`;
+      timerDiv.innerText = `🟢 BullPOV Trading Active for ${showDay}`;
     }
     // 9:00 AM to 3:30 PM => Show countdown
     else if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
@@ -372,7 +372,7 @@
               <div class="row gy-4">
 
                 {% if userTrades != None %}
-                <h1>Your Trades</h1>
+                <h1>My Trades</h1>
                 {% for trade, t in userTrades %}
                 <div class="col-lg-4">
                   <div class="product-box">
@@ -828,45 +828,52 @@
           </section><!-- /Category Product List Section -->
 
           <section id="cart" class="cart section">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row">
+      <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
+        <div class="cart-items">
+          <h1 style="font-family: inherit">Top by MktCap</h1><br>
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-<h1>Top by Market Cap</h1>
-        <div class="row">
-          <div class="col-lg-12" data-aos="fade-up" data-aos-delay="200">
-            <div class="cart-items">
-
-              {% for mkt in topMktCap %}
-              <!-- Cart Item 3 -->
-              <div class="cart-item">
-                <div class="row align-items-center">
-                  <div class="col-lg-6 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
-                    <div class="product-info d-flex align-items-center">
-                      <div class="product-image">
-                        {% img mkt.Symbol as image_exists %}
-                      {% if image_exists %}
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{mkt.Symbol}}.png" class="main-img" loading="lazy">
-                      {% else %}
-                      <img src="{{mkt.Logo}}" class="main-img" loading="lazy">
-                      {% endif %}
-                      </div>
-                      <a href="/stock-preview/{{mkt.Symbol}}">
-                        <div class="product-details">
-                        <h6 class="product-title">{{mkt.Symbol}}</h6>
-                        <div class="product-meta">
-                          <span class="product-color">Price: ₹{{mkt.CurrentPrice|comma}}</span>
-                          <span class="product-size">MktCap: {{mkt.MktCap|crores}}</span>
-                        </div>
-                      </div>
-                      </a>
-                    </div>
+          {% for stock in topMktCap %}
+          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #f9f9f9; border: 1px solid #e0e0e0;">
+            <div class="row align-items-center">
+              <div class="col-lg-6 col-12">
+                <div class="product-info d-flex align-items-center">
+                  <div class="product-image me-3">
+                    {% img stock.Symbol as image_exists %}
+                    {% if image_exists %}
+                      <img style="width: 50px; border-radius: 10px;" src="https://assets-netstorage.groww.in/stock-assets/logos2/{{stock.Symbol}}.png" alt="{{stock.Symbol}}">
+                    {% else %}
+                      <img style="width: 50px; border-radius: 10px;" src="{{stock.Logo}}" alt="{{stock.Symbol}}">
+                    {% endif %}
                   </div>
+
+                  <a href="/stock-preview/{{stock.Symbol}}" class="text-decoration-none w-100">
+                    <div class="product-details">
+                      <h6 class="product-title mb-1">{{stock.Symbol}}</h6>
+                      <div class="product-meta">
+                        <span class="product-color d-block">
+                          <span>Price: ₹{{stock.CurrentPrice|comma}} &nbsp;</span>
+                          <span>MktCap: {{stock.MktCap|crores}}</span>
+                      </div>
+
+                      <button class="remove-item mt-2 btn btn-sm btn-outline-success" type="button" onclick="event.stopImmediatePropagation(); event.preventDefault(); window.location.href='/add-watch-list/{{stock.Symbol}}'">
+                        <span style="color: green; margin-top: -20px;"><i class="bi bi-eye"></i> Add to Watchlist</span>
+                      </button>
+
+                    </div>
+                  </a>
                 </div>
-              </div><!-- End Cart Item -->
-              {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
 
+        </div>
       </div>
-
-    </section>
+    </div>
+  </div>
+</section>
 
 
         </div>
