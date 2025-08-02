@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from django.utils.encoding import force_str
 import uuid
+from django.db.models import F
 import string
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
@@ -719,27 +720,10 @@ def dashboard(request):
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
     topLosers = Stock.objects.filter(TopLoser = True)[:4]
+    topVolumes = list(Stock.objects.filter(Nifty50=True).order_by('-Volume')[:4])
+    topTraded = list(Stock.objects.filter(Nifty50=True).annotate(TotalUsers=F('UPUsers') + F('DownUsers')).order_by('-TotalUsers')[:4])
+    topMktCap = list(Stock.objects.filter(Nifty50=True).order_by('-MktCap')[:20])
 
-    topv = {}
-    topVolumes = Stock.objects.filter(Nifty50 = True)
-    for i in topVolumes:
-        topv[i.Symbol] = i.Volume
-    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
-    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
-
-    topt = {}
-    topTraded = Stock.objects.filter(Nifty50 = True)
-    for i in topTraded:
-        topt[i.Symbol] = i.UPUsers + i.DownUsers
-    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
-    topTraded = Stock.objects.filter(Symbol__in=topTraded)
-
-    topm = {}
-    topMktCap = Stock.objects.filter(Nifty50 = True)
-    for i in topMktCap:
-        topm[i.Symbol] = float(str(i.MktCap).replace(",", "").replace(" Crores", ""))
-    topMktCap = sorted(topm, key=topm.get, reverse=True)[:20]
-    topMktCap = Stock.objects.filter(Symbol__in=topMktCap)
 
     # getting user trades data to be displayed
     usertradesdata = []
@@ -786,9 +770,9 @@ def stockPreview(request, symbol):
         downPercent = 50
     if request.user.is_authenticated:
         user = UserDetail.objects.get(User = request.user)
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : percentage_to_multiplier(upPercent), "down" : percentage_to_multiplier(downPercent), "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "user" : user, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
     else:
-        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : percentage_to_multiplier(upPercent), "down" : percentage_to_multiplier(downPercent), "totalamt" : totalamtdown + totalamtup})
+        return render(request, "stock-preview.html", {"stock" : stock, "change" : change, "up" : upPercent, "down" : downPercent, "totalamt" : totalamtdown + totalamtup})
 
 def categories(request):
     if request.user.is_authenticated == False:
