@@ -55,4 +55,5 @@ urlpatterns = [
     path("trade-receipt/<str:tid>", tradeReceipt, name = "TradeReceipt"),
     path("txn-receipt/<str:id>", txnReceipt, name = "TxnReceipt"),
     # path("refund-txn/<str:oid>", refundTxn, name = "RefundTxn"),
+    path("beta", beta, name = "beta"),
 ]

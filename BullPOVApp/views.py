@@ -436,10 +436,12 @@ def signin(request):
     return redirect("ErrorPage")
 
 def signup(request):
-    return render(request, "beta-wh.html")
     if request.user.is_authenticated == False:
         return render(request, "sign-up.html")
     return redirect("ErrorPage")
+
+def beta(request):
+    return render(request, "beta-wh.html")
 
 def register(request):
     if request.method == "POST":
