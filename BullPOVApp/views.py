@@ -424,6 +424,7 @@ def index(request):
         topt[i.Symbol] = i.UPUsers + i.DownUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
+    messages.success(request, "UNDER BETA TESTING")
     return render(request, "index.html", {"stocks" : topTraded})
 
 def aboutUs(request):
@@ -435,6 +436,7 @@ def signin(request):
     return redirect("ErrorPage")
 
 def signup(request):
+    return render(request, "beta-wh.html")
     if request.user.is_authenticated == False:
         return render(request, "sign-up.html")
     return redirect("ErrorPage")
