@@ -23,7 +23,7 @@
     }
 
     .confirmation-container {
-      background-color: #e7e4e4;
+      background-color: #ffffff;
       padding: 40px;
       border-radius: 20px;
       box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
@@ -67,7 +67,7 @@
     }
   </style>
 </head>
-<body>
+<body style="background-color: #1e1e1e;">
 
   <div class="confirmation-container">
     {% if predict == "UP" %}
@@ -233,7 +233,7 @@
       gsap.to(overlay, { opacity: 1, duration: 0.2 });
       gsap.to(text, { opacity: 0, duration: 0.2 });
       setTimeout(() => {
-        text.innerText = "Seeeeshhh!";
+        text.innerText = "Yayyyy!!";
         gsap.to(text, { opacity: 1, duration: 0.3 });
 
         // Redirect after short delay
