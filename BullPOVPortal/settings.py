@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gh=cu)#0tepx^c8r73_4l5)xxa0bqq(27cqfzlguglrmh$r%)_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "bullpov.com", "www.bullpov.com", "beta.bullpov.com"]
 
@@ -84,11 +84,19 @@ WSGI_APPLICATION = 'BullPOVPortal.wsgi.application'
 #         'NAME': BASE_DIR / 'BullPOV_Database.sqlite3',
 #     }
 # }
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 
+
+# development env db
+# DATABASES = {
+#     'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-restless-smoke-afl567fd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
+# }
+
+# production env db
 DATABASES = {
     'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-weathered-lab-afllh2wd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

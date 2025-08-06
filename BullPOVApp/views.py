@@ -424,6 +424,7 @@ def index(request):
         topt[i.Symbol] = i.UPUsers + i.DownUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
+    # beta
     messages.success(request, "UNDER BETA TESTING")
     return render(request, "index.html", {"stocks" : topTraded})
 
@@ -440,6 +441,7 @@ def signup(request):
         return render(request, "sign-up.html")
     return redirect("ErrorPage")
 
+# beta
 def beta(request):
     return render(request, "beta-wh.html")
 
@@ -804,20 +806,43 @@ def dashboard(request):
     if request.user.is_authenticated == False:
         return redirect("SignIN")
     # indice data list access for the scroller
+    import psycopg2
+    conn = psycopg2.connect(
+        dsn="postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-restless-smoke-afl567fd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    )
+    cursor = conn.cursor()
+
+    # Fetch relevant index data
+    cursor.execute("""
+        SELECT "Name", "Symbol", "CurrentPrice", "OpeningPrice"
+        FROM "BullPOVApp_stock"
+        WHERE "Symbol" IN ('NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50')
+    """)
+    rows = cursor.fetchall()
+
+    # Map column indices
     indice_results = {}
-    for i in Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50']):
-        if i.OpeningPrice != 0:
-            change_percent = ((i.CurrentPrice - i.OpeningPrice) / i.OpeningPrice) * 100
+    for row in rows:
+        name = row[0]
+        symbol = row[1]
+        current_price = row[2]
+        opening_price = row[3]
+
+        if opening_price != 0:
+            change_percent = ((current_price - opening_price) / opening_price) * 100
         else:
             change_percent = 0
 
         trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
 
-        indice_results[i.Name] = {
-            'price': i.CurrentPrice,
+        indice_results[name] = {
+            'price': current_price,
             'change': change_percent,
             'trend': trend,
         }
+
+    cursor.close()
+    conn.close()
 
     
     # top data to be displayed
@@ -856,9 +881,6 @@ def stockPreview(request, symbol):
         totalamtup += i.Amount
     trades = Trade.objects.filter(Stock = stock, Prediction = False, ActiveStatus = True)
     totalamtdown = 0
-    def percentage_to_multiplier(percent):
-        multiplier = (percent / 100) + 1
-        return round(multiplier, 2)
     for i in trades:
         totalamtdown += i.Amount
     if (stock.CurrentPrice - stock.PreviousCloseToday) > 0:

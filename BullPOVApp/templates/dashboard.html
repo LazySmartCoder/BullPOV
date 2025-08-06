@@ -314,12 +314,12 @@
             {% for name, figs in data.items %}
     {% if figs.trend == "up" %}
         <div class="swiper-slide">
-            {{ name }} - {{ figs.price|floatformat:2 }} 
+            {{ name }} - ₹{{ figs.price|floatformat:2|comma }} 
             (<i style="color: green;">{{ figs.change|floatformat:2 }}%</i>)
         </div>
     {% else %}
     <div class="swiper-slide">
-            {{ name }} - {{ figs.price|floatformat:2 }} 
+            {{ name }} - ₹{{ figs.price|floatformat:2|comma }} 
             (<i style="color: red;">{{ figs.change|floatformat:2 }}%</i>)
         </div>
     {% endif %}
@@ -361,7 +361,40 @@
     </section><!-- /Search Results Header Section -->
 
 
+<style>
+  .cart-btn-group {
+  display: flex;
+  gap: 10px; /* space between buttons */
+}
 
+.cart-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.green-btn {
+  background-color: #28a745; /* Bootstrap green */
+}
+
+.green-btn:hover {
+  background-color: #218838;
+}
+
+.red-btn {
+  background-color: #dc3545; /* Bootstrap red */
+}
+
+.red-btn:hover {
+  background-color: #c82333;
+}
+
+</style>
 
 <!-- https://assets.tickertape.in/stock-logos/TCS.png -->
           <!-- Category Product List Section -->
@@ -441,40 +474,7 @@
   <button type="button" onclick="window.location.href='/stock-preview/{{toptraded.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
   <button type="button" onclick="window.location.href='/stock-preview/{{toptraded.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
 </div>
-<style>
-  .cart-btn-group {
-  display: flex;
-  gap: 10px; /* space between buttons */
-}
 
-.cart-btn {
-  flex: 1;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.green-btn {
-  background-color: #28a745; /* Bootstrap green */
-}
-
-.green-btn:hover {
-  background-color: #218838;
-}
-
-.red-btn {
-  background-color: #dc3545; /* Bootstrap red */
-}
-
-.red-btn:hover {
-  background-color: #c82333;
-}
-
-</style>
                         </div>
                       </div>
                     </div>
@@ -522,40 +522,7 @@
   <button type="button" onclick="window.location.href='/stock-preview/{{topindice.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
   <button type="button" onclick="window.location.href='/stock-preview/{{topindice.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
 </div>
-<style>
-  .cart-btn-group {
-  display: flex;
-  gap: 10px; /* space between buttons */
-}
 
-.cart-btn {
-  flex: 1;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.green-btn {
-  background-color: #28a745; /* Bootstrap green */
-}
-
-.green-btn:hover {
-  background-color: #218838;
-}
-
-.red-btn {
-  background-color: #dc3545; /* Bootstrap red */
-}
-
-.red-btn:hover {
-  background-color: #c82333;
-}
-
-</style>
                         </div>
                       </div>
                     </div>
@@ -603,40 +570,7 @@
   <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
   <button type="button" onclick="window.location.href='/stock-preview/{{topvolume.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
 </div>
-<style>
-  .cart-btn-group {
-  display: flex;
-  gap: 10px; /* space between buttons */
-}
 
-.cart-btn {
-  flex: 1;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.green-btn {
-  background-color: #28a745; /* Bootstrap green */
-}
-
-.green-btn:hover {
-  background-color: #218838;
-}
-
-.red-btn {
-  background-color: #dc3545; /* Bootstrap red */
-}
-
-.red-btn:hover {
-  background-color: #c82333;
-}
-
-</style>
                         </div>
                       </div>
                     </div>
@@ -682,40 +616,7 @@
   <button type="button" onclick="window.location.href='/stock-preview/{{topgainer.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
   <button type="button" onclick="window.location.href='/stock-preview/{{topgainer.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
 </div>
-<style>
-  .cart-btn-group {
-  display: flex;
-  gap: 10px; /* space between buttons */
-}
 
-.cart-btn {
-  flex: 1;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.green-btn {
-  background-color: #28a745; /* Bootstrap green */
-}
-
-.green-btn:hover {
-  background-color: #218838;
-}
-
-.red-btn {
-  background-color: #dc3545; /* Bootstrap red */
-}
-
-.red-btn:hover {
-  background-color: #c82333;
-}
-
-</style>
                         </div>
                       </div>
                     </div>
@@ -761,40 +662,7 @@
   <button type="button" onclick="window.location.href='/stock-preview/{{toploser.Symbol}}'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i></button>
   <button type="button" onclick="window.location.href='/stock-preview/{{toploser.Symbol}}'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i></button>
 </div>
-<style>
-  .cart-btn-group {
-  display: flex;
-  gap: 10px; /* space between buttons */
-}
 
-.cart-btn {
-  flex: 1;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.green-btn {
-  background-color: #28a745; /* Bootstrap green */
-}
-
-.green-btn:hover {
-  background-color: #218838;
-}
-
-.red-btn {
-  background-color: #dc3545; /* Bootstrap red */
-}
-
-.red-btn:hover {
-  background-color: #c82333;
-}
-
-</style>
                         </div>
                       </div>
                     </div>
