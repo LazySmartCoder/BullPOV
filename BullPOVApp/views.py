@@ -808,7 +808,7 @@ def dashboard(request):
     # indice data list access for the scroller
     import psycopg2
     conn = psycopg2.connect(
-        dsn="postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-restless-smoke-afl567fd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        dsn="postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-weathered-lab-afllh2wd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     )
     cursor = conn.cursor()
 

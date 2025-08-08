@@ -90,14 +90,14 @@ from django.dispatch import receiver
 
 
 # development env db
-DATABASES = {
-    'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-restless-smoke-afl567fd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
-}
+# DATABASES = {
+#     'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-restless-smoke-afl567fd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
+# }
 
 # production env db
-# DATABASES = {
-#     'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-weathered-lab-afllh2wd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
-# }
+DATABASES = {
+    'default': dj_database_url.config(default='postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-weathered-lab-afllh2wd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require')
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
