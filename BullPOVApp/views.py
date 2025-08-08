@@ -110,7 +110,7 @@ def generate_transaction_receipt_pdf(id, amount, action, txn_id, status, usernam
             ("Status", status),
             ("Amount", f"{amount:.2f} Rs"),
             ("Service Charge", f"0.0 Rs"),
-            ("Net Paid", f"{amount:.2f} Rs"),
+            ("Net Amount", f"{amount:.2f} Rs"),
         ]
 
         # Left column
@@ -926,12 +926,7 @@ def categories(request):
         if stock.TopVolume:
             topVolumes.append(stock)
 
-    topt = {}
-    topTraded = Stock.objects.filter(Nifty50 = True)
-    for i in topTraded:
-        topt[i.Symbol] = i.UPUsers + i.DownUsers
-    topTraded = sorted(topt, key=topt.get, reverse=True)
-    topTraded = Stock.objects.filter(Symbol__in=topTraded)[:6]
+    topTraded = list(Stock.objects.annotate(TotalUsers=ExpressionWrapper(F('UPUsers') + F('DownUsers'), output_field=IntegerField())).order_by('-TotalUsers')[:6])
 
     # getting user trades data to be displayed
     usertradesdata = []
@@ -984,7 +979,10 @@ def tradeDetails(request, symbol, tid):
         Prediction=trader.Prediction,
         ActiveStatus=True
     ).aggregate(total=Sum('Amount'))['total']
-    poolshare = round((trader.Amount / total_amount) * 100, 2)
+    if total_amount == None:
+        poolshare = 100.0
+    else:
+        poolshare = round((trader.Amount / total_amount) * 100, 2)
     if trader.Prediction:
         predict = "UP"
     else:
@@ -1100,7 +1098,7 @@ def withdrawMoney(request):
         if amt > userdet.WalletBalance:
             messages.warning(request, "Insufficient Balance.")
             return redirect("Wallet")
-        txn = WalletTxn(ID = WalletTxn.objects.all().count(), User = request.user, Amount = amt, Action = False, OrderID = "N/A", Status = "PENDING", WithdrawalUPI = upi, DateTime = datetime.now())
+        txn = WalletTxn(ID = WalletTxn.objects.all().count(), User = request.user, Amount = amt, Action = False, OrderID = "N/A", TxnID = "N/A", Status = "PENDING", WithdrawalUPI = upi, DateTime = datetime.now())
         txn.save()
         sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Initiated!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully initiated, and the amount is on its way to your deposit account. <br><br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{float(round(int(userdet.WalletBalance), 2))}<br><br>Expected Credit Time: Upto 7 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
         messages.success(request, "Withdrawal Request Initiated")

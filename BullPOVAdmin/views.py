@@ -73,6 +73,9 @@ def userWithdrawalRequests(request):
 
 def withdrawn(request, id):
     txn = WalletTxn.objects.get(ID = id)
+    user = UserDetail.objects.get(User = txn.User)
+    user.WalletBalance = user.WalletBalance - txn.Amount
+    user.save()
     txn.TxnID = "N/A"
     txn.DateTime = datetime.now()
     txn.Status = "SUCCESS"
@@ -83,12 +86,8 @@ def updateTrends(request):
     gainer = str(request.GET["gainer"]).split("-")
     loser = str(request.GET["loser"]).split("-")
     volume = str(request.GET["volume"]).split("-")
-    for s in Stock.objects.filter(TopGainer = True, TopLoser = True, TopVolume = True):
-        s.TopGainer = False
-        s.TopLoser = False
-        s.TopVolume = False
-        s.save()
     Stock.objects.all().update(UPUsers=0, DownUsers=0)
+    Stock.objects.all().update(TopGainer = False, TopLoser = False, TopVolume = False)
     for g in gainer:
         s = Stock.objects.get(Symbol = g)
         s.TopGainer = True
