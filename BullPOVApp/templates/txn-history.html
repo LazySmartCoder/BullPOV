@@ -37,7 +37,7 @@
                       {% endif %}
                       <div class="product-meta">
                         <span class="product-color d-block">
-                          <span>Order ID: {{t.OrderID|slice:":30:-1"}}...&nbsp;</span>
+                          <span>TRID: {{t.ID}}&nbsp;</span>
                           <span>Transaction ID: {{t.TxnID}}&nbsp;</span>
                           <span>Status: 
                           {% if t.Status == "SUCCESS" %}

@@ -430,7 +430,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/{{t.TradeID}}">{{trade.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.CurrentPrice > trade.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{trade.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{trade.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{trade.Sector}}</strong>
@@ -480,7 +480,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toptraded.Symbol}}">{{toptraded.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{toptraded.CurrentPrice|comma}} {% if toptraded.CurrentPrice > toptraded.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <h4 style="text-align: left;">₹{{toptraded.CurrentPrice|comma}} {% if toptraded.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{toptraded.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{toptraded.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{toptraded.Sector}}</strong>
@@ -528,7 +528,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topindice.Symbol}}">{{topindice.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{topindice.CurrentPrice|comma}} {% if topindice.CurrentPrice > topindice.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                          <h4 style="text-align: left;">₹{{topindice.CurrentPrice|comma}} {% if topindice.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{topindice.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{topindice.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{toptraded.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{topindice.Sector}}</strong>
@@ -550,7 +550,7 @@
 </div>
 
 
-                <h1>Top Volumes</h1>
+                <h1>Top Intraday</h1>
                 {% for topvolume in topVolumes %}
                 <div class="col-lg-4">
                   <div class="product-box">
@@ -576,9 +576,9 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topvolume.Symbol}}">{{topvolume.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{topvolume.CurrentPrice|comma}} {% if topvolume.CurrentPrice > topvolume.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap|crores}}</strong>
-                          <br>
+                          <h4 style="text-align: left;">₹{{topvolume.CurrentPrice|comma}} {% if topvolume.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{topvolume.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{topvolume.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
+                          <p style="text-align: left;">Market Cap: <strong>{{topvolume.MktCap|crores}}</strong>
+                            <br>
                           Sector: <strong>{{topvolume.Sector}}</strong>
                           <br>
                           Volume: <strong>{{topvolume.Volume|comma}}</strong>
@@ -622,7 +622,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{topgainer.Symbol}}">{{topgainer.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{topgainer.CurrentPrice|comma}} {% if topgainer.CurrentPrice > topgainer.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <h4 style="text-align: left;">₹{{topgainer.CurrentPrice|comma}} {% if topgainer.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{topgainer.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{topgainer.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{topgainer.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{topgainer.Sector}}</strong>
@@ -668,7 +668,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{toploser.Symbol}}">{{toploser.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{toploser.CurrentPrice|comma}} {% if toploser.CurrentPrice > toploser.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <h4 style="text-align: left;">₹{{toploser.CurrentPrice|comma}} {% if toploser.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{toploser.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{toploser.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{toploser.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{toploser.Sector}}</strong>
@@ -855,6 +855,19 @@ Results are declared every trading day by 4:30 PM.</p>
   <script src="{% static 'assets/vendor/drift-zoom/Drift.min.js' %}"></script>
   <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
   <script src="{% static 'assets/js/main.js' %}"></script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a1b55c29-bca0-47d9-b721-2622137ca6b5",
+      safari_web_id: "web.onesignal.auto.5f4f9ed9-fb2e-4d6a-935d-81aa46fccce0",
+      notifyButton: {
+        enable: true,
+      },
+    });
+  });
+</script>
 
 </body>
 

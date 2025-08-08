@@ -25,6 +25,7 @@ class Stock(models.Model):
     Nifty50 = models.BooleanField(default=False)
     TopGainer = models.BooleanField(default=False)
     TopLoser = models.BooleanField(default=False)
+    TopVolume = models.BooleanField(default=False)
     UPUsers = models.IntegerField(default=0)
     DownUsers = models.IntegerField(default=0)
 

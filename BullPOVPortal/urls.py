@@ -23,6 +23,7 @@ from django.conf.urls import handler400, handler403, handler404, handler500
 urlpatterns = [
     path('BullPOV-Admin-AB-HG', admin.site.urls),
     path('', include("BullPOVApp.urls")),
+    path('adminpanelhai-aukaat-me-raha/', include("BullPOVAdmin.urls")),
     re_path(r'^assets/(?P<path>.*)$', serve, {'document_root' : settings.MEDIA_ROOT}),
 ]
 

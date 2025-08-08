@@ -4,9 +4,10 @@ from .models import *
 from django.contrib import messages
 from django.db.models import Q
 from django.views.decorators.http import require_POST
+from django.db.models import Sum
 from django.utils.encoding import force_str
 import uuid
-from django.db.models import F
+from django.db.models import F, ExpressionWrapper, IntegerField
 import string
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
@@ -53,7 +54,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 import os
 
-def generate_transaction_receipt_pdf(id, amount, action, order_id, txn_id, status, username, name, email, date):
+def generate_transaction_receipt_pdf(id, amount, action, txn_id, status, username, name, email, date):
     try:
         filename = f"assets/Receipts/Transaction/{username}-{id}.pdf"
         c = canvas.Canvas(filename, pagesize=A4)
@@ -100,14 +101,13 @@ def generate_transaction_receipt_pdf(id, amount, action, order_id, txn_id, statu
             ("Name", name),
             ("Transaction ID", txn_id),
             ("Date", date),
-            ("Status", status),
             ("Action", action),
-            ("Order ID", order_id),
+            ("Username", username),
+            ("Email", email),
         ]
 
         right_data = [
-            ("Username", username),
-            ("Email", email),
+            ("Status", status),
             ("Amount", f"{amount:.2f} Rs"),
             ("Service Charge", f"0.0 Rs"),
             ("Net Paid", f"{amount:.2f} Rs"),
@@ -401,7 +401,7 @@ def sendEmail(sender, receiver, subject, message):
     sender_email = sender
     sender_password = google_app_password
     msg = MIMEMultipart("alternative")
-    msg["From"] = sender_email
+    msg["From"] = f"BullPOV <{sender_email}>"
     msg["To"] = receiver
     msg["Subject"] = subject
     msg.attach(MIMEText(message, "html"))
@@ -814,22 +814,22 @@ def dashboard(request):
 
     # Fetch relevant index data
     cursor.execute("""
-        SELECT "Name", "Symbol", "CurrentPrice", "OpeningPrice"
+        SELECT "Name", "Symbol", "CurrentPrice", "PreviousCloseToday", "PriceChange"
         FROM "BullPOVApp_stock"
         WHERE "Symbol" IN ('NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50')
     """)
     rows = cursor.fetchall()
 
-    # Map column indices
     indice_results = {}
     for row in rows:
         name = row[0]
         symbol = row[1]
         current_price = row[2]
-        opening_price = row[3]
+        previous_close = row[3] or 0
+        price_change = row[4] or 0
 
-        if opening_price != 0:
-            change_percent = ((current_price - opening_price) / opening_price) * 100
+        if previous_close != 0:
+            change_percent = (price_change / previous_close) * 100
         else:
             change_percent = 0
 
@@ -837,10 +837,9 @@ def dashboard(request):
 
         indice_results[name] = {
             'price': current_price,
-            'change': change_percent,
+            'change': round(change_percent, 2),
             'trend': trend,
         }
-
     cursor.close()
     conn.close()
 
@@ -848,9 +847,10 @@ def dashboard(request):
     # top data to be displayed
     topGainers = Stock.objects.filter(TopGainer = True)[:4]
     topLosers = Stock.objects.filter(TopLoser = True)[:4]
-    topVolumes = list(Stock.objects.filter(Nifty50=True).order_by('-Volume')[:4])
-    topTraded = list(Stock.objects.filter(Nifty50=True).annotate(TotalUsers=F('UPUsers') + F('DownUsers')).order_by('-TotalUsers')[:4])
+    topVolumes = Stock.objects.filter(TopVolume = True)[:4]
+    topTraded = list(Stock.objects.annotate(TotalUsers=ExpressionWrapper(F('UPUsers') + F('DownUsers'), output_field=IntegerField())).order_by('-TotalUsers')[:4])
     topMktCap = list(Stock.objects.filter(Nifty50=True).order_by('-MktCap')[:20])
+
 
 
     # getting user trades data to be displayed
@@ -904,22 +904,34 @@ def categories(request):
         messages.warning(request, "Please SignIN first.")
         return redirect("SignIN")
     # top data to be displayed
-    topGainers = Stock.objects.filter(TopGainer = True)[:4]
-    topLosers = Stock.objects.filter(TopLoser = True)[:4]
+    stocks = Stock.objects.filter(
+        TopGainer=True
+    ) | Stock.objects.filter(
+        TopLoser=True
+    ) | Stock.objects.filter(
+        TopVolume=True
+    )
 
-    topv = {}
-    topVolumes = Stock.objects.filter(Nifty50 = True)
-    for i in topVolumes:
-        topv[i.Symbol] = i.Volume
-    topVolumes = sorted(topv, key=topv.get, reverse=True)[:4]
-    topVolumes = Stock.objects.filter(Symbol__in=topVolumes)
+    # Remove duplicates (if any stock is marked multiple True)
+    stocks = stocks.distinct()
+
+    # Group in Python
+    topGainers, topLosers, topVolumes = [], [], []
+
+    for stock in stocks:
+        if stock.TopGainer:
+            topGainers.append(stock)
+        if stock.TopLoser:
+            topLosers.append(stock)
+        if stock.TopVolume:
+            topVolumes.append(stock)
 
     topt = {}
     topTraded = Stock.objects.filter(Nifty50 = True)
     for i in topTraded:
         topt[i.Symbol] = i.UPUsers + i.DownUsers
-    topTraded = sorted(topt, key=topt.get, reverse=True)[:4]
-    topTraded = Stock.objects.filter(Symbol__in=topTraded)
+    topTraded = sorted(topt, key=topt.get, reverse=True)
+    topTraded = Stock.objects.filter(Symbol__in=topTraded)[:6]
 
     # getting user trades data to be displayed
     usertradesdata = []
@@ -967,12 +979,18 @@ def tradeDetails(request, symbol, tid):
     stock = Stock.objects.get(Symbol = symbol)
     trader = Trade.objects.get(TradeID = tid, Trader = request.user, Stock = stock)
     user = UserDetail.objects.get(User = request.user)
+    total_amount = Trade.objects.filter(
+        Stock=stock,
+        Prediction=trader.Prediction,
+        ActiveStatus=True
+    ).aggregate(total=Sum('Amount'))['total']
+    poolshare = round((trader.Amount / total_amount) * 100, 2)
     if trader.Prediction:
         predict = "UP"
     else:
         predict = "DOWN"
     
-    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict})
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict, "poolshare" : poolshare})
 # displaying market data in different paths ends
 
 
@@ -1082,7 +1100,7 @@ def withdrawMoney(request):
         if amt > userdet.WalletBalance:
             messages.warning(request, "Insufficient Balance.")
             return redirect("Wallet")
-        txn = WalletTxn(ID = WalletTxn.objects.all().count(), User = request.user, Amount = amt, Action = False, OrderID = f"BullPOV_{random.randint(10000, 99999)}", Status = "PENDING", WithdrawalUPI = upi, DateTime = datetime.now())
+        txn = WalletTxn(ID = WalletTxn.objects.all().count(), User = request.user, Amount = amt, Action = False, OrderID = "N/A", Status = "PENDING", WithdrawalUPI = upi, DateTime = datetime.now())
         txn.save()
         sendEmail("no-reply@bullpov.com", request.user.email, "Withdrawal Request Successfully Initiated!", normal_text_templates(request.user.first_name, f"Your withdrawal request has been successfully initiated, and the amount is on its way to your deposit account. <br><br>Withdrawn Amount: ₹{amt}<br>Current Balance: ₹{float(round(int(userdet.WalletBalance), 2))}<br><br>Expected Credit Time: Upto 7 business days. <br>If you face any delays or have questions, feel free to reach out to our support team. <br>Happy Trading!"))
         messages.success(request, "Withdrawal Request Initiated")
@@ -1191,5 +1209,5 @@ def txnReceipt(request, id):
     action = "DEPOSIT"
     if txn.Action == False:
         action = "WITHDRAW"
-    generate_transaction_receipt_pdf(id, txn.Amount, action, txn.OrderID, txn.TxnID, txn.Status, txn.User.username, txn.User.first_name, txn.User.email, str(txn.DateTime)[:10])
+    generate_transaction_receipt_pdf(id, txn.Amount, action, txn.TxnID, txn.Status, txn.User.username, txn.User.first_name, txn.User.email, str(txn.DateTime)[:10])
     return redirect(f"/assets/Receipts/Transaction/{txn.User.username}-{id}.pdf")

@@ -91,7 +91,7 @@
                     </div>
                     <div class="product-content">
                         <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/stock-preview/{{stock.Symbol}}">{{stock.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{stock.CurrentPrice|comma}} {% if stock.CurrentPrice > stock.PreviousCloseToday %}(<span style="color: green;">Bullish</span>){% else %}(<span style="color: red;">Bearish</span>){% endif %}</h4><br>
+                        <h4 style="text-align: left;">₹{{stock.CurrentPrice|comma}} {% if stock.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{stock.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{stock.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
                         <p style="text-align: left;">Market Cap: <strong>{{stock.MktCap|crores}}</strong>
                           <br>
                           Sector: <strong>{{stock.Sector}}</strong>

@@ -199,11 +199,11 @@
 
               <div class="cart-btn-group">
   {% if request.user.is_authenticated %}
-  <button type="button" data-bs-toggle="modal" data-bs-target="#up" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}x</button>
-  <button type="button" data-bs-toggle="modal" data-bs-target="#down" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}x</button>
+  <button type="button" data-bs-toggle="modal" data-bs-target="#up" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
+  <button type="button" data-bs-toggle="modal" data-bs-target="#down" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
   {% else %}
-  <button type="button" onclick="window.location.href='/signin'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}x</button>
-  <button type="button" onclick="window.location.href='/signin'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}x</button>
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn green-btn"><i class="bi bi-arrow-up"></i> {{up|floatformat:2}}%</button>
+  <button type="button" onclick="window.location.href='/signin'" class="cart-btn red-btn"><i class="bi bi-arrow-down"></i> {{down|floatformat:2}}%</button>
   {% endif %}
 </div>
 <style>
@@ -272,12 +272,16 @@
                           <ul class="feature-list">
                             <li><i class="bi bi-check-circle"></i> Sector: {{stock.Sector}}</li>
                             <li><i class="bi bi-check-circle"></i> Open Price: ₹{{stock.OpeningPrice|comma}}</li>
-                            <li><i class="bi bi-check-circle"></i> Previous Close: ₹{{stock.PreviousCloseToday|comma}}</li>
+                            <li><i class="bi bi-check-circle"></i> <strong>Previous Close: ₹{{stock.PreviousCloseToday|comma}}</strong></li>
                             <li><i class="bi bi-check-circle"></i> MktCap: {{stock.MktCap|crores}}</li>
                             <li><i class="bi bi-check-circle"></i> Volume: {{stock.Volume|comma}}</li>
                             <li><i class="bi bi-check-circle"></i> P/E Ratio: {{stock.PERatio}}</li>
                             <li><i class="bi bi-check-circle"></i> EPS: {{stock.EPS}}</li>
+                            {% if stock.Symbol == 'NSEI' or stock.Symbol == 'CNXIT' or stock.Symbol == 'NSEMDCP50' or stock.Symbol == 'NSEBANK' %}
+                            <li><i class="bi bi-check-circle"></i> Exchange: National Stock Exchange of India (NSE)</li>
+                            {% else %}
                             <li><i class="bi bi-check-circle"></i> Exchange: Bombay Stock Exchange of India (BSE)</li>
+                            {% endif %}
                           </ul>
                         </div>
                       </div>
