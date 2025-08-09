@@ -137,7 +137,7 @@
 
               <div class="row gy-4">
                 
-                {% for s in stocks %}
+                {% for s in stocks|slice:"::-1" %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">

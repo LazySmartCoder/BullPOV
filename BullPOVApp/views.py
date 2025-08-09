@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from django.db.models import Sum
 from django.utils.encoding import force_str
+from django.http import FileResponse
 import uuid
 from django.db.models import F, ExpressionWrapper, IntegerField
 import string
@@ -974,21 +975,12 @@ def tradeDetails(request, symbol, tid):
     stock = Stock.objects.get(Symbol = symbol)
     trader = Trade.objects.get(TradeID = tid, Trader = request.user, Stock = stock)
     user = UserDetail.objects.get(User = request.user)
-    total_amount = Trade.objects.filter(
-        Stock=stock,
-        Prediction=trader.Prediction,
-        ActiveStatus=True
-    ).aggregate(total=Sum('Amount'))['total']
-    if total_amount == None:
-        poolshare = 100.0
-    else:
-        poolshare = round((trader.Amount / total_amount) * 100, 2)
     if trader.Prediction:
         predict = "UP"
     else:
         predict = "DOWN"
     
-    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict, "poolshare" : poolshare})
+    return render(request, "trade-details.html", {"stock" : stock, "trade" : trader, "user" : user, "totalamt" : trader.Return + trader.Amount, "predict" : predict})
 # displaying market data in different paths ends
 
 
@@ -1160,7 +1152,7 @@ def samachaar(request):
     return render(request, "samachaar.html", {"index_data" : get_global_index_data(), "news" : Samachaar.objects.all()[:10:-1]})
 
 def explore(request):
-    stocks = Stock.objects.all()
+    stocks = Stock.objects.all().order_by('-MktCap')
     paginator = Paginator(stocks, 9)
     page = request.GET.get('page', '1')
     try:
@@ -1209,3 +1201,7 @@ def txnReceipt(request, id):
         action = "WITHDRAW"
     generate_transaction_receipt_pdf(id, txn.Amount, action, txn.TxnID, txn.Status, txn.User.username, txn.User.first_name, txn.User.email, str(txn.DateTime)[:10])
     return redirect(f"/assets/Receipts/Transaction/{txn.User.username}-{id}.pdf")
+
+def onesignal_worker(request):
+    file_path = os.path.join(settings.BASE_DIR, "onesignal", "OneSignalSDKWorker.js")
+    return FileResponse(open(file_path, "rb"), content_type="application/javascript")

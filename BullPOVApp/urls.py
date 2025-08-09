@@ -57,4 +57,5 @@ urlpatterns = [
     # path("refund-txn/<str:oid>", refundTxn, name = "RefundTxn"),
     # beta
     path("beta", beta, name = "beta"),
+    path("OneSignalSDKWorker.js", onesignal_worker),
 ]
