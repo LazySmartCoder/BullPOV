@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from BullPOVApp.models import *
 import subprocess
 from django.db.models import F, ExpressionWrapper, IntegerField
+from datetime import datetime, timedelta
 
 # Create your views here.
 def adminIndex(request):
@@ -21,6 +22,24 @@ def openTrading(request):
     user.save()
     return HttpResponse("Trading Started.")
 
+def get_previous_date():
+    yesterday = datetime.today() - timedelta(days=1)
+    return yesterday.strftime("%Y-%m-%d")
+
+def get_previous_close(symbol: str, date_str: str):
+    # Parse the date
+    target_date = datetime.strptime(date_str, "%Y-%m-%d")
+    # Get one trading day before the target date
+    prev_day = target_date - timedelta(days=1)
+    ticker = yf.Ticker(symbol)
+    # Fetch history from prev_day to target_date
+    data = ticker.history(start=prev_day.strftime("%Y-%m-%d"), end=date_str, interval="1d")
+    if not data.empty:
+        # 'Close' column's last value is the previous close
+        return data["Close"].iloc[-1]
+    else:
+        return 0  # No data (holiday, weekend, or invalid date)
+
 def indiceUpdate(request):
     index_symbols = ['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50']
 
@@ -33,6 +52,7 @@ def indiceUpdate(request):
             open_price = fast_data.get('open')
             day_high = fast_data.get('dayHigh')
             day_low = fast_data.get('dayLow')
+            previous_close_yesterday = float(get_previous_close(f"^{symbol}", get_previous_date()))
             previous_close = fast_data.get('previousClose')
 
             if not current_price:
@@ -45,7 +65,7 @@ def indiceUpdate(request):
             stock.OpeningPrice = open_price or 0
             stock.DayHigh = day_high or 0
             stock.DayLow = day_low or 0
-            stock.PreviousCloseYesterday = stock.PreviousCloseToday
+            stock.PreviousCloseYesterday = previous_close_yesterday
             stock.PreviousCloseToday = previous_close or 0
             stock.PriceChange = (current_price - previous_close) if open_price else 0
 
