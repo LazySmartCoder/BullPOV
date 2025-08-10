@@ -963,10 +963,10 @@ def tradeHistory(request):
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
     usertradesdata = []
-    usertrades = Trade.objects.filter(Trader = request.user)
+    usertrades = Trade.objects.filter(Trader = request.user).order_by("-TradeID")
     for i in usertrades:
         usertradesdata.append(i.Stock)
-    return render(request, "trade-history.html", {"history" : zip(usertradesdata[::-1], usertrades[::-1])})
+    return render(request, "trade-history.html", {"history" : zip(usertradesdata, usertrades)})
 
 def tradeDetails(request, symbol, tid):
     if request.user.is_authenticated == False:
