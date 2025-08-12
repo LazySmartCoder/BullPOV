@@ -15,11 +15,10 @@
             <p class="lead">India’s First <strong>Skill</strong> Driven Stock Trend Platform</p>
             <div class="cta-buttons" data-aos="fade-up" data-aos-delay="300">
               {% if request.user.is_authenticated %}
-              <a href="/dashboard" class="btn btn-primary">Trade Online</a>
+              <a href="/dashboard" class="btn btn-primary">Place Trades</a>
               <a href="/categories" class="btn btn-outline">Explore Trends</a>
               {% else %}
-              <!-- beta -->
-              <a href="/beta" class="btn btn-primary">Register Yourself</a>
+              <a href="/signup" class="btn btn-primary">Trade Online</a>
               <a href="/samachaar" class="btn btn-outline">Samachaar Padhein</a>
               {% endif %}
             </div>

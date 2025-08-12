@@ -425,8 +425,6 @@ def index(request):
         topt[i.Symbol] = i.UPUsers + i.DownUsers
     topTraded = sorted(topt, key=topt.get, reverse=True)[:3]
     topTraded = Stock.objects.filter(Symbol__in=topTraded)
-    # beta
-    messages.success(request, "UNDER BETA TESTING")
     return render(request, "index.html", {"stocks" : topTraded})
 
 def aboutUs(request):
@@ -635,9 +633,6 @@ def contactSave(request):
 
 # calculation and hit order starts
 def checkReturnRate(request, stock):
-    if User.objects.get(username = "anni").last_name == "close":
-        messages.warning(request, "Trading Pool is closed.")
-        return redirect("HomePage")
     if request.user.is_authenticated == False:
         messages.warning(request, "SignIN first.")
         return redirect("SignIN")
@@ -680,6 +675,9 @@ def checkReturnRate(request, stock):
         return render(request, "check-return-rate.html", {"rate" : returnRate, "return" : userReturn, "stock" : share, "predict" : str(stock).split("-")[1], "amt" : amt})
 
 def hitOrder(request, stock):
+    if User.objects.get(username = "anni").last_name == "close":
+        messages.warning(request, "Trading Window is Closed.")
+        return redirect("HomePage")
     if request.user.is_authenticated:
         if User.objects.get(username = "anni").last_name == "close":
             messages.warning(request, "Trading Pool is Closed.")

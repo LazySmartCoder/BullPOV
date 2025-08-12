@@ -472,7 +472,7 @@
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
-                      <span class="product-label">{{toptraded.Symbol}}</span>
+                      <span class="product-label">{{ toptraded.UPUsers|add:toptraded.DownUsers }} Trades Placed</span>
                       {% img toptraded.Symbol as image_exists %}
                       {% if image_exists %}
                       <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{toptraded.Symbol}}.png" class="main-img" loading="lazy">
