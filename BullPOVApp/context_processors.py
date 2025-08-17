@@ -1,6 +1,8 @@
 from .models import *
 
 def global_data(request):
-    return {
-        "walletbal": UserDetail.objects.get(User = request.user).WalletBalance,
-    }
+    if request.user.is_authenticated:
+        return {
+            "walletbal": UserDetail.objects.get(User = request.user).WalletBalance,
+        }
+    return {}
