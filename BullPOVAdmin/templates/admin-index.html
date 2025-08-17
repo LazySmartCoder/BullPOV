@@ -24,6 +24,16 @@
             <input type="text" name="volume">
             <button type="submit">Submit</button>
         </form>
+        <br><br>
+        <h1>Platform Cut Percentage</h1>
+        <form action="/adminpanelhai-aukaat-me-raha/platform-cut" method="post">
+            {% csrf_token %}
+        {% for x, y, z in data %}
+        <label for="">{{x.Name}} | up: {{y}} | down: {{z}}</label>
+        <input type="text" name="cuts[]" value="{{x.Symbol}}-"><br><br>
+        {% endfor %}
+        <button type="submit">Submit</button>
+        </form>
     </div>
 </body>
 </html>

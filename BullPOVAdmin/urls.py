@@ -12,4 +12,5 @@ urlpatterns = [
     path("uwr", userWithdrawalRequests, name = "userWithdrawalRequests"),
     path("withdrawn/<str:id>", withdrawn, name = "withdrawn"),
     path("update-trends", updateTrends, name = "updateTrends"),
+    path("platform-cut", platformCut, name = "platformCut"),
 ]

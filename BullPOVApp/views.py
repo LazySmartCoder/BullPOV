@@ -801,68 +801,136 @@ def changeEmail(request, verify):
 # accounts management ends
 
 # displaying market data in different paths starts
+# def dashboard(request):
+#     if request.user.is_authenticated == False:
+#         return redirect("SignIN")
+
+#     # top data to be displayed
+#     topGainers = Stock.objects.filter(TopGainer=True).order_by('-PriceChange')[:4]
+#     topLosers = Stock.objects.filter(TopLoser=True).order_by('-PriceChange')[:4]
+#     topVolumes = Stock.objects.filter(TopVolume=True).order_by('-Volume')[:4]
+#     # topTraded = Stock.objects.annotate(TotalUsers=ExpressionWrapper(F('UPUsers') + F('DownUsers'), output_field=IntegerField())).order_by('-TotalUsers')[:4]
+#     topTraded = Stock.objects.annotate(
+#         TotalUsers=F('UPUsers') + F('DownUsers')
+#     ).order_by('-TotalUsers')[:4]
+#     topMktCap = Stock.objects.filter(Nifty50=True).order_by('-MktCap')[:20]
+
+#     # getting user trades data to be displayed
+#     usertrades = Trade.objects.filter(
+#         Trader=request.user, ActiveStatus=True
+#     ).order_by('-id')[:4]
+#     return render(request, "dashboard.html", {"topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : usertrades, "topIndices" : Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])})
+
+# def dashboard(request):
+#     if not request.user.is_authenticated:
+#         return redirect("SignIN")
+
+#     topGainers = Stock.objects.filter(TopGainer=True).order_by('-PriceChange')[:4]
+#     topLosers = Stock.objects.filter(TopLoser=True).order_by('PriceChange')[:4]
+#     topVolumes = Stock.objects.filter(TopVolume=True).order_by('-Volume')[:4]
+#     topTraded = Stock.objects.annotate(
+#         TotalUsers=F('UPUsers') + F('DownUsers')
+#     ).order_by('-TotalUsers')[:4]
+#     topMktCap = Stock.objects.filter(Nifty50=True).order_by('-MktCap')[:20]
+#     topIndices = Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])
+
+#     userTrades = Trade.objects.filter(
+#         Trader=request.user, ActiveStatus=True
+#     ).select_related("Stock").order_by('-id')[:4]
+
+#     return render(request, "dashboard.html", {
+#         "topGainers": topGainers,
+#         "topLosers": topLosers,
+#         "topVolumes": topVolumes,
+#         "topTraded": topTraded,
+#         "topMktCap": topMktCap,
+#         "userTrades": userTrades,
+#         "topIndices": topIndices,
+#     })
+
 def dashboard(request):
-    if request.user.is_authenticated == False:
+    if not request.user.is_authenticated:
         return redirect("SignIN")
-    # indice data list access for the scroller
-    import psycopg2
-    conn = psycopg2.connect(
-        dsn="postgresql://neondb_owner:npg_7EQwSHtZf4qk@ep-weathered-lab-afllh2wd-pooler.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    stocks = Stock.objects.filter(
+        Q(TopGainer=True) | Q(TopLoser=True) | Q(TopVolume=True) | Q(Nifty50=True) | 
+        Q(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])
+    ).annotate(
+        TotalUsers=F('UPUsers') + F('DownUsers')
     )
-    cursor = conn.cursor()
 
-    # Fetch relevant index data
-    cursor.execute("""
-        SELECT "Name", "Symbol", "CurrentPrice", "PreviousCloseToday", "PriceChange"
-        FROM "BullPOVApp_stock"
-        WHERE "Symbol" IN ('NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50')
-    """)
-    rows = cursor.fetchall()
+    topGainers = sorted(
+        [s for s in stocks if s.TopGainer], key=lambda x: x.PriceChange, reverse=True
+    )[:4]
 
-    indice_results = {}
-    for row in rows:
-        name = row[0]
-        symbol = row[1]
-        current_price = row[2]
-        previous_close = row[3] or 0
-        price_change = row[4] or 0
+    topLosers = sorted(
+        [s for s in stocks if s.TopLoser], key=lambda x: x.PriceChange
+    )[:4]
 
-        if previous_close != 0:
-            change_percent = (price_change / previous_close) * 100
-        else:
-            change_percent = 0
+    topVolumes = sorted(
+        [s for s in stocks if s.TopVolume], key=lambda x: x.Volume, reverse=True
+    )[:4]
 
-        trend = "up" if change_percent > 0 else "down" if change_percent < 0 else "no"
+    topTraded = sorted(
+        stocks, key=lambda x: x.TotalUsers, reverse=True
+    )[:4]
 
-        indice_results[name] = {
-            'price': current_price,
-            'change': round(change_percent, 2),
-            'trend': trend,
-        }
-    cursor.close()
-    conn.close()
+    topMktCap = sorted(
+        [s for s in stocks if s.Nifty50], key=lambda x: x.MktCap, reverse=True
+    )[:20]
 
-    
-    # top data to be displayed
-    topGainers = Stock.objects.filter(TopGainer = True)[:4]
-    topLosers = Stock.objects.filter(TopLoser = True)[:4]
-    topVolumes = Stock.objects.filter(TopVolume = True)[:4]
-    topTraded = list(Stock.objects.annotate(TotalUsers=ExpressionWrapper(F('UPUsers') + F('DownUsers'), output_field=IntegerField())).order_by('-TotalUsers')[:4])
-    topMktCap = list(Stock.objects.filter(Nifty50=True).order_by('-MktCap')[:20])
+    topIndices = [s for s in stocks if s.Symbol in ['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50']]
 
 
+    userTrades = Trade.objects.filter(
+        Trader=request.user, ActiveStatus=True
+    ).select_related("Stock").order_by('-id')[:4]
 
-    # getting user trades data to be displayed
-    usertradesdata = []
-    usertrades = Trade.objects.filter(Trader = request.user, ActiveStatus = True)[:4:-1]
-    for i in usertrades:
-        usertradesdata.append(i.Stock)
-    if len(usertradesdata) == 0:
-        usertradesdata = None    
-    if len(usertrades) != 0:
-        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "userTrades" : zip(usertradesdata, usertrades), "topIndices" : Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])})
-    else:
-        return render(request, "dashboard.html", {"data" : indice_results, "topGainers" : topGainers, "topLosers" : topLosers, "topVolumes" : topVolumes, "topTraded" : topTraded, "topMktCap" : topMktCap, "topIndices" : Stock.objects.filter(Symbol__in=['NSEI', 'BSESN', 'NSEBANK', 'CNXIT', 'NSEMDCP50'])})
+    # portfolio data
+    totalInvested = 0
+    totalReturn = 0
+
+    user_trades = Trade.objects.filter(Trader=request.user, ActiveStatus=True)
+
+    for t in user_trades:
+        totalInvested += t.Amount  # add stake
+
+        # flip prediction
+        opp_prediction = not t.Prediction  
+
+        # total invested on same side (all users)
+        total_investment = Trade.objects.filter(
+            Stock=t.Stock,
+            Prediction=t.Prediction,
+            ActiveStatus=True
+        ).aggregate(total=Sum('Amount'))['total'] or 0
+
+        # total invested on opposite side (all users)
+        total_investment_opp = Trade.objects.filter(
+            Stock=t.Stock,
+            Prediction=opp_prediction,
+            ActiveStatus=True
+        ).aggregate(total=Sum('Amount'))['total'] or 0
+
+        if total_investment == 0:
+            total_investment = t.Amount
+
+        percent = (t.Amount / total_investment) * 100
+        userReturn = (percent / 100) * total_investment_opp
+
+        totalReturn += userReturn
+
+    return render(request, "dashboard.html", {
+        "topGainers": topGainers,
+        "topLosers": topLosers,
+        "topVolumes": topVolumes,
+        "topTraded": topTraded,
+        "topMktCap": topMktCap,
+        "userTrades": userTrades,
+        "topIndices": topIndices,
+        "investment" : totalInvested,
+        "return" : totalReturn,
+        "currval" : totalInvested + totalReturn,
+    })
 
 
 def search(request):

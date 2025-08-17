@@ -1,14 +1,40 @@
 from django.shortcuts import render, HttpResponse, redirect
-from .updates import *
 from django.contrib.auth.models import User
 from BullPOVApp.models import *
 import subprocess
 from django.db.models import F, ExpressionWrapper, IntegerField
 from datetime import datetime, timedelta
+import yfinance as yf
 
 # Create your views here.
 def adminIndex(request):
-    return render(request, "admin-index.html")
+    stocks = Stock.objects.annotate(
+        total_votes=ExpressionWrapper(F("UPUsers") + F("DownUsers"), output_field=IntegerField())
+    ).filter(total_votes__gt=0)
+    amt_list_up = []
+    amt_list_down = []
+    for i in stocks:
+        up = 0
+        trades = Trade.objects.filter(Stock = i, Prediction = True)
+        for t in trades:
+            up += t.Amount
+        down = 0
+        trades = Trade.objects.filter(Stock = i, Prediction = False)
+        for t in trades:
+            down += t.Amount
+        amt_list_up.append(up)
+        amt_list_down.append(down)
+    return render(request, "admin-index.html", {"data" : zip(stocks, amt_list_up, amt_list_down)})
+
+def platformCut(request):
+    cuts = request.POST.getlist("cuts[]")
+    for i in cuts:
+        symbol = i.split("-")[0]
+        cut = i.split("-")[1]
+        stock = Stock.objects.get(Symbol = symbol)
+        stock.PlatformCut = cut
+        stock.save()
+    return HttpResponse("Platform Cut assigned.")
 
 def closeTrading(request):
     user = User.objects.get(username = "anni")
@@ -65,7 +91,7 @@ def indiceUpdate(request):
             stock.OpeningPrice = open_price or 0
             stock.DayHigh = day_high or 0
             stock.DayLow = day_low or 0
-            stock.PreviousCloseYesterday = previous_close_yesterday
+            stock.PreviousCloseYesterday = stock.PreviousCloseToday
             stock.PreviousCloseToday = previous_close or 0
             stock.PriceChange = (current_price - previous_close) if open_price else 0
 
@@ -85,6 +111,7 @@ def declareResults(request):
     return HttpResponse("Results have been declared.")
 
 def dataMaintainence(request):
+    # Stock.objects.all().update(UPUsers = 0, DownUsers = 0)
     return HttpResponse("Data maintained.")
 
 def userWithdrawalRequests(request):
@@ -106,7 +133,6 @@ def updateTrends(request):
     gainer = str(request.GET["gainer"]).split("-")
     loser = str(request.GET["loser"]).split("-")
     volume = str(request.GET["volume"]).split("-")
-    Stock.objects.all().update(UPUsers=0, DownUsers=0)
     Stock.objects.all().update(TopGainer = False, TopLoser = False, TopVolume = False)
     for g in gainer:
         s = Stock.objects.get(Symbol = g)

@@ -48,7 +48,7 @@ def update_all_stocks():
             open_price = info.get('open', 0)
             day_high = info.get('dayHigh', 0)
             day_low = info.get('dayLow', 0)
-            previous_close_yesterday = float(get_previous_close(f"{symbol}.BO", get_previous_date()))
+            previous_close_yesterday = previous_close_today
             previous_close_today = info.get('previousClose', 0)
             price_change = round(current_price - previous_close_today, 2)
             volume = info.get('volume', 0)

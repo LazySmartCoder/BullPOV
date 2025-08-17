@@ -54,3 +54,13 @@ def img(symbol):
         return True
     else:
         return False
+    
+@register.filter
+def percent_change(price_change, current_price):
+    """
+    Calculates percentage change given PriceChange and CurrentPrice.
+    """
+    previous = current_price - price_change
+    if previous == 0:
+        return 0
+    return (price_change / previous) * 100

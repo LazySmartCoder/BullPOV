@@ -306,7 +306,6 @@
   setInterval(updateTimer, 1000);
 </script>
 
-
     <!-- Announcement Bar -->
     <div class="announcement-bar py-2">
       <div class="container-fluid container-xl">
@@ -324,16 +323,16 @@
             }
           </script>
           <div class="swiper-wrapper" id="data">
-            {% for name, figs in data.items %}
-    {% if figs.trend == "up" %}
+            {% for i in topIndices %}
+    {% if i.PriceChange > 0 %}
         <div class="swiper-slide">
-            {{ name }} - ₹{{ figs.price|floatformat:2|comma }} 
-            (<i style="color: green;">{{ figs.change|floatformat:2 }}%</i>)
+            {{ i.Name }} - ₹{{ i.CurrentPrice|floatformat:2|comma }} 
+            (<i style="color: green;">{{ i.PriceChange|percent_change:i.CurrentPrice|floatformat:2 }}%</i>)
         </div>
     {% else %}
     <div class="swiper-slide">
-            {{ name }} - ₹{{ figs.price|floatformat:2|comma }} 
-            (<i style="color: red;">{{ figs.change|floatformat:2 }}%</i>)
+            {{ i.Name }} - ₹{{ i.CurrentPrice|floatformat:2|comma }}
+            (<i style="color: red;">{{ i.PriceChange|floatformat:2 }}%</i>)
         </div>
     {% endif %}
 {% endfor %}
@@ -408,8 +407,104 @@
 }
 
 </style>
+<style>
 
-<!-- https://assets.tickertape.in/stock-logos/TCS.png -->
+    .portfolio {
+      max-width: 100%;
+      margin: auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .positive {
+      color: #2ecc71;
+    }
+
+    .negative {
+      color: #e74c3c;
+    }
+
+    /* Transaction Section */
+    .transactions {
+      margin-top: 40px;
+    }
+
+    .transactions h2 {
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: #3498db;
+      color: white;
+      font-weight: normal;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
+
+  <div class="portfolio">    
+    <div class="cards">
+      <div class="card">
+        <h2 style="text-align: center; margin-top: 10px;">Total Invested</h2>
+        <p style="text-align: center;">₹{{investment|comma}}</p>
+      </div>
+      <div class="card">
+        <h2 style="text-align: center; margin-top: 10px;">Current Value</h2>
+        <p style="text-align: center;">₹{{currval|comma}}</p>
+      </div>
+      <div class="card">
+        <h2 style="text-align: center; margin-top: 10px;">Net Profit</h2>
+        <p class="positive" style="text-align: center;">+₹{{return|comma}}</p>
+      </div>
+    </div>
+
+  </div>
+  <br><br>
+
           <!-- Category Product List Section -->
           <section id="category-product-list" class="category-product-list section">
 
@@ -417,38 +512,38 @@
 
               <div class="row gy-4">
 
-                {% if userTrades != None %}
+                {% if userTrades %}
                 <h1>My Trades</h1>
-                {% for trade, t in userTrades %}
+                {% for trade in userTrades %}
                 <div class="col-lg-4">
                   <div class="product-box">
                     <div class="product-thumb">
-                      <span class="product-label">{{trade.Symbol}}</span>
-                      {% img trade.Symbol as image_exists %}
+                      <span class="product-label">{{trade.Stock.Symbol}}</span>
+                      {% img trade.Stock.Symbol as image_exists %}
                       {% if image_exists %}
-                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Symbol}}.png" class="main-img" loading="lazy">
+                      <img src="https://assets-netstorage.groww.in/stock-assets/logos2/{{trade.Stock.Symbol}}.png" class="main-img" loading="lazy">
                       {% else %}
-                      <img src="{{trade.Logo}}" class="main-img" loading="lazy">
+                      <img src="{{trade.Stock.Logo}}" class="main-img" loading="lazy">
                       {% endif %}
                       <div class="product-overlay">
                         <div class="product-quick-actions">
                         </div>
                         <div class="add-to-cart-container">
                           <div class="cart-btn-group">
-  <button type="button" onclick="window.location.href='/trade-details/{{trade.Symbol}}/{{t.TradeID}}'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
+  <button type="button" onclick="window.location.href='/trade-details/{{trade.Stock.Symbol}}/{{trade.TradeID}}'" class="cart-btn green-btn"><i class="bi bi-eye"></i></button>
 </div>
 
                         </div>
                       </div>
                     </div>
                     <div class="product-content">
-                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Symbol}}/{{t.TradeID}}">{{trade.Name}}</a></h2>
-                        <h4 style="text-align: left;">₹{{trade.CurrentPrice|comma}} {% if trade.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{trade.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{trade.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
-                        <p style="text-align: left;">Market Cap: <strong>{{trade.MktCap|crores}}</strong>
+                        <h2 style="text-align: left; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><a href="/trade-details/{{trade.Stock.Symbol}}/{{trade.TradeID}}">{{trade.Stock.Name}}</a></h2>
+                        <h4 style="text-align: left;">₹{{trade.Stock.CurrentPrice|comma}} {% if trade.Stock.PriceChange > 0 %}(<span style="color: green;"><i class="bi bi-arrow-up"></i>₹{{trade.Stock.PriceChange|comma}}</span>){% else %}(<span style="color: red;"><i class="bi bi-arrow-down"></i>-₹{{trade.Stock.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}</span>){% endif %}</h4><br>
+                        <p style="text-align: left;">Market Cap: <strong>{{trade.Stock.MktCap|crores}}</strong>
                           <br>
-                          Sector: <strong>{{trade.Sector}}</strong>
+                          Sector: <strong>{{trade.Stock.Sector}}</strong>
                           <br>
-                          Volume: <strong>{{trade.Volume|comma}}</strong>
+                          Volume: <strong>{{trade.Stock.Volume|comma}}</strong>
                         </p>
                     </div>
                   </div>

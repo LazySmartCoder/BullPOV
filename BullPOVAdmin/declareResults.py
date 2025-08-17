@@ -100,8 +100,9 @@ def declareResults():
             # ---------------------------------------
 
             # Calculate cut
-            win_lose_ratio = total_winning_amt / total_losing_amt if total_losing_amt != 0 else float('inf')
-            platform_cut_percent = 0.03 if win_lose_ratio >= 9 else 0.10
+            # win_lose_ratio = total_winning_amt / total_losing_amt if total_losing_amt != 0 else float('inf')
+            # platform_cut_percent = 0.03 if win_lose_ratio >= 9 else 0.10
+            platform_cut_percent = stock["PlatformCut"]
             platform_cut = platform_cut_percent * total_pool
             distributable_pool = total_losing_amt - platform_cut
 

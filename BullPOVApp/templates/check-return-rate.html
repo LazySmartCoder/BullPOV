@@ -84,7 +84,7 @@
 
 <center>
           <main>
-<div class="slide-button__container" id="slideButton">
+<div class="slide-button__container" id="slideButton" style="max-width: 100%; align-items: center; align-content: center;">
     <div class="slide-button__overlay"></div>
     <div class="slide-button__text" style="text-align: center;">Slide to Trade</div>
     <div class="slide-button__control"><span style="margin-top: -4px;">→</span></div>
@@ -235,12 +235,12 @@
       gsap.to(overlay, { opacity: 1, duration: 0.2 });
       gsap.to(text, { opacity: 0, duration: 0.2 });
       setTimeout(() => {
-        text.innerText = "YAYYYYY!!";
+        text.innerText = "Trade Placed";
         gsap.to(text, { opacity: 1, duration: 0.3 });
 
         // Redirect after short delay
         setTimeout(() => {
-          window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}"; // 🔁 change this to your URL
+          window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
         }, 700);
       }, 300);
     }
