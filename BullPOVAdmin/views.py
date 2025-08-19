@@ -154,9 +154,6 @@ def withdrawn(request, id):
 
 def withdrawAborted(request, id):
     txn = WalletTxn.objects.get(ID = id)
-    user = UserDetail.objects.get(User = txn.User)
-    user.WalletBalance = user.WalletBalance - txn.Amount
-    user.save()
     txn.TxnID = "N/A"
     txn.DateTime = datetime.now()
     txn.Status = "FAILED"
