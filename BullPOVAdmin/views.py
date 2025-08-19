@@ -5,6 +5,29 @@ import subprocess
 from django.db.models import F, ExpressionWrapper, IntegerField
 from datetime import datetime, timedelta
 import yfinance as yf
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from BullPOVApp.credentials import *
+from BullPOVApp.emailTemplates import *
+
+def sendEmail(sender, receiver, subject, message):
+    sender_email = sender
+    sender_password = google_app_password
+    msg = MIMEMultipart("alternative")
+    msg["From"] = f"BullPOV <{sender_email}>"
+    msg["To"] = receiver
+    msg["Subject"] = subject
+    msg.attach(MIMEText(message, "html"))
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login("contact.bullpov@gmail.com", sender_password)
+        server.sendmail(sender_email, receiver, msg.as_string())
+        server.quit()
+        return None
+    except Exception as e:
+        print(f"Error sending email: {e}")
 
 # Create your views here.
 def adminIndex(request):
@@ -127,6 +150,18 @@ def withdrawn(request, id):
     txn.DateTime = datetime.now()
     txn.Status = "SUCCESS"
     txn.save()
+    return redirect("userWithdrawalRequests")
+
+def withdrawAborted(request, id):
+    txn = WalletTxn.objects.get(ID = id)
+    user = UserDetail.objects.get(User = txn.User)
+    user.WalletBalance = user.WalletBalance - txn.Amount
+    user.save()
+    txn.TxnID = "N/A"
+    txn.DateTime = datetime.now()
+    txn.Status = "FAILED"
+    txn.save()
+    sendEmail("withdrawals@bullpov.com", txn.User.email, "Withdrawal Request Failed", normal_text_templates(txn.User.first_name, f"Your recent withdrawal request of ₹{txn.Amount} could not be processed. <br><br>Please review your account details and try again. If you need assistance, reply to this email or contact our support team."))
     return redirect("userWithdrawalRequests")
 
 def updateTrends(request):

@@ -7,7 +7,7 @@
 </head>
 <body>
     {% for w in withdrawals %}
-    <h3><span>TRID: {{w.ID}}</span>&nbsp;|&nbsp;<span>User Name: {{w.User.first_name}}</span>&nbsp;|&nbsp;<span>Withdrawal Request: {{w.Amount}}</span>&nbsp;|&nbsp;<span>UPI ID: {{w.WithdrawalUPI}}</span>&nbsp;|&nbsp;<span><button onclick="window.location.href='/adminpanelhai-aukaat-me-raha/withdrawn/{{w.ID}}'">SETTLE</button></span></h3>
+    <h3><span>TRID: {{w.ID}}</span>&nbsp;|&nbsp;<span>User Name: {{w.User.first_name}}</span>&nbsp;|&nbsp;<span>Withdrawal Request: {{w.Amount}}</span>&nbsp;|&nbsp;<span>UPI ID: {{w.WithdrawalUPI}}</span>&nbsp;|&nbsp;<span><button onclick="window.location.href='/adminpanelhai-aukaat-me-raha/withdrawn/{{w.ID}}'">SETTLE</button></span> &nbsp;<button onclick="window.location.href='/adminpanelhai-aukaat-me-raha/withdraw-aborted/{{w.ID}}'">ABORT</button></h3>
     {% endfor %}
 </body>
 </html>

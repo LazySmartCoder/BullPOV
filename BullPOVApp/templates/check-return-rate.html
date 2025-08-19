@@ -199,57 +199,60 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
 
     <script>
-    const container = document.getElementById("slideButton");
-    const control = container.querySelector(".slide-button__control");
-    const overlay = container.querySelector(".slide-button__overlay");
-    const text = container.querySelector(".slide-button__text");
+    window.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("slideButton");
+  const control = container.querySelector(".slide-button__control");
+  const overlay = container.querySelector(".slide-button__overlay");
+  const text = container.querySelector(".slide-button__text");
 
-    const containerWidth = container.offsetWidth;
-    const controlWidth = control.offsetWidth;
-    const maxX = containerWidth - controlWidth - 4; // Account for padding
+  const containerWidth = container.offsetWidth;
+  const controlWidth = control.offsetWidth;
+  const maxX = containerWidth - controlWidth - 4; // Account for padding
 
-    let confirmed = false;
+  let confirmed = false; // ✅ Always reset on page load
 
-    const draggable = Draggable.create(control, {
-      type: "x",
-      bounds: { minX: 0, maxX: maxX },
-      inertia: true,
-      onDrag: function () {
-        const progress = this.x / maxX;
-        gsap.to(overlay, { opacity: progress, duration: 0.1 });
-      },
-      onRelease: function () {
-        if (this.x >= maxX * 0.9 && !confirmed) {
-          confirmed = true;
-          triggerHaptic();
-          completeSlider();
-        } else {
-          gsap.to(control, { x: 0, duration: 0.3 });
-          gsap.to(overlay, { opacity: 0, duration: 0.3 });
-        }
+  const draggable = Draggable.create(control, {
+    type: "x",
+    bounds: { minX: 0, maxX: maxX },
+    inertia: true,
+    onDrag: function () {
+      const progress = this.x / maxX;
+      gsap.to(overlay, { opacity: progress, duration: 0.1 });
+    },
+    onRelease: function () {
+      if (this.x >= maxX * 0.9 && !confirmed) {
+        confirmed = true;
+        triggerHaptic();
+        completeSlider();
+      } else {
+        gsap.to(control, { x: 0, duration: 0.3 });
+        gsap.to(overlay, { opacity: 0, duration: 0.3 });
       }
-    })[0];
+    }
+  })[0];
 
-    function completeSlider() {
-      gsap.to(control, { x: maxX, duration: 0.2 });
-      gsap.to(overlay, { opacity: 1, duration: 0.2 });
-      gsap.to(text, { opacity: 0, duration: 0.2 });
+  function completeSlider() {
+    gsap.to(control, { x: maxX, duration: 0.2 });
+    gsap.to(overlay, { opacity: 1, duration: 0.2 });
+    gsap.to(text, { opacity: 0, duration: 0.2 });
+    setTimeout(() => {
+      text.innerText = "Trade Placed";
+      gsap.to(text, { opacity: 1, duration: 0.3 });
+
+      // Redirect after short delay
       setTimeout(() => {
-        text.innerText = "Trade Placed";
-        gsap.to(text, { opacity: 1, duration: 0.3 });
+        window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
+      }, 700);
+    }, 300);
+  }
 
-        // Redirect after short delay
-        setTimeout(() => {
-          window.location.href = "/hit-order/{{stock.Symbol}}-{{predict}}-{{amt}}";
-        }, 700);
-      }, 300);
+  function triggerHaptic() {
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(100);
+    } else if (window.HapticEngine && window.HapticEngine.impact) {
+      window.HapticEngine.impact({ style: "medium" });
     }
+  }
+});
 
-    function triggerHaptic() {
-      if (window.navigator.vibrate) {
-        window.navigator.vibrate(100);
-      } else if (window.HapticEngine && window.HapticEngine.impact) {
-        window.HapticEngine.impact({ style: "medium" });
-      }
-    }
   </script>

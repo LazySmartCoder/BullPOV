@@ -930,6 +930,7 @@ def dashboard(request):
         "investment" : totalInvested,
         "return" : totalReturn,
         "currval" : totalInvested + totalReturn,
+        "activeTrades" : int(Trade.objects.filter(ActiveStatus = True).count()),
     })
 
 
@@ -1088,6 +1089,8 @@ def wallet(request):
     txn = WalletTxn.objects.filter(User = request.user, Action = True, Status = "PENDING")
     for t in txn:
         t.Status = "CANCELLED"
+        t.TxnID = "N/A"
+        t.DateTime = datetime.now()
         t.save()
     userdet = UserDetail.objects.get(User = request.user)
     return render(request, "wallet.html", {"user" : userdet, "suggest" : userdet.WalletBalance * 0.6})
@@ -1166,6 +1169,8 @@ def walletTxnHistory(request):
     txn = WalletTxn.objects.filter(User = request.user, Action = True, Status = "PENDING")
     for t in txn:
         t.Status = "CANCELLED"
+        t.TxnID = "N/A"
+        t.DateTime = datetime.now()
         t.save()
     txn = WalletTxn.objects.filter(User = request.user)[::-1]
     paginator = Paginator(txn, 10)

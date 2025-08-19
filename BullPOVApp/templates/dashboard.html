@@ -407,102 +407,150 @@
 }
 
 </style>
+
 <style>
-
-    .portfolio {
-      max-width: 100%;
-      margin: auto;
+    :root {
+      --bg: #0f1115;
+      --card: #151922;
+      --card-2: #171b25;
+      --text: #e9eef7;
+      --subtext: #aab3c5;
+      --accent: #4aa3ff;
+      --pos: #3ddc97;
+      --neg: #ff6b6b;
+      --muted: #232838;
+      --border: #22283a;
+      --radius: 18px;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --card-2: #ffffff;
+        --text: #0e1222;
+        --subtext: #586078;
+        --accent: #2563eb;
+        --pos: #12804c;
+        --neg: #b42318;
+        --muted: #eef1f8;
+        --border: #e6e9f2;
+      }
     }
+
+    * { box-sizing: border-box; }
 
     .card {
-      background: #fff;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transition: 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .card h2 {
-      font-size: 14px;
-      color: #777;
-      margin-bottom: 10px;
-    }
-
-    .card p {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .positive {
-      color: #2ecc71;
-    }
-
-    .negative {
-      color: #e74c3c;
-    }
-
-    /* Transaction Section */
-    .transactions {
-      margin-top: 40px;
-    }
-
-    .transactions h2 {
-      margin-bottom: 15px;
-    }
-
-    table {
       width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      backdrop-filter: saturate(140%) blur(4px);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .card:hover { transform: translateY(-2px); }
+
+    .body {
+      display: flex;
+      flex-direction: row;
     }
 
-    th, td {
-      text-align: left;
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
+    .v-divider { width: 1px; background: var(--border); }
+
+    .metric {
+      flex: 1;
+      padding: 22px clamp(16px, 4vw, 28px);
+      display: grid;
+      gap: 8px;
+      place-content: center;
+      min-height: 110px;
+      text-align: center;
+    }
+    .amount {
+      font-size: clamp(22px, 4.5vw, 28px);
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .label {
+      font-size: 13px;
+      color: var(--subtext);
+      letter-spacing: .3px;
+    }
+    .amount.negative { color: var(--neg); }
+    .amount.positive { color: var(--pos); }
+
+    .footers {
+      padding: 14px clamp(16px, 4vw, 20px);
+      background: linear-gradient(0deg, var(--muted), transparent);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      justify-content: center; /* ✅ Center footer content */
     }
 
-    th {
-      background: #3498db;
-      color: white;
-      font-weight: normal;
+    .chips { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      justify-content: center; /* ✅ Center the chips */
     }
 
-    tr:hover {
-      background: #f9f9f9;
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px; font-size: 13px; color: var(--subtext);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
-  </style>
+    .chip strong { color: var(--accent); letter-spacing: .2px; }
 
-  <div class="portfolio">    
-    <div class="cards">
-      <div class="card">
-        <h2 style="text-align: center; margin-top: 10px;">Total Invested</h2>
-        <p style="text-align: center;">₹{{investment|comma}}</p>
+    .chart {
+      width: 42px; height: 18px;
+    }
+
+    @media (max-width: 560px) {
+      .body { flex-direction: row; }
+      .v-divider { display: block; }
+      .metric { text-align: center; place-content: center; }
+      .footer { flex-direction: column; align-items: center; }
+    }
+</style>
+
+<center>
+  <div class="card" role="group" aria-labelledby="portfolio-title" style="max-width: 100%;">
+    <div class="body">
+      <div class="metric" aria-label="Investment">
+        <div class="amount" style="color: white;">₹{{investment|comma}}</div>
+        <div class="label" style="color: white;">Total Investment</div>
       </div>
-      <div class="card">
-        <h2 style="text-align: center; margin-top: 10px;">Current Value</h2>
-        <p style="text-align: center;">₹{{currval|comma}}</p>
-      </div>
-      <div class="card">
-        <h2 style="text-align: center; margin-top: 10px;">Net Profit</h2>
-        <p class="positive" style="text-align: center;">+₹{{return|comma}}</p>
+      <div class="v-divider" aria-hidden="true"></div>
+      <div class="metric" aria-label="Returns">
+        <div class="amount negative" style="color: green;">+₹{{return|comma}}</div>
+        <div class="label" style="color: white;">Returns</div>
       </div>
     </div>
 
+    <div class="footers">
+      <div class="chips">
+        <div class="chip" title="Market volume">
+          <i class="bi bi-currency-rupee"></i>
+          <strong>Current Value: ₹{{currval|comma}}</strong>
+        </div>
+        <div class="chip" title="Market volume">
+          <svg class="chart" viewBox="0 0 100 40" fill="none">
+            <polyline points="2,30 18,22 28,26 40,12 55,20 66,9 82,18 98,10" stroke="currentColor" stroke-width="2" fill="none" opacity=".65"/>
+          </svg>
+          <strong>{{activeTrades}} Active Traders</strong>
+        </div>
+      </div>
+    </div>
   </div>
+</center>
+
   <br><br>
 
           <!-- Category Product List Section -->
@@ -811,7 +859,7 @@
           <h1 style="font-family: inherit">Top by MktCap</h1><br>
 
           {% for stock in topMktCap %}
-          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #f9f9f9; border: 1px solid #e0e0e0;">
+          <div class="cart-item mb-4 p-3 rounded shadow-sm" style="background-color: #ffffff; border: 1px solid #f6f4f4;">
             <div class="row align-items-center">
               <div class="col-lg-6 col-12">
                 <div class="product-info d-flex align-items-center">
@@ -877,6 +925,7 @@ Results are declared every trading day by 4:30 PM.</p>
                   <a href="https://www.instagram.com/bullpov" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                   <a href="https://www.youtube.com/@BullPOV" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
                   <a href="https://www.linkedin.com/company/bullpov" aria-label="linkedin"><i class="bi bi-linkedin"></i></a>
+                  <a href="https://wa.link/p664s3" aria-label="linkedin"><i class="bi bi-whatsapp"></i></a>
                 </div>
               </div>
             </div>

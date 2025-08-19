@@ -11,6 +11,7 @@ urlpatterns = [
     path("data-maintainence", dataMaintainence, name = "dataMaintainence"),
     path("uwr", userWithdrawalRequests, name = "userWithdrawalRequests"),
     path("withdrawn/<str:id>", withdrawn, name = "withdrawn"),
+    path("withdraw-aborted/<str:id>", withdrawAborted, name = "withdrawAborted"),
     path("update-trends", updateTrends, name = "updateTrends"),
     path("platform-cut", platformCut, name = "platformCut"),
 ]

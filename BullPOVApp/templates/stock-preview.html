@@ -173,7 +173,7 @@
                 <div class="price-wrapper">
                   <span class="current-price">₹{{stock.CurrentPrice|comma}}</span>
                   {% if change %}
-                  <span class="original-price" style="text-decoration: none; color: green;">₹{{stock.PriceChange}}<i class="bi bi-arrow-up"></i></span>
+                  <span class="original-price" style="text-decoration: none; color: green;">₹{{stock.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}<i class="bi bi-arrow-up"></i></span>
                   {% else %}
                   <span class="original-price" style="text-decoration: none; color: red;">-₹{{stock.PriceChange|floatformat:2|stringformat:"s"|slice:"1:"}}<i class="bi bi-arrow-down"></i></span>
                   {% endif %}
@@ -182,8 +182,8 @@
 
                 <div class="range-container">
   <div class="range-labels">
-    <span>✅ ₹{{stock.DayLow|comma}} (Low)</span>
-    <span>✅ ₹{{stock.DayHigh|comma}} (High)</span>
+    <span><i class="bi bi-arrow-down"></i> ₹{{stock.DayLow|comma}}</span>
+    <span><i class="bi bi-arrow-up"></i> ₹{{stock.DayHigh|comma}}</span>
   </div>
   <input type="range" min="{{stock.DayLow}}" max="{{stock.DayHigh}}" value="{{stock.CurrentPrice}}" disabled class="range-slider" />
 </div>
@@ -191,7 +191,7 @@
 
 
                 <div class="stock-info">
-                  <i class="bi bi-check-circle-fill"></i>
+                  <i class="bi bi-cash-stack"></i>
                   {% if stock.CurrentPrice > stock.PreviousCloseToday %}<span style="color: green;">Bullish</span>{% else %}<span style="color: red;">Bearish</span>{% endif %}
                   <span class="stock-count">(₹{{totalamt|comma}} invested by Traders)</span>
                 </div>
